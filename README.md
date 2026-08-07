@@ -1,51 +1,69 @@
 # advanced-rigger
 
-Build-control documentation for the CraneQualified **Advanced Rigger (Stage 4)**
-e-learning stage: `S4_M01` through `S4_M09`.
+Build-control documentation for the nine **Advanced Rigger** modules.
 
-Stage 4 is built and verified as a learning product (9 modules, 225 questions, 12
-verification checks passing on all nine). This repository holds the documentation
-layer that the stage shipped without, and that the seven planned downstream courses
-will need.
+They are **new modules added to the existing Stage 4 sequence** as `S4_M15` through
+`S4_M23`, following the same format as every other stage. Nothing existing is
+overwritten.
 
 ## Contents
 
 | Document | What it covers |
 |---|---|
-| [`docs/AR_module_format_spec.md`](docs/AR_module_format_spec.md) | Build format aligned to the mobile crane process (`Developer Handoff - July`). Scoring model, public/protected boundary, runtime event contract, wrong-answer behaviour, asset externalization, verification, and the retrofit sequence. |
-| [`docs/AR_question_architecture.md`](docs/AR_question_architecture.md) | Gate sizing against house convention, item-writing rules, the ACS coverage-mapping layer, gate composition targets, and the protected registry. |
-| [`docs/S4_source_register.md`](docs/S4_source_register.md) | Every source cited by the ACS, assigned a tier under the model adopted by the Crane Technician track (Gate Master Rev 1.3 Section 11). Identifies Tier 1 public-domain material that can replace Tier 2b grounding, and the one acquisition that is genuinely required. |
-| [`docs/S4_gap_analysis.md`](docs/S4_gap_analysis.md) | Structural gaps between what the ACS asserts and what the verification suite proves. ACS-code traceability, module boundaries, negative source declarations, and the harvest-course sourcing costs. |
+| [`docs/module_format_spec.md`](docs/module_format_spec.md) | Numbering, scoring model, protected registry, public/protected boundary, runtime event contract, wrong-answer behaviour, asset externalization, verification, build sequence |
+| [`docs/question_architecture.md`](docs/question_architecture.md) | Gate sizing, item-writing rules, ACS coverage mapping, gate composition targets, topic ownership |
+| [`docs/S4_source_register.md`](docs/S4_source_register.md) | Every source cited by the ACS, assigned a tier under the model adopted by the Crane Technician track. Tier 1 substitutions, and the one acquisition genuinely required |
+| [`docs/S4_gap_analysis.md`](docs/S4_gap_analysis.md) | Structural gaps between what the ACS asserts and what the verification suite proves |
+
+## Module numbering
+
+Stage 4 currently ends at `S4_M14`. These continue the sequence.
+
+| ACS module | New ID | Gate code |
+|---|---|---|
+| Center of Gravity Determination | `S4_M15` | AR-101C |
+| Unequal Leg Loading and Off-Level Pick Points | `S4_M16` | AR-102C |
+| Sling Tension Beyond the Chart | `S4_M17` | AR-103C |
+| Slings and Field-Assembled Terminations | `S4_M18` | AR-104C |
+| Rigging Hardware and Specialty Attachments | `S4_M19` | AR-105C |
+| Blocks, Sheaves and Multi-Part Line Loading | `S4_M20` | AR-106C |
+| Multi-Point Lifts and Load Sharing | `S4_M21` | AR-107C |
+| Friction and Inclined-Plane Rigging | `S4_M22` | AR-108C |
+| Below-the-Hook Lifting Device Design (BTH-1) | `S4_M23` | AR-109C |
+
+`data-cq-stage="4"` unchanged. Salts become `CQ1:S4_M15_...`. Keys append to the existing
+`platform/cq_keys_S4.json` (112 records to 184). ACS codes renumber with the modules:
+`S4.M01.K1` becomes `S4.M15.K1`. `S4_M14` now points at `S4_M15`; `S4_M23` terminates the
+stage.
+
+> **Note on the two older documents.** `S4_source_register.md` and `S4_gap_analysis.md`
+> were written before the renumber and refer to modules as M01-M09 and codes as
+> `S4.M01.*`. Their content is unaffected - map M01 to M15, M02 to M16, and so on.
 
 ## Settled decisions - 7 August 2026
 
 | Decision | Effect |
 |---|---|
-| **Gate size is 8** | Gate moves q19-q24 to **q18-q25**, `review_offset` 18 to **17**, gate letters balance **2/2/2/2**, ungated bank drops 19 to 17, stage gate records 54 to **72** |
-| **Rename, never overwrite** | Advanced Rigger rebuilds as **`AR_M01`-`AR_M09`**, new files. Originals archived to a non-deployed path, byte-identical. Mobile crane `S4_M01`-`S4_M14` untouched and never in scope |
+| **New modules, existing stage** | `S4_M15`-`S4_M23`. Nothing overwritten. Only edit to an existing file is `S4_M14`'s next-module pointer |
+| **Gate size 8** | Gate q19-q24 to **q18-q25**, `review_offset` 18 to **17**, letters balance **2/2/2/2**, ungated bank 19 to 17, new registry records **72** |
+| **Adopt Gen 3 scoring** | Keys server-side in `cq_keys_S4.json`, assets externalized - matching `S4_M01`-`S4_M14` |
+| **Ungated 17 items** | Formative plus R2 harvest reserve. Written to gate quality, scored neutrally |
+| **Skill floor** | At least two `S#` codes in every gate |
+| **Topic owners** | Angle factors M16, snatch-block resultant M20, combined weight M21. D/d split M17/M20 with cross-reference |
 
 ## The open architecture finding
 
-**The stage is on the superseded scoring architecture.** Advanced Rigger bakes 225 FNV
-hashes into module HTML. The mobile crane track moved keys server-side at Stage 3 and
-now states plainly that retained FNV hashes are for standalone preview only and "must
-not be accepted as the production scoring path." Advanced Rigger needs the same retrofit
-Stage 3 went through - not a rebuild.
+The Advanced Rigger modules were authored on the Gen 1 client-scored model - 225 FNV
+hashes baked into HTML. Stage 4 is on Gen 3, keys server-side. Stage 6 states the rule:
+retained FNV hashes are for standalone preview only and "must not be accepted as the
+production scoring path." FNV-1a is non-cryptographic; for a four-option item that is
+four guesses.
 
-The rename decision makes this cheaper, not harder: because `AR_*` modules are generated
-as new files rather than edited in place, the key extraction and the salt change happen
-in the same pass that emits them.
-
-## Still missing from this repository
-
-- The nine module HTML files
-- `S4_MXX_manifest.json` (nine)
-- `S4_STAGE_crosscheck_report.md` - the stage crosscheck of record
-- The Stage 4 ACS Build Map HTML itself
-
-The CM track's standing rule applies: **build from the archive, never from a URL.**
+Joining Stage 4 means adopting Stage 4's scoring. That is a retrofit pass, not a rebuild
+- the same one Stage 3 went through.
 
 ## Related
 
-- Second Brain: CraneQualified HQ -> Crane Technician - Open Source Register
-- Companion repo: `rgalliv/mobilecranetech` (Crane Mechanic track canonical documents)
+- Second Brain: CraneQualified HQ, Crane Technician Open Source Register
+- Mobile crane build process: SharePoint, `Crane Qualified Build Files/Developer Handoff - July`
+- Companion repo: `rgalliv/mobilecranetech`
