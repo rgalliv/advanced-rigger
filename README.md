@@ -17,17 +17,24 @@ will need.
 | [`docs/S4_source_register.md`](docs/S4_source_register.md) | Every source cited by the ACS, assigned a tier under the model adopted by the Crane Technician track (Gate Master Rev 1.3 Section 11). Identifies Tier 1 public-domain material that can replace Tier 2b grounding, and the one acquisition that is genuinely required. |
 | [`docs/S4_gap_analysis.md`](docs/S4_gap_analysis.md) | Structural gaps between what the ACS asserts and what the verification suite proves. ACS-code traceability, module boundaries, negative source declarations, and the harvest-course sourcing costs. |
 
-## Two things to decide first
+## Settled decisions - 7 August 2026
 
-**Module IDs collide.** The mobile crane track already occupies `S4_M01`-`S4_M14` with
-`data-cq-stage="4"`. Advanced Rigger uses `S4_M01`-`S4_M09`. Rename to `AR_M01`-`AR_M09`
-before anything else - it changes every salt.
+| Decision | Effect |
+|---|---|
+| **Gate size is 8** | Gate moves q19-q24 to **q18-q25**, `review_offset` 18 to **17**, gate letters balance **2/2/2/2**, ungated bank drops 19 to 17, stage gate records 54 to **72** |
+| **Rename, never overwrite** | Advanced Rigger rebuilds as **`AR_M01`-`AR_M09`**, new files. Originals archived to a non-deployed path, byte-identical. Mobile crane `S4_M01`-`S4_M14` untouched and never in scope |
+
+## The open architecture finding
 
 **The stage is on the superseded scoring architecture.** Advanced Rigger bakes 225 FNV
 hashes into module HTML. The mobile crane track moved keys server-side at Stage 3 and
 now states plainly that retained FNV hashes are for standalone preview only and "must
 not be accepted as the production scoring path." Advanced Rigger needs the same retrofit
 Stage 3 went through - not a rebuild.
+
+The rename decision makes this cheaper, not harder: because `AR_*` modules are generated
+as new files rather than edited in place, the key extraction and the salt change happen
+in the same pass that emits them.
 
 ## Still missing from this repository
 

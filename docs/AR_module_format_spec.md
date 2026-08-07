@@ -47,7 +47,7 @@ Removed the client-side `CQ_KEY` blocks and key markers from learner modules").
 
 ---
 
-## 2. Module ID collision - fix before anything else
+## 2. Module ID collision - resolved by rename, not overwrite
 
 The mobile crane track already occupies `S4_M01` through `S4_M14` with
 `data-cq-stage="4"`. Advanced Rigger uses `S4_M01` through `S4_M09` and salts of the
@@ -55,18 +55,52 @@ form `CQ1:S4_M01_...`.
 
 **These collide.** Same module IDs, same stage attribute, different courses.
 
-| Item | Current | Adopt |
+**DECIDED 7 Aug 2026.** The Advanced Rigger modules are **renamed and rebuilt as new
+artifacts. Nothing is overwritten.**
+
+| Item | Original | New build |
 |---|---|---|
 | Module ID | `S4_M01` .. `S4_M09` | `AR_M01` .. `AR_M09` |
 | Stage attribute | `data-cq-stage="4"` | `data-cq-stage="AR"` |
 | Salt | `CQ1:S4_M01_...` | `CQ1:AR_M01_...` |
 | Key file | (none - baked in) | `platform/cq_keys_AR.json` |
 | Gate codes | `AR-101C` .. `AR-109C` | unchanged - already unique |
+| Gate items | q19-q24 | **q18-q25** (`review_offset` 17) |
 | Chain terminus | `STAGE_COMPLETE` | `AR_COMPLETE` (Stage 6 uses `S6_COMPLETE`) |
 
-Gate codes are already collision-free. Everything else needs renaming, and the salt
-change means **every hash is recomputed** - which is fine, because the retrofit moves
-them off the client anyway.
+### The no-overwrite rule
+
+No existing module file is modified, replaced, or deleted. This covers **two distinct
+sets** of files, and the distinction matters:
+
+1. **The mobile crane `S4_M01`-`S4_M14` modules.** A different course. Untouched, and
+   never in scope.
+2. **The original Advanced Rigger `S4_M01`-`S4_M09` modules.** Preserved as the source
+   of record. The new `AR_*` build is derived from them; they are not edited in place.
+
+Consequences to plan for:
+
+- **The retrofit is a generate-alongside, not an edit.** Read the original, emit
+  `AR_MXX_*.html` as a new file. The original stays byte-identical.
+- **The collision persists in storage even after the rename**, because both `S4_M01`
+  sets still exist on disk. Resolve it by **path, not by filename**: the originals move
+  to an archive path that is never deployed; only `modules/AR_*.html` is served.
+- **Every hash is recomputed** - the salt changes, and the gate moves from 6 items to 8.
+  This is free, because the retrofit takes keys off the client anyway (section 3.1).
+- **Two banks now exist per module.** The original with a 6-item gate, the new with 8.
+  `MODULE_MANIFEST.csv` must record which is authoritative, or a future pass will
+  harvest the wrong one.
+
+Recommended layout:
+
+```
+modules/                     AR_M01..AR_M09 - the only deployed module path
+platform/cq_keys_AR.json     SERVER-SIDE ONLY
+archive/s4_original/         original Advanced Rigger S4_M01..S4_M09, never deployed
+```
+
+Nothing in `archive/` is served, referenced by a manifest as authoritative, or fed to
+the verifiers.
 
 ---
 
@@ -220,23 +254,36 @@ cleanliness, regulatory hygiene, cross-module integrity.
 
 Ordered so nothing is done twice.
 
-1. **Rename** to `AR_M01..AR_M09`, `data-cq-stage="AR"`, salts `CQ1:AR_MXX_...`,
-   terminus `AR_COMPLETE`.
-2. **Extract keys** to `platform/cq_keys_AR.json`. Remove client key blocks and key
+0. **Archive the originals.** Move Advanced Rigger `S4_M01`-`S4_M09` to
+   `archive/s4_original/`. Record a SHA256 per file. Nothing after this point writes to
+   that path.
+1. **Generate `AR_M01..AR_M09`** as new files from the archived originals -
+   `data-cq-stage="AR"`, salts `CQ1:AR_MXX_...`, terminus `AR_COMPLETE`. Originals stay
+   byte-identical.
+2. **Move the gate to q18-q25** and set `review_offset` to 17. Re-balance the gate to
+   2/2/2/2 across A/B/C/D. Two items per module enter the gate for the first time -
+   they must pass de-leak and run-length like any gate item.
+3. **Extract keys** to `platform/cq_keys_AR.json`. Remove client key blocks and key
    markers. Block the route.
-3. **Map the event contract** onto `cq:*` + `CQ.scoreAnswer` / `CQ.requestComplete`.
-4. **Implement wrong-answer behaviour** per 3.4.
-5. **Externalize assets.** Generate `MODULE_MANIFEST.csv` and `ASSET_MANIFEST.csv`.
-6. **Build the ACS coverage map** (see `AR_question_architecture.md`) - do this before
-   audio, because a coverage correction changes which items are in the gate.
-7. **ElevenLabs pass.** Overlay ships here.
-8. **Reconcile overlay GATE to engine GATE.** Re-run the full suite. This is where the
-   13/13 figure becomes final.
-9. **Browser verification**, desktop and mobile.
-10. **Independent review** before production.
+4. **Map the event contract** onto `cq:*` + `CQ.scoreAnswer` / `CQ.requestComplete`.
+5. **Implement wrong-answer behaviour** per 3.4.
+6. **Externalize assets.** Generate `MODULE_MANIFEST.csv` and `ASSET_MANIFEST.csv`,
+   marking the `AR_*` build authoritative and the archive not-deployed.
+7. **Build the ACS coverage map** (see `AR_question_architecture.md`) - before audio,
+   because a coverage correction changes which items are in the gate.
+8. **ElevenLabs pass.** Overlay ships here.
+9. **Reconcile overlay GATE to engine GATE.** Both must now carry the 8-item set. Re-run
+   the full suite. This is where the 13/13 figure becomes final.
+10. **Browser verification**, desktop and mobile.
+11. **Independent review** before production.
 
-Steps 1 through 5 are mechanical. Step 6 is judgement. Steps 7 and 8 are the real
+Steps 0 through 6 are mechanical. Step 7 is judgement. Steps 8 and 9 are the real
 remaining build.
+
+**Order note.** Step 2 must precede step 7, and both must precede step 8. The gate
+membership set flows: gate size decides which items are gated, the coverage map may
+correct which items *should* be gated, and only then does the overlay ship with a GATE
+set worth reconciling. Doing the audio pass first means doing it twice.
 
 ---
 

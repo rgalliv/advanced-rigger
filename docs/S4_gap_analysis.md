@@ -51,7 +51,7 @@ traceability the ACS exists to provide is asserted but never demonstrated.
 Stage 4 defines roughly 180 ACS codes across 9 modules and carries 225 questions. With
 no map between them, three questions cannot currently be answered:
 
-- Which codes are gate-tested (the 6 questions at 100% mastery) versus merely present
+- Which codes are gate-tested (the gate questions at 100% mastery) versus merely present
   in the 25-item bank?
 - Which codes are taught but never tested at all?
 - When the R2 exam prep harvests "M01-M05 and M07," which codes come with it?
@@ -71,7 +71,8 @@ measured." That correction was only findable because the coverage map existed.
 
 **Fix.** Add two fields to each `S4_MXX_manifest.json` and one check to the suite:
 
-- `acs_coverage.gate` - codes measured by q19-q24
+- `acs_coverage.gate` - codes measured by the gate block (q18-q25 as of the 8-item
+  decision; see `AR_question_architecture.md`)
 - `acs_coverage.bank` - codes measured elsewhere in the 25
 - `acs_coverage.taught_only` - codes present in slides, deliberately untested
 - New verification check: every code in the module's ACS plate appears in exactly one

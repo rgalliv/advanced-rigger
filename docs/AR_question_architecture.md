@@ -19,27 +19,37 @@ and conventions only - no crane-operator content, no question wording.
 | Stage 3 | 13 | 291 rows total, 102 gate | 8 (M02: 6) | - | server |
 | Stage 4 (mobile crane) | 14 | - | 8 (M01: 24; M06/M07: 0) | - | server, protected registry |
 | Stage 6 | 7 | 5 | 5 | 100% | server, runtime-scored |
-| **Advanced Rigger** | **9** | **25** | **6** (q19-q24) | **24%** | **client FNV (Gen 1)** |
+| **Advanced Rigger** | **9** | **25** | **8** (q18-q25) | **32%** | **client FNV (Gen 1) - retrofit pending** |
 
-Two things stand out.
+**DECIDED 7 Aug 2026: gate size is 8.** This matches house convention - Stage 3 uses 8
+across twelve of thirteen modules, mobile crane Stage 4 across eleven of twelve gated
+modules. The original Advanced Rigger build used 6 (q19-q24), which was the Stage 2
+minimum and the Stage 3 exception.
 
-**The house gate size is 8, not 6.** Stage 3 uses 8 across twelve of thirteen modules;
-mobile crane Stage 4 uses 8 across eleven of twelve gated modules. Six is the Stage 2
-minimum and the Stage 3 exception. Advanced Rigger sits at the low end.
+### What moving 6 to 8 changes
 
-**Advanced Rigger has by far the largest bank.** 25 items per module against Stage 6's
-5. That is not a criticism - a 25-item bank with distribution control is a genuinely
-better instrument. But it means **19 of 25 items per module carry no gate consequence**,
-and that ratio needs a stated purpose.
+| | Was | Now |
+|---|---|---|
+| Gate items | q19-q24 | **q18-q25** |
+| `review_offset` | 18 | **17** |
+| Ungated bank | 19 items | **17 items** |
+| Gate records per stage | 54 of 225 | **72 of 225** |
+| Max ACS codes gate-measured per module | 6 | **8** |
+| Gate letter balance | 4 letters over 6 items - cannot be even | **2/2/2/2 - exactly even** |
 
-### Recommendation
+That last row is a real gain, not bookkeeping. With 6 items across 4 letters the gate
+can never be balanced; two letters always appear once and two appear twice. **With 8 it
+balances exactly.** Tighten the gate-composition check accordingly:
 
-Keep the 25-item bank. **Raise the gate from 6 to 8** to match house convention, and -
-more importantly - because six items cannot cover the ACS. See section 3.
+| Check | Was | Now |
+|---|---|---|
+| Gate composition | All four letters present; max consecutive run of 1 | **Exactly 2 of each letter**; max consecutive run of 1 |
 
-If the gate stays at 6, say why in the ACS. An unexplained deviation from house
-convention is the kind of thing that looks like an oversight during an audit even when
-it was a decision.
+The full-bank 7/6/6/6 distribution across all 25 items is unaffected and stays as is.
+
+**Advanced Rigger still has by far the largest bank** - 25 items per module against
+Stage 6's 5. That is a strength, not a problem. But 17 of 25 items still carry no gate
+consequence, and that ratio needs a stated purpose. See section 4.
 
 ---
 
@@ -82,11 +92,12 @@ with, because none of them ship an ACS at all.
 ### The problem, stated precisely
 
 Advanced Rigger defines roughly **180 ACS codes** across 9 modules - averaging 20 per
-module (7 K, 6 R, 5 S is typical). Each module gates **6 items**.
+module (7 K, 6 R, 5 S is typical). Each module gates **8 items**.
 
-**Six items cannot measure twenty codes.** At most 6 codes per module are gate-measured;
-the remaining 14 are either measured in the ungated 19 or not measured at all. Nothing
-currently records which.
+**Eight items cannot measure twenty codes.** At most 8 codes per module are
+gate-measured; the remaining 12 are either measured in the ungated 17 or not measured at
+all. Nothing currently records which. Moving 6 to 8 improved the ceiling by two codes
+per module - it did not remove the need for the map.
 
 The ACS masthead states the purpose of the codes:
 
@@ -147,9 +158,9 @@ That last one is a judgement call worth encoding. The ACS separates Knowledge, R
 Skill deliberately. A gate that samples only `K#` codes measures whether the learner
 read the slides, not whether they can rig.
 
-### Suggested gate composition target
+### Gate composition target
 
-For an 8-item gate against a ~20-code module:
+For the 8-item gate against a ~20-code module:
 
 | Band | Items | Rationale |
 |---|---:|---|
@@ -164,17 +175,20 @@ the split in the manifest so it is a decision on the record.
 
 ## 4. Gate item selection
 
-Current: `q19-q24`, a fixed contiguous tail block, `review_offset` 18.
+**Target: `q18-q25`, a fixed contiguous tail block, `review_offset` 17.**
 
-This is the same shape the mobile crane stages use - a fixed final block rather than a
-sample - and it is right for a mastery gate. Keep it. Two notes:
+A fixed final block rather than a random sample is the right shape for a mastery gate,
+and it is what every mobile crane stage uses. Two notes:
 
-**`review_offset` must track the gate start.** Advanced Rigger uses 18 with a gate at
-q19, so the first gate item renders as "Final Question 1." CM-101 uses `review_offset` 6
-with a gate at q07 for the same effect. If the gate moves to 8 items, it becomes
-q18-q25 and `review_offset` becomes 17. Easy to miss.
+**`review_offset` must track the gate start.** With the gate at q18, `review_offset` 17
+makes the first gate item render as "Final Question 1." The original build used 18 with a
+gate at q19; CM-101 uses 6 with a gate at q07. **This is the single easiest thing to get
+wrong in the 6-to-8 move** - an unchanged offset of 18 would label the gate
+"Final Question 0" and silently misnumber all eight.
 
-**The 19 ungated items need a stated role.** They are currently just "the bank." Give
+Add a check: `review_offset` equals `(first gate question index) - 1`.
+
+**The 17 ungated items need a stated role.** They are currently just "the bank." Give
 them a purpose in the ACS - formative practice, spaced review, or item-bank reserve for
 the R2 exam prep harvest. Whichever it is, the public formative activities must
 **record the learner selection neutrally** with no machine-readable correctness, per the
@@ -205,7 +219,7 @@ resultant (M06/M08), combined weight against the chart (M07/M09), and D/d ratio
 Once keys move server-side per the format spec:
 
 - One record per scored item. Advanced Rigger: **9 modules x 25 items = 225 records**,
-  of which **72 are gate** at an 8-item gate (54 at the current 6).
+  of which **72 are gate** (9 x 8).
 - Records carry module-hash matching, as the mobile crane Stage 4 registry does
   (112 records, "exact deterministic conversion").
 - Verify **uniqueness and well-formedness** of every record before deployment.
@@ -218,16 +232,25 @@ argument against the bank size.
 
 ---
 
-## 7. Open decisions
+## 7. Decisions
 
-These need Russ, not analysis:
+### Settled
 
-1. **Gate size: 6 or 8?** House convention says 8. Six is defensible if stated.
-2. **Does the 25-item bank feed R2 exam prep directly**, or is it formative only? Changes
-   how the ungated 19 are written and how neutrally they must record selections.
-3. **Skill-coverage floor** - is "at least one `S#` in every gate" a rule or a
-   preference?
-4. **Who owns each of the four overlapping topics?** Four one-line decisions.
-5. **Is the coverage map built before or after the ElevenLabs pass?** Recommend before -
+| # | Decision | Date |
+|---|---|---|
+| 1 | **Gate size is 8** (q18-q25, `review_offset` 17, 2/2/2/2 letter balance) | 7 Aug 2026 |
+| 2 | **New modules are renamed, not overwritten.** `AR_M01`-`AR_M09` are built as new artifacts. No existing module file is modified or replaced. | 7 Aug 2026 |
+
+### Still open
+
+3. **Does the 25-item bank feed R2 exam prep directly**, or is it formative only? Changes
+   how the ungated 17 are written and how neutrally they must record selections.
+4. **Skill-coverage floor** - is "at least one `S#` in every gate" a rule or a
+   preference? With 8 items and a 3/2/3 target it is comfortably satisfiable either way.
+5. **Who owns each of the four overlapping topics?** Angle factors (M02/M03),
+   snatch-block resultant (M06/M08), combined weight (M07/M09), D/d ratio (M03/M06).
+   Four one-line decisions.
+6. **Is the coverage map built before or after the ElevenLabs pass?** Recommend before -
    a coverage correction changes gate membership, and gate membership changes the overlay
-   GATE set that the audio pass ships.
+   GATE set that the audio pass ships. The 6-to-8 move makes this sharper, not softer:
+   two items per module are entering the gate for the first time.
