@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Center of Gravity Determination | CraneQualified S4_M15</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M15" data-cq-stage="4"
+      data-cq-total="54" data-cq-gate-code="R-201C / AR-101C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M15 &middot; Center of Gravity Determination</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Center of Gravity Determination</h1>
+<p class='sub'>CraneQualified Stage 4 &middot; Advanced Rigger</p><p class='sub'>Module S4_M15 &middot; Gate code R-201C / AR-101C</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ul><li>Define center of gravity and explain why the hook must be over it</li><li>Explain how center of gravity height affects load stability</li><li>Locate the center of gravity of a symmetric load</li><li>Calculate the center of gravity of a composite load using the moment method</li><li>Determine center of gravity and total weight using the two-scale method</li><li>Verify a calculated center of gravity with a controlled trial lift</li><li>Apply required measures when the center of gravity cannot be determined</li></ul><div class='gate-note'>This module ends with a six question knowledge check. You must score 100% to complete the module. The correct answer is not shown on a missed gate question.</div>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>What Center of Gravity Actually Is</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>Center of Gravity Defined</h2>
+<p>The <b>center of gravity</b> is the single point in a load where its weight is evenly balanced in every direction.</p><ul><li>Support the load at that point and it will balance, with no tendency to rotate</li><li>Suspend the load and it will always come to rest with that point directly under the hook</li><li>It is a property of the load itself, set by shape and material distribution</li><li>It exists whether or not anybody has calculated it</li></ul><p class='note'>Shorthand you will hear on site: <b>CG</b>, and occasionally <b>COG</b>. Both mean the same point.</p>
+</div></section>
+<section class="slide t-content" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>The CG Is a Point in Space</h2>
+<p>The center of gravity does not have to fall on solid material.</p><ul><li>A steel ring balances at the center of the circle -- in open air</li><li>A U-shaped or L-shaped weldment balances outside its own material</li><li>A pipe spool bent back on itself can balance in the gap</li><li>An open frame or skid balances in the space the frame surrounds</li></ul><p class='note'>This is why you cannot always mark the CG with paint. You can often only mark the vertical line it falls on.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The center of gravity of a load is best described as:</p>
+<div class="quiz-group" data-qid="S4_M15_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q01',0,'fb_S4_M15_q01')">The geometric middle of the load's outline</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q01',1,'fb_S4_M15_q01')">The point where load weight is evenly balanced</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q01',2,'fb_S4_M15_q01')">The heaviest single point on the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q01',3,'fb_S4_M15_q01')">The point where the slings attach to the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>The Hook Must Be Over the CG</h2>
+<p>A load hanging from a single hoist line will always settle with its center of gravity directly beneath the hook.</p><ul><li>Hook over the CG: the load rises level and hangs quiet</li><li>Hook offset from the CG: the load swings and rotates until it corrects itself</li><li>The correction happens the instant the load goes free of the ground</li><li>An offset hookup also loads sling legs unevenly</li></ul><p class='note'>The load line should also be plumb. Side pull introduces stresses the equipment was not designed to carry.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A load's center of gravity can be located in open air, outside the material of the load itself.</p>
+<div class="quiz-group" data-qid="S4_M15_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q02',0,'fb_S4_M15_q02')">False -- unless the load is made of more than one material</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q02',1,'fb_S4_M15_q02')">True, but only for loads over twenty thousand pounds</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q02',2,'fb_S4_M15_q02')">True -- hollow and L-shaped loads place it outside the material</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q02',3,'fb_S4_M15_q02')">False -- it must always fall on a solid part of the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>What an Offset Hookup Costs You</h2>
+<p>When the hook is not over the CG:</p><ul><li><b>Swing.</b> The load accelerates sideways as it lifts free</li><li><b>Rotation.</b> The load turns to bring the CG under the hook</li><li><b>Uneven leg loading.</b> One leg carries more than its calculated share</li><li><b>Loss of control.</b> Tag line handlers are reacting instead of guiding</li><li><b>Struck-by exposure.</b> Anyone in the swing path is at risk</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When the hook is not directly over the center of gravity and the load is lifted:</p>
+<div class="quiz-group" data-qid="S4_M15_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q03',0,'fb_S4_M15_q03')">The sling legs continue to share the load equally</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q03',1,'fb_S4_M15_q03')">The load swings and rotates until the CG settles under the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q03',2,'fb_S4_M15_q03')">The load rises evenly but registers as heavier on the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q03',3,'fb_S4_M15_q03')">Nothing changes until the load is above head height</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>CG Height and Load Stability</h2>
+<p>Where the CG sits <i>vertically</i> relative to the pick points decides whether the load hangs stably.</p><table class='cmp'><tr><th>Pick points ABOVE the CG</th><th>Pick points BELOW the CG</th></tr><tr><td><b>Stable.</b> The load behaves like a pendulum. Disturb it and it returns to level.</td><td><b>Unstable.</b> The load behaves like a pencil on its tip. It rolls until the CG swings below the pick points.</td></tr><tr><td>Normal, preferred arrangement</td><td>Requires tag lines, restraint, and deliberate control</td></tr></table><p class='note'>Pick points level with the CG are <b>neutral</b> -- the load has no tendency to return to level after a disturbance.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">For a load to hang stably, the effective pick point should be:</p>
+<div class="quiz-group" data-qid="S4_M15_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q04',0,'fb_S4_M15_q04')">Above the center of gravity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q04',1,'fb_S4_M15_q04')">Level with the center of gravity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q04',2,'fb_S4_M15_q04')">At the heaviest end of the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q04',3,'fb_S4_M15_q04')">Below the center of gravity</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q04"></div>
+</div></section>
+<section class="slide t-divider" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Finding the Center of Gravity</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Order of Confidence</h2>
+<ol class='rank'><li><b>Documented data.</b> Manufacturer drawings, data plates, general arrangement drawings, shipping documents. Highest confidence.</li><li><b>Calculation.</b> Geometry for uniform loads; the moment method for composite loads. Reliable when the inputs are good.</li><li><b>Weighing.</b> Scales or load cells. Gives real numbers for the load as it sits right now, contents included.</li><li><b>Trial lift observation.</b> Verification, not determination. Confirms or corrects what you already worked out.</li></ol><p class='note'>ASME B30.5 places the duty to obtain the load weight and its approximate CG on the <b>rigger</b>.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The first place a rigger should look for load weight and center of gravity information is:</p>
+<div class="quiz-group" data-qid="S4_M15_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q05',0,'fb_S4_M15_q05')">A controlled trial lift performed on the jobsite</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q05',1,'fb_S4_M15_q05')">Manufacturer drawings, data plates, or shipping papers</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q05',2,'fb_S4_M15_q05')">The judgment of the crane operator on site</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q05',3,'fb_S4_M15_q05')">An estimate calculated from the load's dimensions</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Symmetric and Uniform Loads</h2>
+<p>When a load is one material, uniform in thickness, and regular in shape, the CG sits at the <b>geometric center</b>.</p><ul><li>Rectangular plate: center in both directions</li><li>Solid round bar or pipe of uniform wall: mid-length, on the axis</li><li>Cube or rectangular solid: center in all three directions</li></ul><p class='note'><b>The assumption breaks the moment anything is not uniform.</b> Cutouts, attached components, tapered sections, thicker end plates, internal bracing, and residual contents all move the CG away from the geometric center.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A solid steel plate of uniform thickness has its center of gravity located:</p>
+<div class="quiz-group" data-qid="S4_M15_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q06',0,'fb_S4_M15_q06')">One third of the way in from the longest edge</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q06',1,'fb_S4_M15_q06')">It cannot be determined without weighing it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q06',2,'fb_S4_M15_q06')">At the thickest corner</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q06',3,'fb_S4_M15_q06')">At the geometric center of the plate</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>The Plumb-Bob Method</h2>
+<p>For an irregular load you can pick up and hang freely, the <b>plumb-bob method</b> reads the CG directly off the suspended load.</p><ol class='rank'><li>Suspend the load from one attachment point and let it settle</li><li>Drop a plumb line from the hook -- the CG lies on that line. Mark it (Line A)</li><li>Re-hang from a different point and drop a second line (Line B)</li><li>The CG is where Line A and Line B cross</li></ol><p class='note'>Best used in the <b>shop</b>, before a piece goes to the field: the load must hang completely free with no ground or obstruction contact, the hoist must be rated for the full weight, and wind throws it off -- so do it indoors or in calm air. For field-installed equipment that cannot be re-suspended, the trial lift or the two-scale method is more practical.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In the plumb-bob method, the center of gravity is found by:</p>
+<div class="quiz-group" data-qid="S4_M15_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q07',0,'fb_S4_M15_q07')">Measuring the load's dimensions and dividing the total by its density</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q07',1,'fb_S4_M15_q07')">Calculating a moment for each component from a chosen reference point</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q07',2,'fb_S4_M15_q07')">Hanging the load and dropping a plumb line from two different points</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q07',3,'fb_S4_M15_q07')">Weighing the load at two separate support points and comparing them</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>The Moment Method: The Idea</h2>
+<p>A <b>moment</b> is a turning effect. It equals <b>weight multiplied by distance</b> from a chosen reference point.</p><div class='formula'>Moment = Weight &times; Distance</div><p>Think of a seesaw. A light child sitting far from the pivot balances a heavy child sitting close to it, because what balances is not weight alone and not distance alone -- it is the two multiplied together.</p><p>A composite load is just several children on the same seesaw. The CG is the point where all their moments balance.</p>
+</div></section>
+<section class="slide t-content" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h2>The Moment Method: The Procedure</h2>
+<ol class='rank'><li><b>Pick a reference point</b> and stay with it. An end of the load, a machined face, a bolt line -- any point works, as long as every measurement comes off the same one.</li><li><b>Break the load into components</b> whose individual weights you know or can estimate.</li><li><b>Measure each component's distance</b> from the reference point to <i>that component's own</i> center of gravity.</li><li><b>Multiply</b> each weight by its distance to get each moment.</li><li><b>Add</b> all the moments together.</li><li><b>Divide</b> the total moment by the total weight.</li></ol><div class='formula'>CG distance = (Sum of all moments) &divide; (Total weight)</div><p class='note'>Repeat along a second axis to locate the CG in two dimensions.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In the moment method, a moment is calculated as:</p>
+<div class="quiz-group" data-qid="S4_M15_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q08',0,'fb_S4_M15_q08')">Weight multiplied by distance from the reference point</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q08',1,'fb_S4_M15_q08')">Weight divided by the number of components</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q08',2,'fb_S4_M15_q08')">Distance divided by weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q08',3,'fb_S4_M15_q08')">Weight added to distance from the reference point</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q08"></div>
+</div></section>
+<section class="slide t-content" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Worked Example: Two-Component Skid</h2>
+<p><b>Given:</b> a 20 ft skid, 8,000 lb total.<br>Component A: 6,000 lb, centered 4 ft from the left end.<br>Component B: 2,000 lb, centered 16 ft from the left end.</p><div class='work'>Reference point: left end of the skid<br><br>Moment A = 6,000 lb &times; 4 ft = <b>24,000 lb-ft</b><br>Moment B = 2,000 lb &times; 16 ft = <b>32,000 lb-ft</b><br><br>Total moment = 24,000 + 32,000 = <b>56,000 lb-ft</b><br>Total weight = 6,000 + 2,000 = <b>8,000 lb</b><br><br>CG = 56,000 &divide; 8,000 = <b>7 ft from the left end</b></div><p class='note'><b>Sanity check:</b> the CG landed closer to the heavy component, which is what it should do. If your answer drifts toward the light end, you made an error.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A 20 ft skid weighs 8,000 lb total. Component A is 6,000 lb at 4 ft from the left end; component B is 2,000 lb at 16 ft. The CG is located:</p>
+<div class="quiz-group" data-qid="S4_M15_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q09',0,'fb_S4_M15_q09')">4 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q09',1,'fb_S4_M15_q09')">10 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q09',2,'fb_S4_M15_q09')">7 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q09',3,'fb_S4_M15_q09')">12 ft from the left end</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Worked Example: Three Components</h2>
+<p><b>Given:</b> a 30 ft skid.<br>Pump: 4,000 lb at 5 ft &middot; Motor: 3,000 lb at 12 ft &middot; Base frame: 3,000 lb at 15 ft (frame is uniform, so its own CG is at mid-length)</p><div class='work'>Reference point: left end<br><br>Pump&nbsp;&nbsp;&nbsp;= 4,000 &times; 5&nbsp;&nbsp; = 20,000 lb-ft<br>Motor&nbsp;&nbsp;= 3,000 &times; 12 = 36,000 lb-ft<br>Frame&nbsp;&nbsp;= 3,000 &times; 15 = 45,000 lb-ft<br><br>Total moment = <b>101,000 lb-ft</b><br>Total weight = <b>10,000 lb</b><br><br>CG = 101,000 &divide; 10,000 = <b>10.1 ft from the left end</b></div><p class='note'>The frame counts. A base frame or skid structure is often 20 to 40 percent of total weight and is routinely left out by mistake.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When using the moment method, the reference point you measure from:</p>
+<div class="quiz-group" data-qid="S4_M15_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q10',0,'fb_S4_M15_q10')">Can be any point, provided every measurement uses it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q10',1,'fb_S4_M15_q10')">Must be the geometric center of the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q10',2,'fb_S4_M15_q10')">Must be the left end of the load being measured</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q10',3,'fb_S4_M15_q10')">Must be the heaviest component on the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>The Two-Scale Weighing Method</h2>
+<p>Support the load at two known points and read the weight at each. You get <b>both</b> the total weight and the CG location.</p><div class='formula'>Total weight = Left reading + Right reading<br><br>Distance from left support = (Right reading &times; Span) &divide; Total weight</div><ul><li>Use calibrated scales or load cells under cribbing at each support</li><li>The load must be level and resting only on the two supports</li><li>The CG sits nearer the support carrying the greater share</li><li>Reflects the load <b>as it sits now</b>, including contents</li></ul>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Worked Example: Two-Scale</h2>
+<p><b>Given:</b> a 30 ft beam on two scales, 30 ft apart.<br>Left scale: 4,000 lb &middot; Right scale: 2,000 lb</p><div class='work'>Total weight = 4,000 + 2,000 = <b>6,000 lb</b><br><br>Distance from left = (2,000 &times; 30) &divide; 6,000<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = 60,000 &divide; 6,000<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; = <b>10 ft from the left end</b></div><p class='note'><b>Sanity check:</b> the left scale carries twice the right, so the CG should be twice as close to the left. 10 ft vs 20 ft. It checks.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A 30 ft beam is supported on two scales, one at each end. The left scale reads 4,000 lb and the right scale reads 2,000 lb. The CG is:</p>
+<div class="quiz-group" data-qid="S4_M15_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q11',0,'fb_S4_M15_q11')">20 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q11',1,'fb_S4_M15_q11')">15 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q11',2,'fb_S4_M15_q11')">5 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q11',3,'fb_S4_M15_q11')">10 ft from the left end</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q11"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The two-scale weighing method gives you:</p>
+<div class="quiz-group" data-qid="S4_M15_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q12',0,'fb_S4_M15_q12')">Both the total weight and the CG location</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q12',1,'fb_S4_M15_q12')">The tension carried in each sling leg</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q12',2,'fb_S4_M15_q12')">Only the center of gravity, not the weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q12',3,'fb_S4_M15_q12')">Only the total weight of the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q12"></div>
+</div></section>
+<section class="slide t-divider" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Verifying in the Field</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h2>The Trial Lift</h2>
+<p>Raise the load only until it is just clear of the ground. Stop. Watch.</p><ul><li>All personnel positioned clear before the load breaks contact</li><li>Lift slowly and stop within a few inches of the ground</li><li>Observe whether the load rises level or tilts</li><li>If it tilts: <b>set it down</b> and reposition the rigging</li><li>Repeat until the load rises level</li><li>If it will not come level, stop and re-examine the plan</li></ul><p class='note'>The trial lift is the cheapest information you will get. At two inches, a bad hookup costs you time. At ten feet, it costs more.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">During a trial lift, the load is raised just clear of the ground and it tilts noticeably to one end. The correct response is:</p>
+<div class="quiz-group" data-qid="S4_M15_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q13',0,'fb_S4_M15_q13')">Continue the lift slowly and use tag lines to hold it level</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q13',1,'fb_S4_M15_q13')">Swing the load clear of the ground and re-level it in the air</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q13',2,'fb_S4_M15_q13')">Add a second sling to the high end while the load is suspended</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q13',3,'fb_S4_M15_q13')">Set the load back down and reposition the rigging</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q13"></div>
+</div></section>
+<section class="slide t-content" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Reading the Tilt</h2>
+<p>The direction of the tilt tells you where the CG is.</p><table class='cmp'><tr><th>What you see</th><th>What it means</th><th>What to do</th></tr><tr><td>One end hangs low</td><td>CG is toward the low end</td><td>Move the hook toward the low end</td></tr><tr><td>Load rises level</td><td>Hook is over the CG</td><td>Proceed with the lift</td></tr><tr><td>Load rotates on lift-off</td><td>CG is offset on the other axis</td><td>Set down; check the CG crosswise as well</td></tr><tr><td>Load rolls in the slings</td><td>Pick points are below the CG</td><td>Set down; re-rig above the CG</td></tr></table><p class='note'><b>The low end is the heavy end.</b> The most common field error is reading this backward and moving the hook the wrong direction.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A suspended load hangs low on its right end. This tells you the center of gravity is:</p>
+<div class="quiz-group" data-qid="S4_M15_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q14',0,'fb_S4_M15_q14')">Toward the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q14',1,'fb_S4_M15_q14')">Toward the right end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q14',2,'fb_S4_M15_q14')">At the geometric center</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q14',3,'fb_S4_M15_q14')">Directly under the hook</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Correcting an Out-of-Level Load</h2>
+<p>On a fixed-attachment bridle, the load tilts toward the heavy end. Three legitimate corrections, in the order you will usually reach for them:</p><ol class='rank'><li><b>Shorten the sling on the low (heavy) side</b> -- this lifts the heavy end up to level. (Equivalently, lengthen the high/light side.)</li><li><b>Move the attachment toward the heavy end</b>, so the hook ends up over the CG.</li><li><b>Adjust effective leg length</b> with turnbuckles or chain lever hoists when the attachment points are fixed.</li></ol><p class='warn'><b>Not acceptable:</b> lengthening the low side (drops it further); holding a load level with tag lines; adding counterweight; adjusting rigging while the load is suspended; increasing hoist speed to reduce apparent swing.</p><p class='note'>When leg lengths differ, leg tensions differ too. Recheck your sling capacities against the new geometry.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On a bridle hitch where the load hangs out of level, the balance can be corrected by:</p>
+<div class="quiz-group" data-qid="S4_M15_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q15',0,'fb_S4_M15_q15')">Increasing hoist speed to reduce the swing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q15',1,'fb_S4_M15_q15')">Tightening the sling leg on the high end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q15',2,'fb_S4_M15_q15')">Adding counterweight to the high end of the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q15',3,'fb_S4_M15_q15')">Adjusting leg lengths or moving the pick points</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q15"></div>
+</div></section>
+<section class="slide t-divider" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Loads That Fight You</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Liquid and Loose Contents</h2>
+<p>A partially filled or loosely loaded container does not have a fixed CG.</p><ul><li>Liquid runs to the low side when the load tilts, moving the CG with it</li><li>Acceleration, stopping, and swinging all drive the contents</li><li>The shift can be sudden and self-reinforcing: tilt drives flow, flow increases tilt</li><li>Loose bulk material, unsecured tooling, and stacked parts behave the same way</li></ul><p class='note'><b>Preferred controls:</b> empty the container, or fill it completely. If it must be lifted partly full, use baffles or internal restraint, move slowly, avoid abrupt starts and stops, and treat the CG as a range rather than a point.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A partially filled tank is being lifted. The primary hazard from the liquid is that:</p>
+<div class="quiz-group" data-qid="S4_M15_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q16',0,'fb_S4_M15_q16')">The CG shifts as the liquid moves during the lift</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q16',1,'fb_S4_M15_q16')">The liquid increases wind load on the tank</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q16',2,'fb_S4_M15_q16')">The liquid adds weight that is not on the data plate</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q16',3,'fb_S4_M15_q16')">The liquid makes the tank harder to sling</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>High CG Loads and Tipping</h2>
+<p>Tall, narrow loads with the weight concentrated high are stable in the air and unstable on the ground.</p><ul><li>Suspended from above, the load hangs stably</li><li>The hazard arrives at <b>set-down</b>, when the load takes its own weight</li><li>Uneven ground, settling cribbing, or a soft spot starts the tip</li><li>Once past the tipping point, the load's own weight completes the fall</li></ul><p class='note'><b>Controls:</b> prepare and level the set-down area in advance; use adequate blocking with sufficient bearing area; keep tag lines attached until the load is stable and restrained; brace or guy tall loads before releasing the rigging.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A tall, narrow load with a high center of gravity is most at risk of:</p>
+<div class="quiz-group" data-qid="S4_M15_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q17',0,'fb_S4_M15_q17')">Overloading the crane's rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q17',1,'fb_S4_M15_q17')">Two-blocking during the hoisting phase</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q17',2,'fb_S4_M15_q17')">Tipping over when it is set down</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q17',3,'fb_S4_M15_q17')">Sling failure at the attachment points</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h2>When the CG Cannot Be Determined</h2>
+<p>Sometimes the information is not there. OSHA addresses this directly for assembly and disassembly work at <b>29 CFR 1926.1404(h)(6)</b> in Subpart CC, and the principle applies to rigging generally.</p><ul><li>The CG must be identified where it is necessary for the method used to maintain stability</li><li>Where information is insufficient to identify it accurately, measures designed to prevent dangerous movement resulting from an inaccurate identification must be used</li></ul><p class='note'><b>What those measures look like:</b> a slow controlled trial lift with everyone clear; tag lines rigged before lift-off; increased exclusion zone; restraint against rotation; a conservative CG assumption with margin; a second lifting point available; and a documented stop point if the load does not behave as expected.</p>
+</div></section>
+<section class="slide t-content" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Documenting the CG</h2>
+<p>The center of gravity is lift plan information, not a number that lives in one person's head.</p><ul><li>Record the CG location and how it was determined</li><li>Record the total weight and its source</li><li>Mark the CG line on the load where it can be seen, when practical</li><li>Communicate it in the pre-lift briefing so the whole crew knows</li><li>Under ASME B30.5 the rigger ensures the weight and approximate CG have been obtained; the lift director ensures the operator is informed of the weight</li></ul><p class='note'>If the load is picked again later by a different crew, your documentation is what they inherit.</p>
+</div></section>
+<section class="slide t-divider" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions &middot; 100% required to complete this module</p><div class='gate-note'>The correct answer is not shown on a missed question. If you do not pass, review the module and retest.</div>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">When the center of gravity of a load cannot be accurately determined, the required approach is to:</p>
+<div class="quiz-group" data-qid="S4_M15_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q18',0,'fb_S4_M15_q18')">Use measures that prevent dangerous movement</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q18',1,'fb_S4_M15_q18')">Assume it is at the geometric center and proceed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q18',2,'fb_S4_M15_q18')">Refuse the lift under all circumstances</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q18',3,'fb_S4_M15_q18')">Increase the crane's rated capacity margin by ten percent</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">Under ASME B30.5, ensuring the weight of the load and its approximate center of gravity have been obtained is the responsibility of:</p>
+<div class="quiz-group" data-qid="S4_M15_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q19',0,'fb_S4_M15_q19')">The crane manufacturer</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q19',1,'fb_S4_M15_q19')">The rigger</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q19',2,'fb_S4_M15_q19')">The signal person</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q19',3,'fb_S4_M15_q19')">The equipment owner</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A 24 ft skid weighs 12,000 lb. A 9,000 lb press sits centered at 6 ft from the left end and a 3,000 lb control cabinet sits centered at 18 ft. The CG is:</p>
+<div class="quiz-group" data-qid="S4_M15_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q20',0,'fb_S4_M15_q20')">12 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q20',1,'fb_S4_M15_q20')">15 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q20',2,'fb_S4_M15_q20')">6 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q20',3,'fb_S4_M15_q20')">9 ft from the left end</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A load is picked with the hook positioned 18 inches to the left of the actual center of gravity. On lift-off, the load will:</p>
+<div class="quiz-group" data-qid="S4_M15_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q21',0,'fb_S4_M15_q21')">Rise level because the slings equalize</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q21',1,'fb_S4_M15_q21')">Rise with the left end low and stay that way</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q21',2,'fb_S4_M15_q21')">Rotate until the CG settles directly under the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q21',3,'fb_S4_M15_q21')">Rise level, then tilt once it clears the obstruction</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A load is rigged from lugs located below its center of gravity. This condition is:</p>
+<div class="quiz-group" data-qid="S4_M15_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q22',0,'fb_S4_M15_q22')">Unstable -- the load will tend to roll over</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q22',1,'fb_S4_M15_q22')">Unstable only if the load weighs more than 5,000 pounds</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q22',2,'fb_S4_M15_q22')">Stable, provided the sling angle is above 60 degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q22',3,'fb_S4_M15_q22')">Stable -- the low attachment cradles the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">A 40 ft vessel rests on two load cells 40 ft apart. The left cell reads 15,000 lb, the right reads 5,000 lb. The CG is located:</p>
+<div class="quiz-group" data-qid="S4_M15_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q23',0,'fb_S4_M15_q23')">15 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q23',1,'fb_S4_M15_q23')">10 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q23',2,'fb_S4_M15_q23')">20 ft from the left end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q23',3,'fb_S4_M15_q23')">30 ft from the left end</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">During a trial lift of a transformer, the load lifts with the north end noticeably low. The rigger should conclude that:</p>
+<div class="quiz-group" data-qid="S4_M15_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q24',0,'fb_S4_M15_q24')">The crane is out of level</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q24',1,'fb_S4_M15_q24')">The north sling leg is defective and must be replaced</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q24',2,'fb_S4_M15_q24')">The center of gravity is toward the north end of the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q24',3,'fb_S4_M15_q24')">The load exceeds the crane's rated capacity</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-53" data-idx="53">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">The most reliable way to confirm a calculated center of gravity before committing to a lift is to:</p>
+<div class="quiz-group" data-qid="S4_M15_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q25',0,'fb_S4_M15_q25')">Have a second rigger review the arithmetic</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q25',1,'fb_S4_M15_q25')">Compare it against a similar load lifted previously</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q25',2,'fb_S4_M15_q25')">Recalculate it using a different reference point</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M15_q25',3,'fb_S4_M15_q25')">Perform a controlled trial lift and watch the load</button>
+</div>
+<div class="feedback" id="fb_S4_M15_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-54" data-idx="54">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div class='completion-panel'><p id='score-summary'>Complete the knowledge check to finish this module.</p><div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M16'}}))">Next: Unequal Leg Loading &gt;</button></div>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 54</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 54;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M15)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M15_CenterOfGravity";
+var HASHES={"S4_M15_q01": "50b8159f", "S4_M15_q02": "ede3a89b", "S4_M15_q03": "0a5630cd", "S4_M15_q04": "01a57b07", "S4_M15_q05": "8c0395ab", "S4_M15_q06": "a8570004", "S4_M15_q07": "a2c952b0", "S4_M15_q08": "1cf0c8b3", "S4_M15_q09": "4876f03a", "S4_M15_q10": "3303f2ea", "S4_M15_q11": "16916ab8", "S4_M15_q12": "7828a33c", "S4_M15_q13": "70dfe74e", "S4_M15_q14": "cf771b19", "S4_M15_q15": "d204c3b4", "S4_M15_q16": "b4b157c8", "S4_M15_q17": "ad52785d", "S4_M15_q18": "09c29992", "S4_M15_q19": "ef501486", "S4_M15_q20": "f184c450", "S4_M15_q21": "0bf7495c", "S4_M15_q22": "cad275d3", "S4_M15_q23": "741c30c7", "S4_M15_q24": "2df7555f", "S4_M15_q25": "4869da6b"};
+var GATE=["S4_M15_q18", "S4_M15_q19", "S4_M15_q20", "S4_M15_q21", "S4_M15_q22", "S4_M15_q23", "S4_M15_q24", "S4_M15_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=53;            /* completion slide (54) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (54) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M15)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Center of Gravity Determination, the first module in the Advanced Rigger stage. Here is why this module comes first. Every rigging decision you make downstream -- what sling to grab, what hitch to use, where to hook up, how much tension ends up in each leg -- all of it assumes you know two things about the load. What it weighs, and where it balances. Get the weight wrong and you overload something. Get the balance point wrong and the load moves on its own the second it leaves the ground. I have been on jobs where a crew nailed the sling selection, nailed the angles, did everything by the book, and still had a skid spin a quarter turn on lift-off because nobody checked where the weight actually sat. [PAUSE / ASK] Before we start, ask yourself how you would find the balance point of a loaded pump skid sitting in front of you right now.", "2": "Those are the seven things you walk out of here able to do. Notice that three of them are calculations and three of them are field judgment. That split is deliberate, because a rigger who can do the math but cannot read a load on a trial lift is only half useful, and so is the reverse. The module ends with a six question knowledge check and it requires one hundred percent. That is not there to be harsh. It is there because on this subject, an eighty three percent understanding of where a load balances is the kind of thing that puts a skid into somebody. I have worked with riggers who could run these numbers in their head after a few months of practice. It comes with reps. [PAUSE / ASK] Look at that list and pick out the one you feel least sure about right now.", "3": "First section. Before we calculate anything, we need to be precise about what this point is, because most people carry around a fuzzy version of it that works fine until it does not. We are going to define it, then look at two things it controls: which way the load swings, and whether the load hangs steady or wants to roll over. Those two behaviors account for most of the load control problems you will see in the field. I have watched a seasoned crew get surprised by a load that rolled in the slings, and every one of them could have told you what center of gravity meant if you asked. [PAUSE / ASK] Ask yourself whether you could explain the difference between where a load balances and where its middle is.", "4": "Here is the definition, and it is worth getting exactly right. The center of gravity is the one point where the weight of the load is balanced in every direction at once. Not the middle of its outline. Not the heaviest component. The balance point. Two consequences fall straight out of that definition. First, if you could support the load at that point it would sit there without wanting to rotate. Second, and this is the one that matters on the hook, a suspended load will always rotate until that point ends up directly under the hook. It does not ask permission and it does not wait. The other thing to understand is that this point belongs to the load. It was there before you showed up. Your rigging does not create it or move it -- your rigging either lines up with it or fights it. On a job in a plant shutdown I watched two riggers argue for ten minutes about where to hook a gearbox, and the gearbox already knew the answer. [PAUSE / ASK] Say the definition back in your own words before you move on.", "5": "This trips people up the first time they meet it. The balance point does not have to land on any actual metal. Think about a wedding ring, or a big steel flange ring, or a horseshoe. The balance point of a ring is the middle of the hole, and there is nothing there. Same story with a U-shaped weldment or an open skid frame. The point sits in the air the shape surrounds. Why does that matter to you practically? Because you will hear people say mark the CG on the load, and sometimes you physically cannot. What you can usually do is mark the vertical line the balance point falls on, on the outside of the load where you can see it, and that is enough to line your hook up. I have seen a fabrication shop paint a stripe down the side of every large weldment for exactly this reason, and the riggers loved them for it. [PAUSE / ASK] Picture a horseshoe and put your finger where it balances.", "6": "This one is about the definition, and the definition matters because everything else in this module builds on it. The center of gravity is the single point where the weight of the load is balanced in every direction. Hang the load from that point and it sits still. Some folks will reach for the heaviest spot on the load, and that is close but wrong -- a dense motor on one end pulls the balance point toward it, but the balance point is not the motor itself, it is somewhere between the motor and everything else. Someone might think it is the geometric middle of the outline, and that is only true when the material is spread out evenly, which on real equipment it almost never is. Some people will point at the sling attachment points, but those are where you decided to hook up. The load does not care where you hooked up. The balance point is set by the load itself, before you ever showed up with a sling. [PAUSE / ASK] Take a second on this before you answer. Make your call.", "7": "This is the operating rule that everything else serves. A load hanging on a line settles with its balance point under the hook, every time, without exception. So your whole job when you hook up is to put the hook over that point before the load leaves the ground, because if you do not, the load will do the moving itself. When that hookup is right, the load comes up level and it hangs still and it is boring, and boring is exactly what you want. When it is wrong, the load swings and rotates the moment it goes free, and there is a second problem riding along with it -- the legs stop sharing evenly. One leg picks up more than you planned. There is a related point about the load line itself needing to hang plumb. Dragging a load sideways puts stresses into the machine that were never in the design. On a warehouse job I watched an operator try to skid a crate sideways with an overhead crane and put a flat spot in a sheave doing it. [PAUSE / ASK] Think about the last load you saw picked and whether it hung quiet.", "8": "The center of gravity is a point in space, not a spot you can put your thumb on. On a big steel ring, on a U-shaped weldment, on a pipe spool bent back on itself, that balance point sits in the open air inside the curve. Some folks will insist it has to land on solid material, and that feels right until you picture a donut -- the balance point of a donut is the hole. Someone might think weight has something to do with it, but a five hundred pound ring and a fifty thousand pound ring both balance at the center of the circle. Some people will tie it to the number of materials, and that changes where the point lands but not whether it can sit in open air. [PAUSE / ASK] Picture a horseshoe in your head and ask yourself where it balances. Make your call.", "9": "Let us be concrete about what goes wrong, because swing sounds mild until you see it. First, the load accelerates sideways as it comes free. It is not drifting, it is being pulled by gravity into a new position, and a big load carries real energy doing that. Second, it rotates. Third, and this is the one that does not announce itself, the legs stop sharing the way you calculated. You sized those slings assuming a share, and now one of them is carrying more. Fourth, your tag line people go from guiding the load to reacting to it, which is how people get pulled off balance or dragged. And the sum of all that is a struck-by exposure for anybody standing in the path. I was on a precast job where a wall panel swung about three feet on lift-off because the hookup was off, and the closest laborer to it had done everything right and still had to move. [PAUSE / ASK] Where do people usually stand on your jobs during a pick?", "10": "Gravity is going to win this argument every single time. A suspended load will always come to rest with its balance point directly beneath the hook. If you did not hook up over that point, the load moves itself to get there, and it does that the instant it leaves the ground. That movement is a swing, and a swing on a heavy load is how people get pinned. Some folks will say the load just gets heavier, but the weight never changed -- what changed is where the weight is hanging from. Someone might think the height matters, that it is safe until the load is up high, but the swing happens at the moment the load goes free. Some people assume the slings still share evenly, and that is exactly backward -- an off-center hookup is one of the main ways one leg ends up carrying far more than its share. [PAUSE / ASK] I have watched a crew lift a pump skid two inches and jump back when it spun a quarter turn on them. Nobody got hurt that day. Make your call.", "11": "Now the vertical question, and this is the one that produces the ugly surprises. It is not just about lining up left and right. It is about whether the point you are picking from sits above or below the balance point. Above the balance point, the load is a pendulum. Nudge it and it swings back to level on its own. That is stable and that is what you want. Below the balance point, you have a pencil standing on its tip. The load wants to roll, and it will roll until the heavy part gets underneath the points it is hanging from, and it does not do that gently. There is a third case worth naming: pick points exactly level with the balance point. That is neutral. The load has no reason to come back to level, so wherever a bump leaves it, it stays. Think about a tall electrical cabinet with lifting lugs down low on the sides. That is the unstable case, and where the standards and the manufacturer allow it at all, it comes with tag lines and a deliberate plan. I have seen a tall cabinet rigged from low lugs roll about twenty degrees in the slings and everybody's stomach dropped at once. [PAUSE / ASK] Think of a load on your job with attachment points down low.", "12": "This is the stability rule and it is the one that separates a load that hangs quiet from a load that rolls over on you. When the point you are picking from is above the balance point, the load behaves like a pendulum -- push it and it swings back to level. When the pick point is below the balance point, the load is balanced like a pencil standing on its tip, and it will roll to get the heavy part underneath. Some folks will say level is fine, but level is neutral -- the load has no reason to come back, so any bump leaves it wherever it ended up. Someone might think below is correct because it sounds like you are cradling the load, but that is the tip-over case. Some people will chase the heavy end, which is about where, not about how high. [PAUSE / ASK] Think about a tall electrical cabinet rigged from lugs down low on its sides. Make your call.", "13": "Section two, and this is where we get to work. Four ways to find the balance point, in order of how much you should trust them. Documents first. Geometry when the load is simple and uniform. The moment method when the load is made of parts, which is most real equipment. And weighing when you need hard numbers and the load is sitting somewhere you can get scales under it. You will use all four, sometimes on the same job. What I want you to walk away with is the habit of asking which one applies before you start measuring anything. I have watched a rigger spend forty minutes calculating a skid that had the weight and balance point stamped on a plate at the other end. [PAUSE / ASK] Ask yourself which of these you have actually done.", "14": "Four sources, ranked. Start with documents. If the people who built it published the weight and the balance point, that beats anything you are going to work out with a tape measure, and it takes thirty seconds to look. Second, calculation. Geometry when the load is one uniform material in a regular shape, the moment method when it is made of parts. Both are trustworthy, and both are only as good as the numbers you feed them. Third, weighing. Scales give you the load as it actually sits today, including whatever is inside it that nobody mentioned. Fourth, trial lift. And I want to be careful here -- the trial lift is verification, not determination. It tells you whether you were right. It does not do the homework for you. Now, whose job is this? Under B30.5 the rigger is responsible for making sure the load weight and approximate balance point have been obtained. That sits on you. On a refinery turnaround I watched a rigger stop a pick and go find the vessel drawings, and it cost twenty minutes and saved a bad afternoon. [PAUSE / ASK] Who typically supplies the weight on your jobs?", "15": "There is an order of confidence here, and you always start at the top of it. Documented data from the people who built the thing beats anything you can work out standing next to it. A data plate, a general arrangement drawing, a bill of lading -- those are the first stop, every time. Some folks jump straight to calculating from dimensions, and that is a real skill you will use constantly, but it is what you do when the documents are not there, not instead of looking. Someone might lean on the operator, and a good operator has judgment worth listening to, but judgment is not data and it is not the operator's job to supply the weight. Some people will name the trial lift, and that is a verification step -- it confirms what you already calculated, it does not replace the homework. [PAUSE / ASK] On a plant job I have seen the weight stamped right on the skid frame while three people argued about it. Make your call.", "16": "The easy case first, and it really is easy. One material, even thickness, regular shape -- the balance point is the geometric middle. A rectangular plate balances at the center in both directions. A length of uniform pipe balances at mid-length on its axis. A solid block balances at the center in all three directions. Simple. But here is what I actually want you to take from this slide, and it is not the easy part. It is knowing precisely when you have left the easy case. Torch a hole in that plate and the balance point moves away from the hole. Weld a bracket on one end and it moves toward the bracket. Taper the section, thicken one end plate, add internal bracing, leave product inside -- every one of those moves the point. On real equipment, the uniform case is the exception, not the rule. I have seen riggers treat a fabricated tank like a uniform cylinder and forget it had a dished head on one end and a flat on the other. [PAUSE / ASK] Look around and find something near you that is genuinely uniform.", "17": "When material is spread out evenly and the shape is regular, the balance point and the geometric center are the same place. A rectangular plate of one thickness, one material, no cutouts -- measure the middle in both directions and you have it. This is the easy case, and it is worth knowing precisely so you recognize when you have left it. Some folks will hunt for a thickest corner, but the premise already told you the thickness is uniform. Someone might reach for a one third rule, and there are rules like that for triangles and other shapes, but they do not apply to a rectangle. Some people will say you cannot know without weighing, and weighing gives you the weight -- it does not tell you where the balance point sits. [PAUSE / ASK] Now ask yourself what changes the moment somebody torches a hole in that plate. Make your call.", "18": "This is a method your Stage 2 work introduced, and it earns its place in the advanced course because it is the shop rigger's tool. When you can actually pick a piece up and let it hang free, the load will tell you where it balances without any arithmetic at all. You hang it from one point, let it stop swinging, and drop a plumb line straight down from the hook. The balance point is somewhere on that line -- guaranteed, because a hanging load always settles with its balance point under the hook. You mark that line right on the load. Then you hang it from a different point, drop a second line, mark that one too, and where the two marks cross is your balance point in two dimensions. A couple of honest limits. The load has to hang completely free -- if a corner is still kissing the ground or a wall, the reading lies to you. The hoist has to be rated for the whole load, because there are no shortcuts on a temporary hang. And wind will push a suspended load around, so this is an indoor, calm-air method. That is why it lives in the shop. I have watched a fab shop hang a big irregular weldment twice and paint the crossing point on it before it ever shipped, and the field crew loved them for it. [PAUSE / ASK] Where on your work could you hang a piece free before it goes out?", "19": "The plumb-bob method reads the balance point straight off a hanging load. You suspend the load from one attachment point, let it settle, and drop a plumb line from the hook straight down. The balance point sits somewhere on that line, because a hanging load always puts its balance point under the hook. Mark the line on the load. Then you hang it from a different point and drop a second line, and where the two lines cross is your balance point. Some folks will reach for the weighing method, and that is a different valid tool -- it gives you the balance point from scale readings, not from a hanging line. Someone might describe measuring and dividing by density, which gets you the weight, not where it balances. Some people will name the moment method, which is the calculation you run on paper, not the thing you do with the load hanging in front of you. [PAUSE / ASK] I have watched a fab shop hang a big weldment twice and paint the crossing point right on it before it ever went to the field. Make your call.", "20": "Here is the idea behind the method, and if you get the idea the arithmetic is nothing. A moment is a turning effect, and it is weight times distance from wherever you decide to measure from. That is it. The seesaw is the picture I want in your head. A small kid way out at the end balances a big kid sitting close to the middle. Neither weight alone nor distance alone explains that. What explains it is the product of the two. Now scale that up. A load made of several components is just several kids on the same seesaw, each one with a weight and a distance. The balance point of the whole thing is the spot where all those turning effects cancel out. That is what we are solving for. One thing to watch: weight times distance gives you pound-feet. If you ever find yourself adding pounds to feet, stop, because the units are telling you the method went sideways. I taught this to a millwright crew once and the seesaw was the thing that made it stick. [PAUSE / ASK] Picture two people on a seesaw and get them balanced in your head.", "21": "Six steps. Step one, pick your reference point and then do not change it. The left end of the skid, a machined face, a bolt line -- it genuinely does not matter which, because the answer comes out as a distance from wherever you started. What kills people is measuring one component off the left end and the next off the centerline. Step two, break the load into pieces you know the weight of. Step three, measure to each piece's own balance point, not to its edge -- if the motor is three feet long, you want the middle of the motor. Step four, multiply each weight by its distance. Step five, add them up. Step six, divide by the total weight. What comes out is the distance from your reference point to the balance point of the whole load. And if you need it in two directions, you run the same six steps again along the other axis. On a compressor skid I helped plan, we ran it lengthwise and crosswise and found the balance point was nearly a foot off the centerline because of where the oil cooler sat. [PAUSE / ASK] Walk the six steps back in your head before you move on.", "22": "A moment is weight times distance, and once that clicks the whole method becomes arithmetic. Think of a kid on a seesaw. A light kid far out balances a heavy kid sitting close in, because what matters is not weight alone and not distance alone, it is the two multiplied together. That product is the moment. Some folks will add weight and distance, and you can hear that it is wrong the moment you check the units -- pounds plus feet is not a thing. Someone might divide distance by weight, which flips the relationship and would tell you a heavier component has less influence, the opposite of what a seesaw does. Some people will divide by the component count, which is averaging, and averaging throws away exactly the information you are trying to keep. [PAUSE / ASK] Picture that seesaw before you answer. Make your call.", "23": "Let us run one all the way through. Twenty foot skid, eight thousand pounds total. Six thousand pound component centered four feet from the left end, two thousand pound component centered sixteen feet from the left end. Reference point is the left end and it stays the left end. First moment: six thousand times four is twenty four thousand pound-feet. Second moment: two thousand times sixteen is thirty two thousand pound-feet. Notice something there -- the lighter component produced the bigger moment, because it is sitting so much further out. That is the seesaw doing its thing. Add them: fifty six thousand pound-feet. Total weight is eight thousand pounds. Divide and you get seven feet from the left end. Now the part I want you to do every single time: sanity check it. Seven feet is on the heavy side of the skid, which is where it belongs, because the heavy component is over there. If your number ever comes out on the light side, you have made a mistake and you know it before anybody else does. I have caught my own arithmetic errors this way more than once on a job trailer table. [PAUSE / ASK] Cover the numbers and work it yourself.", "24": "Run the method. Pick the left end as your reference point. The heavy component gives you six thousand pounds times four feet, which is twenty four thousand. The light component gives you two thousand times sixteen, which is thirty two thousand. Add those together for fifty six thousand, then divide by the total weight of eight thousand pounds. That lands you at seven feet from the left end. Notice it sits much closer to the heavy component, which is what your gut should have told you before you did any math. Some folks will just name the heavy component's own position, forgetting that the lighter component still pulls the balance point toward itself. Someone might split the skid in half and call it the middle, which would only be right if the two components were equal. Some people will average the two positions and land between them without weighting, which ignores that one component is three times the other. [PAUSE / ASK] Do the arithmetic on paper, do not eyeball it. Make your call.", "25": "Same method, three components, and one new wrinkle. Thirty foot skid. Pump at four thousand pounds, five feet in. Motor at three thousand pounds, twelve feet in. And the base frame itself at three thousand pounds. Now where does the frame count from? The frame is uniform along its length, so its own balance point is at its mid-length, fifteen feet. Multiply each one out: twenty thousand, thirty six thousand, forty five thousand pound-feet. Total is one hundred and one thousand. Total weight ten thousand pounds. Divide and you land at ten point one feet from the left end. Here is the part I want to hammer on. The frame. People forget the structure they are standing on. That base frame was thirty percent of the total weight, and if you leave it out your answer moves badly. On real equipment the skid or base frame commonly runs twenty to forty percent of the whole package. I have seen a calculation submitted with the pump and motor and no frame, and the number was off by more than two feet. [PAUSE / ASK] What structure would you have forgotten on that skid?", "26": "The reference point is yours to pick. An end of the load, a machined face, a bolt line, the edge of the skid -- any of them works, because the method finds the balance point relative to wherever you started measuring. What will burn you is switching reference points partway through, measuring one component from the left end and the next from the centerline. Some folks will lock onto the left end as a rule, and the left end is a fine habit but it is a habit, not a requirement. Someone might insist on the geometric center, which is often an awkward place to measure from and has no special standing. Some people will anchor on the heaviest component, and that gives you a correct answer expressed from an odd starting line. [PAUSE / ASK] On a long vessel I worked, we measured everything off the north nozzle because it was the one thing everybody could see from anywhere on the pad. Make your call.", "27": "This is the method that settles arguments. Set the load on two supports a known distance apart with a scale or load cell under each one, and read them. Add the two readings and you have the total weight. Then, to find how far the balance point sits from the left support, take the reading from the far support, multiply by the span, and divide by the total. Two conditions have to hold or the numbers lie to you. The load has to be level, and it has to be resting on those two supports and nothing else. If a corner of the skid is still touching a timber somewhere, that timber is carrying load your scales cannot see. The check that keeps you honest: the balance point always sits nearer the support that reads higher. And the real strength of this method is that it tells you about the load as it actually is today, right now, contents and all -- it does not care what the drawing says. I have used two load cells to settle a fifteen minute argument about a generator skid that everybody had a different number for. [PAUSE / ASK] Have you ever had load cells available on a job?", "28": "Run the numbers. Thirty foot beam, scales at each end thirty feet apart. Left reads four thousand, right reads two thousand. Total weight is six thousand pounds, that part is just addition. For the position, take the far reading -- the right scale, two thousand pounds -- multiply by the thirty foot span to get sixty thousand, then divide by the six thousand pound total. Ten feet from the left end. And now the sanity check, which on this method is beautifully simple. The left scale is carrying twice what the right one is. So the balance point should be twice as close to the left as it is to the right. Ten feet to the left, twenty feet to the right. That is exactly a two to one ratio, so the answer is consistent. The most common mistake here is grabbing the near reading instead of the far one, which lands you on the wrong side of the beam. The ratio check catches it every time. I have watched a foreman catch that exact error in about four seconds using nothing but the ratio. [PAUSE / ASK] Which reading do you multiply by the span?", "29": "Two scales, one reading at each end, and the balance point sits closer to the scale carrying more. Total weight is six thousand pounds. To find the distance from the left support, take the far scale reading, two thousand pounds, multiply by the span of thirty feet, and divide by the total. That is sixty thousand divided by six thousand, which is ten feet from the left end. Sanity check it -- the left scale carries twice what the right one does, so the balance point should be twice as close to the left, and ten feet versus twenty feet is exactly that. Some folks will land on the midspan out of habit, which would only be right if both scales read the same. Someone might use the near scale reading instead of the far one and end up on the wrong side entirely. Some people will guess low without checking that the two distances have to add up to the full span. [PAUSE / ASK] Always sanity check which side the answer should fall on. Make your call.", "30": "This is why the method is worth the setup time. Add the two readings and you have the total weight. Compare the two readings against the span and you have the balance point. Two numbers out of one operation, and both of them are the numbers the lift plan is asking for. Some folks will say you only get weight, which throws away half of what the readings are telling you -- the difference between the two scales is exactly the information about where the balance point sits. Someone might think you only get the balance point, forgetting that the readings are pounds and pounds add. Some people will reach for sling tension, but that comes later, out of your hitch geometry and sling angles, not out of two scales under a load sitting on the ground. [PAUSE / ASK] I have used a pair of load cells under cribbing to settle an argument about a generator skid in about fifteen minutes. Make your call.", "31": "Section three. You have done the math, and now you are standing next to the load with slings on it. This section is about the last check before you commit, and it is the one that catches everything the paperwork could not know about. Contents nobody mentioned. A component that is not where the drawing put it. Water in the bottom of a vessel. The math is honest about the load you described. The trial lift is honest about the load in front of you. I have seen a calculation come out perfect and the load still hang crooked because there was forty gallons of coolant in a sump nobody drained. [PAUSE / ASK] Ask yourself what your last load might have had inside it.", "32": "Here is the procedure and it is short. Everybody gets clear first -- and I mean before the load breaks contact with the ground, not as it comes up. Then you lift slow and you stop within a few inches. And then you do the part people skip: you actually stop and look. Does it come up level, or does one end hang low? If it tilts, you set it back down and you move your rigging. Not adjust it in the air. Not fight it with tag lines. Set it down. Then you try again, and you keep at it until the load comes up level. And if it will not come level after a couple of honest attempts, that is the load telling you your understanding of it is wrong, and the right move is to stop and go back to the plan. Here is the way I want you to think about this. At two inches off the ground, a bad hookup costs you twenty minutes. At ten feet, it costs a whole lot more than that. Same mistake, wildly different price, and the only variable is whether you checked. I watched a crew skip the trial lift on a tank once because they were behind schedule, and they spent the rest of the afternoon dealing with what happened next. [PAUSE / ASK] Does your crew actually stop and look, or just keep going?", "33": "The trial lift did its job. It told you the hook is not over the balance point, and it told you while the load was still an inch off the ground where the consequence is nothing. You set it down, you move your rigging, you try again. Some folks will want to push on and fight it with tag lines, but tag lines are for controlling rotation and keeping hands off the load -- they are not for correcting a bad hookup, and asking them to do that overloads the people holding them. Someone might want to add a sling with the load in the air, which puts hands and bodies under a suspended load that has already shown you it is not behaving. Some people will suggest getting it clear and sorting it out up high, which takes the one situation where the load is still safe to correct and trades it for the one where it is not. [PAUSE / ASK] This is the cheapest information you will get all day. Make your call.", "34": "The load will tell you what is wrong if you know how to read it. One end hangs low: the balance point is toward that low end, so move your hook that way. Load comes up level: you are over the balance point, go to work. Load rotates as it lifts rather than tilting front to back: your balance point is offset on the other axis, so set it down and check crosswise, because you solved one direction and not the other. Load rolls in the slings: your pick points are below the balance point, and that is not a hook position problem, that is a re-rig. Now the one I want burned in. The low end is the heavy end. Low equals heavy. The most common error I see in the field is somebody watching a load hang low on the left, deciding the right side must need help, and moving the hook right, which makes it worse. Low end, heavy end, move toward it. Say it a couple of times. I have had to walk a young rigger back from exactly that mistake on a live pick. [PAUSE / ASK] Which end is the heavy end?", "35": "The load is telling you where the weight is, and you read it exactly the way you would read a scale. A suspended load rotates until its balance point ends up beneath the hook, so whichever end swings down is the end the balance point is closer to. Low on the right means heavy on the right, which means you hooked up too far left. Some folks will say it is already under the hook, but if it were, the load would be hanging level -- the tilt is the evidence that it is not. Someone might read it backward and call the high end the heavy end, which is the single most common misread on a trial lift and it sends you moving the rigging the wrong direction. Some people will fall back on the geometric center, but the load just demonstrated it does not agree with that assumption. [PAUSE / ASK] Watch which way it dips and move the hook that way. Make your call.", "36": "Here is the rule, and I want you to lock it in the way your earlier training framed it, because you will be tested on it exactly this way. When a load on a fixed-attachment bridle hangs low on one end, that low end is the heavy end, and the first correction is to shorten the sling on that low, heavy side. Shortening the low side lifts the heavy end up until the load comes level. Say that back to yourself, because the trap is to do the opposite -- lengthening the low side just lets the heavy end drop further, and it is the single most common wrong move. Same result the other direction: you can lengthen the high, light side instead. Your second option is to move the attachment toward the heavy end so the hook lines up over the balance point. Your third, when the attachment points are fixed where they are, is to change effective leg length with turnbuckles or chain lever hoists. Now the things that are not fixes. Do not hold a load level with tag lines -- that is not what tag lines are for, and it puts real force on the people holding them. Do not add counterweight, because now you are picking something you never calculated. Do not adjust rigging with the load in the air, ever. And hoist speed does nothing for balance. One more thing people miss: the moment your legs are different lengths, your angles change, and different angles mean different tension in each leg. So go back and check your sling capacities against the geometry you actually ended up with. On a steel job I watched a crew shorten one leg with a come-along and never revisit the tension math. [PAUSE / ASK] Which side do you shorten when the right end hangs low?", "37": "You have two honest options. Move where you are picking from so the hook ends up over the balance point, or change the effective length of the legs so the load hangs level from where you already are. Turnbuckles and chain lever hoists in the legs are the standard way to do the second one. Some folks will talk about hoist speed, but speed has nothing to do with balance -- moving faster just means the swing carries more energy. Someone might say tighten the high side, which is backward: shortening the high leg lifts that end further and makes the tilt worse. Some people will suggest adding weight to bring the light end down, and now you are lifting a load you did not plan for and did not calculate. [PAUSE / ASK] Fix the geometry, do not fight the physics. Make your call.", "38": "Last section before the knowledge check. Everything so far assumed the balance point holds still. Now we look at the loads where it does not, or where you cannot find it at all. Liquids that slosh. Loads with the weight up high that want to go over when you set them. And the honest case where you simply do not have enough information and you have to work anyway. These are the ones that get experienced people, because the arithmetic is fine and the load still misbehaves. I have seen a crew do everything right on paper and get surprised by a half-full tote. [PAUSE / ASK] Think of a load on your job whose contents you could not verify.", "39": "A partly full container does not have one balance point. It has a range, and the load picks where in that range it wants to be based on what you just did with it. Tilt it and the liquid runs downhill and takes the balance point with it. Start or stop suddenly and the contents surge. And here is the part that makes it genuinely dangerous: it feeds itself. A small tilt moves the liquid, the liquid moving increases the tilt, and that increases the flow. It can get away from you. This is not just liquids either. Loose bulk material in a bin, unsecured tooling in a gang box, a stack of parts that can slide -- same behavior. So what do you do? First choice, take the variable away: empty it or fill it. A full container has nowhere for the contents to go and behaves like a solid. If you genuinely have to lift it partly full, then you slow everything down, you avoid abrupt starts and stops, you use baffles or restraint if the vessel has them, and you plan around the balance point being a zone instead of a point. I have seen a half-full chemical tote get lively on a crew who thought it was a routine pick. [PAUSE / ASK] What is the first question to ask about a closed container?", "40": "A partly full tank does not have one balance point, it has a moving one. Tip the tank, swing it, stop it quickly, and the liquid runs to one side and takes the balance point with it. That is a load that was hanging level a second ago and now is not, with nobody having touched it. Some folks will say the real issue is the extra weight, and unaccounted weight is absolutely a problem, but weight you did not know about is a problem you can solve by weighing -- a shifting balance point is a problem that shows up mid-lift. Someone might point at slinging difficulty, which is a nuisance, not the hazard. Some people will reach for wind load, but the liquid is inside the tank and does not change what the wind sees. [PAUSE / ASK] The fix is usually to fill it or empty it, not to lift it partly full. Make your call.", "41": "Tall and narrow with the weight up high. In the air, hanging from above, this load is fine -- it is a pendulum and it behaves. The danger comes at set-down, and specifically in the seconds when the load transitions from hanging on your hook to standing on its own base. That is when the high balance point becomes a liability. All it takes is ground that is not level, or one timber that settles more than the others, or a soft spot in the surface, and the load starts to lean. And once it leans past a certain point, its own weight finishes the job. There is no catching it. So the controls are all about the set-down. Prepare that area before the load arrives -- level it, know what the bearing surface will do, get adequate blocking under it with enough area to spread the load. Keep your tag lines on until the load is genuinely stable, not until it touches down. And if it is tall enough to need bracing or guying, get that on before anybody releases the rigging. I have seen a switchgear cabinet go over in a laydown yard, after a clean lift, because one timber underneath it settled into soft ground. The lift was perfect. The set-down was not. [PAUSE / ASK] When does a lift actually end?", "42": "Tall and narrow with the weight up high is a tipping problem, and the moment it is most likely to bite is when you set it down. In the air, hanging from above, it is stable. The instant it takes its own weight on uneven ground or on soft cribbing, that high balance point wants to go over. Some folks will point at crane capacity, but the geometry of the load does not change what it weighs -- a two thousand pound cabinet is two thousand pounds whether it is tall or flat. Someone might expect the slings to be the weak link, and slings are sized off the load and the angles, not off how tall the thing is. Some people will name two-blocking, which is about the relationship between the block and the boom tip and has nothing to do with the load's shape. [PAUSE / ASK] I have seen a switchgear cabinet go over in a laydown yard because one timber under it had settled. Make your call.", "43": "Sometimes you do not have the information and the work still has to happen. The federal rules address this head on for assembly and disassembly work, in paragraph 1404(h)(6) of Subpart CC, and the thinking carries straight across to rigging. The rule is in two parts. Where your method of keeping the load stable depends on knowing the balance point, you have to identify it. And where you do not have enough information to identify it accurately, you are required to use measures designed to keep an inaccurate assumption from producing dangerous movement. Read that second part carefully, because it is not permission to guess and carry on. It is a requirement to actively control for being wrong. In practice that looks like a slow deliberate trial lift with everybody clear. Tag lines on before it comes off the ground, not after. A bigger exclusion zone than you would normally set. Restraint against rotation. A conservative assumption with margin built in rather than an optimistic one. And a clear, agreed stop point -- everybody knows in advance what behavior means we set it down and start over. Under 29 CFR 1926.1419(j) anybody on that crew can call that stop, and on a load you are unsure about, that authority matters more than usual. On a plant turnaround I worked, we picked a surplus tank with no drawings and no data plate, and the plan was written around not knowing -- tag lines on early, a wide exclusion zone, and one agreed signal that meant set it down. [PAUSE / ASK] What would your stop criteria be?", "44": "Last content slide, and it is about what happens to this number after you work it out. It goes on the lift plan. Not in your head, not on the back of your glove. Write down where the balance point is and how you determined it, because how you got there tells the next person how much to trust it -- a number off a manufacturer drawing and a number off a field estimate are not the same number. Record the weight and where it came from too. When you can, mark the line on the outside of the load where people can see it. And say it out loud in the pre-lift briefing, so the operator and the signal person and the tag line handlers all have the same picture. On responsibility: under B30.5, the rigger makes sure the weight and approximate balance point have been obtained, and the lift director makes sure the operator knows the weight. Two people, two duties, no gap. And here is the reason it matters beyond today -- that same load will get picked again someday by a crew that was not here. What you wrote down is what they inherit. I have been the crew that inherited good documentation and the crew that inherited nothing, and the difference is a whole morning. [PAUSE / ASK] What would you want to inherit?", "45": "This is the gate. Six questions, and you need all six. Two of them are moment method calculations, one is two-scale weighing, and three are field judgment. Everything on this check came out of the last forty minutes. A couple of things before you start. Take the calculations on paper rather than in your head -- write down your reference point, write down each moment, and sanity check whether the answer landed on the heavy side. On the judgment questions, picture the load hanging and ask what gravity is going to do with it. And if you miss one, you will not be shown the right answer. That is deliberate. You go back through the module and retest, because on this subject knowing the answer matters less than understanding why it is the answer. I have never met a good rigger who resented being made to understand something twice. [PAUSE / ASK] Take a breath, and take your time on the arithmetic.", "46": "Subpart CC addresses this directly for assembly and disassembly work, and the principle carries across rigging generally. Where you do not have enough information to pin the balance point down, you are required to put measures in place that keep an inaccurate assumption from turning into dangerous movement. That means things like tag lines, restraint, controlled trial lifts, and keeping people clear. Some folks will assume the geometric center and get on with it, which is precisely the unverified assumption the requirement exists to protect against. Someone might say refuse every time, and there are lifts you should refuse, but a blanket refusal is not what the standard asks for and it is not how work gets done safely. Some people will reach for a capacity margin, and capacity margin is about the crane -- it does nothing about a load that swings when it leaves the ground. [PAUSE / ASK] The question is always what keeps the load from moving unexpectedly. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "47": "This one lands on the rigger, and it is listed first in the rigger's responsibilities for a reason -- everything else you do depends on it. Get the weight and get the approximate balance point before you pick equipment or configure a hitch. The lift director has a parallel duty to make sure the operator knows the weight, but the rigger owns obtaining it. Some folks will hand this to the manufacturer, who supplies data on their equipment but has no presence on your job. Someone might assign it to the owner, who has responsibilities for inspection and maintenance, not for characterizing every load that gets picked. Some people will name the signal person, whose job is directing equipment movement and who under the federal rules only has to be there in three specific situations. [PAUSE / ASK] If nobody can tell you what it weighs, the job is not ready. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "48": "Work the moment method from the left end. Nine thousand pounds times six feet gives fifty four thousand. Three thousand pounds times eighteen feet gives fifty four thousand as well. Those sum to one hundred and eight thousand, divided by the total of twelve thousand pounds, which puts the balance point at nine feet from the left end. It sits closer to the press because the press is three times heavier, exactly as it should. Some folks will name the press position itself and forget the cabinet pulls the point away from it. Someone might split the skid and call the midpoint, which would need two equal components to be true. Some people will land beyond the midpoint toward the cabinet, which has the heavy component on the wrong side. [PAUSE / ASK] Set up the arithmetic deliberately. Make your call.", "49": "A suspended load always ends up with its balance point under the hook. That is not a tendency, it is the outcome, and it happens the instant the load goes free of the ground. Offset the hook and the load rotates and swings to correct it. Some folks will expect the slings to equalize and hold it level, but slings do not decide where a load hangs -- gravity does, and the slings just carry whatever share the geometry hands them. Someone might expect the load to lift with one end low and sit there, but a tilted hang is a stage the load passes through on its way to putting the balance point under the hook, not where it stops. Some people will think the movement waits until the load is up clear, which puts the swing at the worst possible height instead of at ground level. [PAUSE / ASK] Picture the load hanging free before you answer. Make your call.", "50": "Pick points below the balance point is the tip-over condition. The load is balanced the way a broom balances on your palm, and it wants to roll until the heavy part gets underneath the points it is hanging from. Some folks read low attachments as cradling, which is a reasonable picture and completely wrong here -- cradling would mean the sling legs come up around the outside of the load above the balance point, which is a different arrangement entirely. Someone might try to solve it with sling angle, but a steeper angle changes leg tension, not whether the load is balanced above or below where it is hanging from. Some people will tie it to weight, and weight sets the consequence, not the condition -- a light load in this arrangement rolls just as readily. [PAUSE / ASK] Where the standards allow this at all, it is with tag lines and deliberate control. Make your call.", "51": "Total weight is twenty thousand pounds. To get the distance from the left support, take the far reading of five thousand pounds, multiply by the forty foot span, and divide by the twenty thousand pound total. Two hundred thousand over twenty thousand gives ten feet from the left end. Check it against your gut -- the left cell is carrying three times the right, so the balance point should sit three times closer to the left, and ten feet versus thirty feet is that ratio exactly. Some folks will default to midspan, which requires equal readings. Someone might use the near reading instead of the far one and land well past the correct point. Some people will produce the distance measured from the wrong end, which is the right number pointed backward. [PAUSE / ASK] Always state which end you measured from. Make your call.", "52": "Read the load. A suspended load rotates so its balance point ends up under the hook, so the end that hangs low is the end the balance point is closer to. North end low means the weight is toward the north end and the hookup is too far south. Some folks will suspect a stretched or defective leg, and while a badly mismatched leg can produce a tilt, the first and far more common explanation is that the hook is not over the balance point -- and you inspected those slings before you hooked up. Someone might blame crane levelness, which affects the machine's stability and its capacity, but the load hangs plumb off the hook regardless of how the carrier sits. Some people will jump to overloading, which shows up as an overload indication or a machine that will not pick, not as a tilt in the load. [PAUSE / ASK] The tilt is a balance point message, not a capacity message. Make your call.", "53": "Every other option checks your paperwork. Only one of them checks reality. A controlled trial lift, with the load barely clear of the ground and everybody positioned clear, tells you whether the actual load agrees with your actual rigging -- and it catches the things arithmetic cannot, like contents you did not know about or a component that is not where the drawing says. Some folks will compare against a similar load, which is useful for a sanity check but assumes two things are the same when the differences are exactly what you are hunting for. Someone might recalculate from a different reference point, which is a genuinely good check on your arithmetic and catches nothing about the physical load. Some people will get a second set of eyes on the math, which is worth doing and still only verifies the calculation, not the object. [PAUSE / ASK] Verify against the load, not against the paper. Make your call.", "54": "That is Center of Gravity Determination. Here is what you should be walking out with. The balance point belongs to the load, and a suspended load will always put that point under the hook whether you planned for it or not. Pick points above the balance point give you a stable load; below it gives you one that wants to roll. Documents first, then calculation, then weighing, and the trial lift verifies rather than determines. The moment method is weight times distance, summed, divided by total weight, off one reference point you do not change. And the low end is the heavy end. Next module is Unequal Leg Loading and Off-Level Pick Points, which picks up exactly where this one stops -- now that you know where the load balances, we work out what each sling leg is actually carrying, and why a four leg bridle does not divide by four. I have watched riggers get real confidence the week these two modules click together. [PAUSE / ASK] Before you go, think of one load on your current job you would now check differently."};
+var GATE = ["S4_M15_q18", "S4_M15_q19", "S4_M15_q20", "S4_M15_q21", "S4_M15_q22", "S4_M15_q23", "S4_M15_q24", "S4_M15_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"6": "S4_M15_q01", "8": "S4_M15_q02", "10": "S4_M15_q03", "12": "S4_M15_q04", "15": "S4_M15_q05", "17": "S4_M15_q06", "19": "S4_M15_q07", "22": "S4_M15_q08", "24": "S4_M15_q09", "26": "S4_M15_q10", "29": "S4_M15_q11", "30": "S4_M15_q12", "33": "S4_M15_q13", "35": "S4_M15_q14", "37": "S4_M15_q15", "40": "S4_M15_q16", "42": "S4_M15_q17", "46": "S4_M15_q18", "47": "S4_M15_q19", "48": "S4_M15_q20", "49": "S4_M15_q21", "50": "S4_M15_q22", "51": "S4_M15_q23", "52": "S4_M15_q24", "53": "S4_M15_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M15';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>
