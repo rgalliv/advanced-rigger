@@ -10,6 +10,7 @@ overwritten.
 
 | Document | What it covers |
 |---|---|
+| [`docs/build_audit_2026-08-07.md`](docs/build_audit_2026-08-07.md) | **Independent audit of the shipped artifacts.** 14 claims recomputed and confirmed; one high-severity defect found that the 12-point suite cannot detect |
 | [`docs/module_format_spec.md`](docs/module_format_spec.md) | Numbering, scoring model, protected registry, public/protected boundary, runtime event contract, wrong-answer behaviour, asset externalization, verification, build sequence |
 | [`docs/question_architecture.md`](docs/question_architecture.md) | Gate sizing, item-writing rules, ACS coverage mapping, gate composition targets, topic ownership |
 | [`docs/S4_source_register.md`](docs/S4_source_register.md) | Every source cited by the ACS, assigned a tier under the model adopted by the Crane Technician track. Tier 1 substitutions, and the one acquisition genuinely required |
@@ -50,6 +51,22 @@ stage.
 | **Ungated 17 items** | Formative plus R2 harvest reserve. Written to gate quality, scored neutrally |
 | **Skill floor** | At least two `S#` codes in every gate |
 | **Topic owners** | Angle factors M16, snatch-block resultant M20, combined weight M21. D/d split M17/M20 with cross-reference |
+
+## Audit finding - 7 August 2026
+
+**Answer keys are mechanically predictable.** Six modules (M04-M09) use a strict
+A-B-C-D repeating key across q01-q18; M03 is near-identical. Eight of nine share the
+gate sequence `D-A-B-D-C-A`. The defect has propagated to a second course (`EM_M01`),
+so it lives in `cq_content_MODEL_TEMPLATE.py`, not in nine authoring slips.
+
+The 12-point suite cannot see it. A cycle passes *max consecutive run of 1* perfectly -
+that check was written to stop `AAAA`, and a cycle is the most efficient way to satisfy
+it. Everything else the suite measures was independently confirmed correct, including
+225/225 FNV hashes and two-engine GATE parity on all nine.
+
+Fix is mechanical: permute options, re-derive `answer` from the correct text, re-bake
+hashes. Do it in the same pass as the gate move to 8 and the Gen 3 retrofit - all three
+rewrite the question block.
 
 ## The open architecture finding
 
