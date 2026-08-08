@@ -14,7 +14,9 @@ import json, re, sys, html as H
 KNOWN_GATE_SEQS = {
     "BDACBD": "S4_M01", "ACBDCA": "S4_M02",
     "DABDCA": "S4_M03-M09 / EM_M01", "ABDCABCD": "S4_M15",
-    "DCDBABCA": "S4_M16",
+    "DCDBABCA": "S4_M16", "DACBADBC": "S4_M17", "ABADCBCD": "S4_M18",
+    "ACDABDCB": "S4_M19", "DABCABDC": "S4_M20", "CDABDCAB": "S4_M21",
+    "DACBDBCA": "S4_M22", "BABDCDCA": "S4_M23",
 }
 
 

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Slings and Terminations | CraneQualified S4_M18</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M18" data-cq-stage="4"
+      data-cq-total="52" data-cq-gate-code="R-201C / AR-104C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M18 &middot; Slings and Terminations</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Slings and Terminations</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 4</p><p class='meta'>Gate R-201C / AR-104C -- 6-question final at 100 percent</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Describe how a wire rope is built -- wires, strands, and core</li><li>Rank common terminations by efficiency and install U-bolt clips and splices correctly</li><li>Apply the wire rope removal criteria, including the broken-wire thresholds</li><li>Identify alloy chain sling markings, matched attachments, and removal conditions</li><li>Inspect synthetic web and roundslings and apply their chemical, heat, and damage limits</li><li>Apply the one rule that retires any sling of any type: no readable identification</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>Wire Rope Construction and Terminations</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>How a Wire Rope Is Built</h2>
+<p>A wire rope is assembled from the inside out:</p><ol class='rank'><li>Individual <b>wires</b> are laid together into a <b>strand</b></li><li>Several <b>strands</b> are laid around a <b>core</b> to form the rope</li></ol><p>The <b>core</b> supports the strands and holds their shape under load:</p><ul><li><b>IWRC</b> -- independent wire rope core (stronger, more heat resistant)</li><li><b>Fiber core</b> -- more flexible, less heat and crush resistant</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A wire rope is built up in which order, from smallest part to whole?</p>
+<div class="quiz-group" data-qid="S4_M18_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q01',0,'fb_S4_M18_q01')">Fibers spun into strands, strands twisted to wires</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q01',1,'fb_S4_M18_q01')">Cores braided into wires, wires formed to strands</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q01',2,'fb_S4_M18_q01')">Wires laid into strands, strands laid around a core</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q01',3,'fb_S4_M18_q01')">Strands laid into wires, wires wrapped on a core</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>Terminations and Efficiency</h2>
+<p>A <b>termination</b> is the end connection that lets a rope attach to a load or anchor -- an eye, a socket, or a fitting.</p><p class='warn'>The termination is almost always the weakest point of the assembly. The rope body may hold its full strength, but the end connection decides how much of it you can use.</p><p>We rate terminations by <b>efficiency</b>: the percentage of the rope's strength the connection preserves.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A termination on a wire rope is:</p>
+<div class="quiz-group" data-qid="S4_M18_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q02',0,'fb_S4_M18_q02')">The lay direction that the outer strands are laid in</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q02',1,'fb_S4_M18_q02')">Any point along the rope where its diameter changes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q02',2,'fb_S4_M18_q02')">The painted mark that shows the rope's rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q02',3,'fb_S4_M18_q02')">The end connection that lets the rope attach to something</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Terminations, Strongest to Weakest</h2>
+<p>Common wire rope terminations, roughly by strength retained:</p><table class='rate'><tr><th>Termination</th><th>Strength retained</th></tr><tr><td>Poured (spelter) socket / swaged fitting</td><td>near full</td></tr><tr><td>Hand-tucked splice (Flemish eye)</td><td>high</td></tr><tr><td>Wedge socket</td><td>good</td></tr><tr><td>U-bolt wire rope clips (correctly installed)</td><td>good, if correct</td></tr><tr><td>Knot</td><td>prohibited -- can halve strength</td></tr></table><p class='note'>All legitimate methods keep most of the rope's strength when done right. A knot is never allowed on a lifting rope.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Among common wire rope terminations, which generally develops the HIGHEST percentage of the rope's strength?</p>
+<div class="quiz-group" data-qid="S4_M18_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q03',0,'fb_S4_M18_q03')">A properly poured or swaged socket</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q03',1,'fb_S4_M18_q03')">A wedge socket under normal use</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q03',2,'fb_S4_M18_q03')">A knot tied in the rope end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q03',3,'fb_S4_M18_q03')">A set of U-bolt wire rope clips</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Installing Wire Rope Clips</h2>
+<p>When U-bolt clips form an eye, installation is everything:</p><ul><li><b>Saddle on the live side</b>, <b>U-bolt on the dead end</b> -- "never saddle a dead horse"</li><li>Use the <b>manufacturer's number of clips</b> at the correct spacing</li><li>Torque the nuts to spec, then <b>retorque after the first load</b></li></ul><p class='warn'>Reversing the clip (U-bolt on the live line) crushes the load-carrying part of the rope and destroys the connection's strength.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When U-bolt wire rope clips are used to form an eye, they must be installed so that:</p>
+<div class="quiz-group" data-qid="S4_M18_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q04',0,'fb_S4_M18_q04')">The U-bolt bears on the live side and the saddle on the dead end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q04',1,'fb_S4_M18_q04')">The saddle sits on the live side and the U-bolt on the dead end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q04',2,'fb_S4_M18_q04')">All clips are spaced tight against one another</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q04',3,'fb_S4_M18_q04')">The U-bolts alternate sides down the rope</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q04"></div>
+</div></section>
+<section class="slide t-content" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h2>The Eye Splice</h2>
+<p>A hand-tucked eye splice in wire rope must have <b>at least three full tucks</b> of each strand back into the rope body.</p><ul><li>Fewer tucks and the eye can pull out under load</li><li>Protruding strand ends are <b>covered or blunted</b> so they do not snag</li><li>The eye is sized so the included angle at the splice stays <b>60 degrees or less</b></li></ul><p class='note'>Fiber rope splices require more tucks; the wire rope floor is three.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An eye splice in a wire rope sling must contain at least:</p>
+<div class="quiz-group" data-qid="S4_M18_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q05',0,'fb_S4_M18_q05')">Three full tucks of each strand</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q05',1,'fb_S4_M18_q05')">Six full tucks of each strand</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q05',2,'fb_S4_M18_q05')">Two full tucks of each strand</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q05',3,'fb_S4_M18_q05')">One full tuck of each strand</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q05"></div>
+</div></section>
+<section class="slide t-divider" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Wire Rope Sling Inspection and Removal</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>The Broken Wire Criteria</h2>
+<p>A <b>rope lay</b> is the length it takes one strand to make a full wrap around the rope. Within one lay, remove the sling if you find:</p><ul><li><b>10 randomly distributed broken wires</b> in one rope lay, OR</li><li><b>5 broken wires in one strand</b> in one rope lay</li></ul><p class='note'>The single-strand number is lower because clustered damage is more serious than the same count spread around. Anchored to ASME B30.9 and the sling requirements of OSHA 29 CFR 1926.251 and 1910.184.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A wire rope sling must be removed from service when a single rope lay shows:</p>
+<div class="quiz-group" data-qid="S4_M18_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q06',0,'fb_S4_M18_q06')">Any visible surface dust or dirt anywhere on the wires</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q06',1,'fb_S4_M18_q06')">One single broken wire located anywhere along the sling</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q06',2,'fb_S4_M18_q06')">A slight difference in the tightness between strands</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q06',3,'fb_S4_M18_q06')">10 randomly distributed broken wires, or 5 in one strand</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Shape Damage: Kinks, Birdcages, Crushing</h2>
+<p>Damage to the rope's shape ends its service life, because distorted strands stop sharing load:</p><ul><li><b>Kink</b> -- a permanent tight bend that has distorted the rope</li><li><b>Birdcage</b> -- strands sprung outward like a cage, from shock or sudden release</li><li><b>Crushing / flattening</b> -- loss of the round cross section</li></ul><p class='warn'>Any of these is an immediate removal. The damage is permanent and cannot be worked back out.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Which of these wire rope conditions calls for immediate removal from service?</p>
+<div class="quiz-group" data-qid="S4_M18_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q07',0,'fb_S4_M18_q07')">The identification tag being a faded color</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q07',1,'fb_S4_M18_q07')">A splice with more than three tucks</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q07',2,'fb_S4_M18_q07')">A kink, birdcage, or crushed section in the rope</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q07',3,'fb_S4_M18_q07')">A light coat of the manufacturer's lubricant</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>Diameter, Corrosion, and the Core</h2>
+<p>Some of the worst wire rope damage is inside:</p><ul><li><b>Reduced diameter</b> -- signals internal wear, core failure, or corrosion; a removal condition</li><li><b>Corrosion</b> -- rust pitting weakens wires and hides broken ones</li><li><b>Heat damage</b> -- can ruin strength with no visible sign</li></ul><p class='note'>Measure diameter against the original. The outside can look fine while the core is failing.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A noticeable reduction in a wire rope sling's diameter usually indicates:</p>
+<div class="quiz-group" data-qid="S4_M18_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q08',0,'fb_S4_M18_q08')">Internal wear, a core failure, or corrosion -- a removal condition</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q08',1,'fb_S4_M18_q08')">That the sling was overrated back at the original factory</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q08',2,'fb_S4_M18_q08')">Nothing significant at all, so long as the sling still looks shiny</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q08',3,'fb_S4_M18_q08')">The sling has simply been stretched out to a somewhat longer length</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q08"></div>
+</div></section>
+<section class="slide t-content" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h2>Heat and End-Fitting Damage</h2>
+<p>Two more wire rope removal conditions:</p><ul><li><b>Heat exposure</b> -- alters the steel and lubricant invisibly; treat strength as unknown and remove</li><li><b>Damaged end fittings</b> -- cracked, bent, worn, or corroded sockets, thimbles, or eyes</li></ul><p class='warn'>Do not quench a hot sling with water -- it can worsen the damage. A heat-exposed sling has no safe remaining role.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Wire rope slings exposed to high heat should be:</p>
+<div class="quiz-group" data-qid="S4_M18_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q09',0,'fb_S4_M18_q09')">Used only for basket hitches from that point on forward</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q09',1,'fb_S4_M18_q09')">Cooled off quickly with water and then returned to use</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q09',2,'fb_S4_M18_q09')">Removed from service, since heat can ruin strength invisibly</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q09',3,'fb_S4_M18_q09')">Kept in service, since steel handles just about any heat</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q09"></div>
+</div></section>
+<section class="slide t-divider" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Alloy Chain Slings</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Chain Grade and Identification</h2>
+<p>An alloy steel chain sling carries permanent, durable identification stating:</p><ul><li><b>Size</b>, <b>grade</b>, <b>rated capacity</b>, and <b>manufacturer</b></li></ul><p><b>Grade matters.</b> Alloy grades (e.g., grade 80, grade 100) are the lifting grades. Lower-grade hardware chain (proof coil, etc.) is <b>not</b> a lifting chain.</p><p class='warn'>If a chain cannot tell you its grade and rating, treat it as an unknown and keep it out of the lift.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An alloy steel chain sling must carry permanent identification that states:</p>
+<div class="quiz-group" data-qid="S4_M18_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q10',0,'fb_S4_M18_q10')">The calendar date its next repaint is due</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q10',1,'fb_S4_M18_q10')">Size, grade, rated capacity, and manufacturer</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q10',2,'fb_S4_M18_q10')">Only the overall length of the chain itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q10',3,'fb_S4_M18_q10')">The truck that it happens to be assigned to</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Matched, Rated Attachments</h2>
+<p>Every fitting in the chain's load path -- master link, coupling links, hooks -- must be <b>rated at least equal to the chain</b>.</p><p class='warn'>Makeshift fasteners are prohibited: no shop-made hooks, no field-bent rebar, no bolts or rods standing in for rated hardware.</p><p>A weak fitting silently downrates the whole assembly to itself.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The hooks, rings, and coupling links used on an alloy chain sling must:</p>
+<div class="quiz-group" data-qid="S4_M18_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q11',0,'fb_S4_M18_q11')">Be made from field-bent reinforcing bar</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q11',1,'fb_S4_M18_q11')">Be any convenient hardware that fits the chain</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q11',2,'fb_S4_M18_q11')">Weigh less than the chain to save capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q11',3,'fb_S4_M18_q11')">Be rated at least equal to the chain itself</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Chain Removal Criteria</h2>
+<p>Remove an alloy chain sling from service for any of these, inspected link by link:</p><ul><li><b>Wear</b> beyond the allowed limit at any point on a link</li><li><b>Stretch / elongation</b> -- a sign of overload; links get longer and thinner</li><li><b>Nicks, gouges, or cracks</b>; bent, twisted, or stretched links</li><li><b>Heat damage</b> or evidence of a repair by an unqualified party</li></ul><p class='note'>Measure a set number of links against the original length to catch stretch.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An alloy chain sling should be removed from service when a link shows:</p>
+<div class="quiz-group" data-qid="S4_M18_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q12',0,'fb_S4_M18_q12')">Wear, stretch, nicks, gouges, or cracks beyond the limits</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q12',1,'fb_S4_M18_q12')">A protective coat of the manufacturer's own coating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q12',2,'fb_S4_M18_q12')">A little bit of loose dust down in the link barrels</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q12',3,'fb_S4_M18_q12')">Any factory grade stamp that is pressed into the link</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q12"></div>
+</div></section>
+<section class="slide t-content" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Where Chain Shines</h2>
+<p>Alloy chain earns its place in the hardest service:</p><ul><li><b>Heat</b> -- handles temperatures that would destroy synthetics</li><li><b>Abrasion and sharp edges</b> -- shrugs off what chews up other slings</li><li><b>Heavy, dirty, repetitive work</b> -- foundries, mills, heavy fab</li></ul><p class='note'>The trade-off is weight -- chain is the heaviest sling to handle. And it still gets the same inspection discipline.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Compared with wire rope and synthetic slings, an alloy chain sling is especially valued for:</p>
+<div class="quiz-group" data-qid="S4_M18_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q13',0,'fb_S4_M18_q13')">Being by far the lightest sling to carry around</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q13',1,'fb_S4_M18_q13')">Never needing any inspection at all, ever</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q13',2,'fb_S4_M18_q13')">Being perfectly safe to shorten with a knot</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q13',3,'fb_S4_M18_q13')">Standing up to heat and rough, abrasive service</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q13"></div>
+</div></section>
+<section class="slide t-divider" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Synthetic Web and Roundslings</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Web Sling Construction</h2>
+<p>On a synthetic web sling, the eyes and end fittings are formed by <b>stitching only</b>, laid in an even pattern with enough stitches to develop the sling's full breaking strength.</p><p class='warn'>The stitching is structural. <b>Broken or worn stitches are a removal condition.</b></p><p>No staples, glue, or clips -- stitching is the only approved method.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On a synthetic web sling, end fittings and eyes are attached by:</p>
+<div class="quiz-group" data-qid="S4_M18_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q14',0,'fb_S4_M18_q14')">Metal staples driven straight through the webbing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q14',1,'fb_S4_M18_q14')">Stitching only, in an even pattern to full strength</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q14',2,'fb_S4_M18_q14')">Adhesive glue run along the folded-over webbing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q14',3,'fb_S4_M18_q14')">Wire rope clips crimped down over the webbing</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Chemical and Temperature Limits</h2>
+<p>Synthetic slings have chemical enemies -- match the material to the environment:</p><table class='rate'><tr><th>Material</th><th>Keep away from</th></tr><tr><td>Nylon</td><td>acids and phenolics</td></tr><tr><td>Polyester, polypropylene</td><td>caustics (alkalis)</td></tr><tr><td>Aluminum fittings</td><td>caustics</td></tr></table><p class='note'>Temperature: polyester and nylon web are limited to about 180 degrees F; polypropylene to about 200 degrees F.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A nylon web sling should NOT be used where there is exposure to:</p>
+<div class="quiz-group" data-qid="S4_M18_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q15',0,'fb_S4_M18_q15')">Acids or phenolic chemicals</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q15',1,'fb_S4_M18_q15')">Temperatures around room temperature</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q15',2,'fb_S4_M18_q15')">Clean dry indoor storage</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q15',3,'fb_S4_M18_q15')">Ordinary daylight and fresh air</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Web Sling Removal Criteria</h2>
+<p>Remove a synthetic web sling from service for any of these:</p><ul><li><b>Acid or caustic burns</b></li><li><b>Melting or charring</b> of any part of the surface</li><li><b>Snags, punctures, tears, or cuts</b></li><li><b>Broken or worn stitches</b></li><li><b>Distorted or damaged end fittings</b></li><li><b>Missing or illegible identification</b></li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A synthetic web sling must be removed from service for any of the following EXCEPT:</p>
+<div class="quiz-group" data-qid="S4_M18_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q16',0,'fb_S4_M18_q16')">Acid or caustic burns, or melting and charring</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q16',1,'fb_S4_M18_q16')">Broken or worn stitches, or distorted fittings</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q16',2,'fb_S4_M18_q16')">A legible tag showing the correct rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q16',3,'fb_S4_M18_q16')">Snags, punctures, tears, or cuts</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Roundslings and the Warning Core</h2>
+<p>An <b>endless roundsling</b> carries its load on hidden core yarns inside a woven cover. The cover takes the wear; the core carries the load.</p><p class='warn'>Many roundslings use a brightly colored core or warning yarn. If you can see the core color through a cut or tear, the cover is breached and the sling is <b>out of service</b>.</p><p>You cannot inspect the core directly -- so a damaged cover means an unverifiable sling.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An endless roundsling shows the colored core yarns through a tear in its cover. This means:</p>
+<div class="quiz-group" data-qid="S4_M18_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q17',0,'fb_S4_M18_q17')">Only the outer cover needs a wash before the sling is reused</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q17',1,'fb_S4_M18_q17')">The load-bearing core is exposed and the sling is out of service</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q17',2,'fb_S4_M18_q17')">The sling is fine as long as the core color still looks bright</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q17',3,'fb_S4_M18_q17')">The sling has just been upgraded to a higher rated capacity</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>The One Rule Above All Types</h2>
+<p>Across every sling family -- wire rope, chain, web, roundsling -- one rule governs:</p><p class='warn'>A sling with <b>missing or unreadable identification</b> is out of service, no matter its type or apparent condition.</p><p>Without the tag you cannot confirm rating, grade, material, or history. A sling you cannot identify is a sling you cannot trust.</p>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>Protecting Every Sling on an Edge</h2>
+<p>Sharp edges threaten every sling type at once:</p><ul><li>They <b>cut</b> synthetic web and roundslings</li><li>They <b>nick and kink</b> wire rope</li><li>They <b>nick and gouge</b> chain links</li></ul><p class='note'>One <b>corner protector or softener</b> over the edge protects whatever sling is on it -- and opens the bend radius. Keep them on the truck.</p>
+</div></section>
+<section class="slide t-divider" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">Before any lift, the single condition that takes ANY sling out of service regardless of type is:</p>
+<div class="quiz-group" data-qid="S4_M18_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q18',0,'fb_S4_M18_q18')">A small amount of surface dust</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q18',1,'fb_S4_M18_q18')">A manufacturer's lubricant or coating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q18',2,'fb_S4_M18_q18')">A missing or unreadable identification tag</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q18',3,'fb_S4_M18_q18')">A grade or capacity stamp being present</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">A wire rope sling and a synthetic web sling both pass over the same sharp plate edge. The best single action is to:</p>
+<div class="quiz-group" data-qid="S4_M18_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q19',0,'fb_S4_M18_q19')">Swap to a smaller sling so it seats in the edge</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q19',1,'fb_S4_M18_q19')">Place a corner protector or softener over the edge for both</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q19',2,'fb_S4_M18_q19')">Lift quickly so the edge bears load only briefly</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q19',3,'fb_S4_M18_q19')">Use only the chain sling since edges never affect chain</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A wire rope sling is being inspected. Which finding by itself requires immediate removal from service?</p>
+<div class="quiz-group" data-qid="S4_M18_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q20',0,'fb_S4_M18_q20')">Five broken wires within one strand in one rope lay</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q20',1,'fb_S4_M18_q20')">A faint film of lubricant on the outer wires</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q20',2,'fb_S4_M18_q20')">A slightly dusty surface from the laydown yard</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q20',3,'fb_S4_M18_q20')">The manufacturer's capacity tag being present</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">An eye is being made on a wire rope with U-bolt clips. The correct installation puts:</p>
+<div class="quiz-group" data-qid="S4_M18_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q21',0,'fb_S4_M18_q21')">The U-bolt on the live side, the saddle on the dead end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q21',1,'fb_S4_M18_q21')">The clips welded to lock them in place</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q21',2,'fb_S4_M18_q21')">One clip only, torqued as tight as possible</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q21',3,'fb_S4_M18_q21')">The saddle on the live side, the U-bolt on the dead end</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A chain sling is rigged with a hook whose rating is below the chain's rating. The assembly's safe capacity is:</p>
+<div class="quiz-group" data-qid="S4_M18_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q22',0,'fb_S4_M18_q22')">The average of the chain and hook ratings</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q22',1,'fb_S4_M18_q22')">Still the full rated capacity of the chain</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q22',2,'fb_S4_M18_q22')">Limited to the rating of the weaker hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q22',3,'fb_S4_M18_q22')">Increased because two components share the load</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">A synthetic web sling shows charring and a melted, glazed patch on the webbing. The correct action is:</p>
+<div class="quiz-group" data-qid="S4_M18_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q23',0,'fb_S4_M18_q23')">Trim off the melted section and keep using the rest</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q23',1,'fb_S4_M18_q23')">Remove it from service immediately</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q23',2,'fb_S4_M18_q23')">Rate it at half capacity from now on</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q23',3,'fb_S4_M18_q23')">Return it to service since synthetics resist heat</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">A rigger reaches for a web sling near an open acid line. The most important material question is:</p>
+<div class="quiz-group" data-qid="S4_M18_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q24',0,'fb_S4_M18_q24')">The color of the sling's protective cover</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q24',1,'fb_S4_M18_q24')">How long the sling is overall</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q24',2,'fb_S4_M18_q24')">Whether the sling is nylon, which acids attack</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q24',3,'fb_S4_M18_q24')">The brand name printed on the tag</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">During pre-use inspection a rigger finds a sling whose identification tag is torn off and gone. The rigger should:</p>
+<div class="quiz-group" data-qid="S4_M18_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q25',0,'fb_S4_M18_q25')">Guess the rating from the sling's size and use it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q25',1,'fb_S4_M18_q25')">Match it to a tagged sling that looks the same</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q25',2,'fb_S4_M18_q25')">Use it only for light loads to be safe</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M18_q25',3,'fb_S4_M18_q25')">Remove it from service until it is properly identified</button>
+</div>
+<div class="feedback" id="fb_S4_M18_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M19'}}))">Next: Specialty Rigging Hardware &gt;</button><p>That is Slings and Terminations.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 52</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 52;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M18)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M18_SlingsTerminations";
+var HASHES={"S4_M18_q01": "398d6123", "S4_M18_q02": "bd24cf2d", "S4_M18_q03": "11db1113", "S4_M18_q04": "917278d1", "S4_M18_q05": "76fff3c5", "S4_M18_q06": "d9ad5159", "S4_M18_q07": "cf4e6d35", "S4_M18_q08": "7e41411a", "S4_M18_q09": "62ceba7b", "S4_M18_q10": "da87bad0", "S4_M18_q11": "080de57d", "S4_M18_q12": "85394619", "S4_M18_q13": "9dabc7ff", "S4_M18_q14": "15fa4a4c", "S4_M18_q15": "20592e70", "S4_M18_q16": "3fe9d06f", "S4_M18_q17": "5b1f2421", "S4_M18_q18": "04c915bb", "S4_M18_q19": "0e11d4cf", "S4_M18_q20": "f6ab6ac0", "S4_M18_q21": "6e4d5342", "S4_M18_q22": "2fae9038", "S4_M18_q23": "173c0e52", "S4_M18_q24": "dd60203a", "S4_M18_q25": "b2d9fa46"};
+var GATE=["S4_M18_q18", "S4_M18_q19", "S4_M18_q20", "S4_M18_q21", "S4_M18_q22", "S4_M18_q23", "S4_M18_q24", "S4_M18_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=51;            /* completion slide (52) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (52) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M18)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Slings and Terminations, module four of the Advanced Rigger stage. The last module taught you to size the tension in a sling. This module goes inside the sling itself. We look at how each type is built -- wire rope, alloy chain, synthetic web, and roundsling -- because how a sling is made tells you how it fails. We look at terminations, the end connections, because the end is almost always the weakest point of the whole assembly. And most important, we build the removal-from-service criteria for each type, the checks you run before every single lift. This is the module that turns you from someone who uses slings into someone who can condemn a bad one on sight. I have watched a sharp rigger catch a sling that a whole crew had walked past. [PAUSE / ASK] Before we start, ask yourself how many broken wires it takes to retire a wire rope sling. Hold your guess.", "2": "Six outcomes, and notice they are mostly about judgment, not arithmetic. The last module was math; this one is inspection and decision. You will be able to look at a sling and say, with a reason, whether it lifts today or gets cut up and thrown out. Each sling family has its own construction, its own failure modes, and its own removal criteria, and we take them one at a time. The gate at the end is six questions at one hundred percent, because a condemned sling that stays in service is exactly the kind of thing that puts a load on somebody. This is the stuff that separates a rigger from a sling-hanger. I have worked next to hands who could feel a bad rope before they even got the tag read. [PAUSE / ASK] Look at the six and pick the sling type you know the least about.", "3": "First section. We start with wire rope, because it is the most common lifting sling and the one with the most going on inside it. Understand how it is built and how it is ended, and its failures stop being mysteries. Out on a job the rope that fails almost always fails at the end connection or from damage you could have read if you knew what you were looking at. [PAUSE / ASK] Ask yourself what actually holds a spliced eye together.", "4": "Let us build a wire rope from the inside out, because every kind of damage you will inspect for makes sense once you see the structure. The smallest piece is a single wire. Lay a bunch of wires together and you get a strand. Lay several strands around a central core and you have the rope. So it is wires into strands, strands around a core. That core is doing real work -- it supports the strands and keeps the rope round under load. It comes two ways: an independent wire rope core, a little rope inside the rope, which is stronger and handles heat better; or a fiber core, which is more flexible but gives up heat and crush resistance. When we talk later about a rope losing diameter or getting crushed, this core is what has failed. On a job I watched a fiber-core sling get flattened under a load edge that an independent wire rope core might have shrugged off. [PAUSE / ASK] Wires, strands, core -- which part keeps the rope round?", "5": "Before you can judge a wire rope you have to know how it is put together, because every failure mode traces back to the build. Start small: individual wires are laid together to form a strand, and then several strands are laid around a central core to form the rope. So it goes wires, then strands, then rope around a core. The core can be another wire rope, called an independent wire rope core, or a fiber core, and the core supports the strands and helps them keep their shape under load. Some folks will flip it and say strands make wires, but a strand is the bundle, not the piece. Someone might put the core on the outside as a wrap, but the core runs down the center. Some people will describe fibers spun into strands, which is how you build a synthetic rope, not a steel one. On a job I watched a new hand call the whole rope a strand, and getting the words right is the first step to reading damage right. [PAUSE / ASK] Wires, strands, core -- picture the cross section. Make your call.", "6": "Now the ends. A termination is how the rope ends and attaches -- the eye you hook into, the socket poured onto the end, the fitting that connects it to the world. Here is the part that surprises people: the termination is almost always the weakest point of the whole assembly. The rope body might be good for its full published strength, but the way you end it decides how much of that you actually get. So we rate terminations by efficiency -- the percent of the rope's strength the connection keeps. A hundred percent efficient end gives you the whole rope; a lower one gives you less. That is why a good rope on a bad end is a weak assembly. When you inspect, you inspect the termination as hard as the rope. I have watched a strong rope let go right at a sloppy end connection while the body never even strained. [PAUSE / ASK] Why is the end usually the weakest part?", "7": "A termination is simply how the rope ends and attaches to the world -- the eye, the socket, the fitting that lets you hook the rope to a load or an anchor. It matters more than people expect, because the termination is almost always the weakest point of the assembly. The rope body might hold its full published strength, but the way you end it decides how much of that strength you actually get to use. That is why we rate terminations by efficiency, the percentage of the rope's strength the end connection preserves. Some folks will think a termination is any diameter change, but a worn spot is damage, not a termination. Someone might name the lay direction, which is about how the strands twist, not how the rope ends. Some people will point at the capacity tag, which tells you the rating but is not the connection itself. I have watched a perfectly good rope fail right at a badly made end. [PAUSE / ASK] The end connection is usually the weakest link -- why does that matter? Make your call.", "8": "Terminations are not equal, and here is the rough ranking. At the top, a poured spelter socket or a properly swaged fitting develops nearly the full strength of the rope, because the rope is gripped along its whole length with no sharp bend. A hand-tucked splice comes next, then a wedge socket, then correctly installed clips -- and every one of those legitimate methods keeps most of the rope's strength when it is done right. At the very bottom, off the chart, is a knot, which can cut a rope's strength roughly in half and is flat prohibited on any lifting rope. The lesson is not to memorize exact percentages, it is to know that the end connection has a cost and to pick and build it deliberately. On a heavy rig-up I watched a poured socket take a jolt that would have dragged a set of clips right through. [PAUSE / ASK] What termination sits at the top, and what is banned outright?", "9": "Terminations are not equal, and knowing the ranking keeps you from trusting a weak end with a heavy load. At the top, a properly poured spelter socket or a correctly swaged fitting develops nearly the full strength of the rope, because the rope is locked in along its whole gripped length with no sharp bend. A hand-tucked splice comes in a bit lower, a wedge socket lower still, and properly installed clips lower again, though all of the legitimate methods keep most of the rope's strength when done right. Some folks will rank the wedge socket at the top, but its holding is good, not the best. Someone might trust clips as the strongest, but they depend entirely on correct installation and sit below sockets. Some people will even consider a knot, and a knot is never allowed on a lifting rope -- it can cut the strength roughly in half and is prohibited. On a rig-up I watched a poured socket take a shock that would have pulled clips through. [PAUSE / ASK] Full grip, no sharp bend -- that is the strongest family. Make your call.", "10": "Clips are only as good as the way they go on, and there is one rule with a saying attached. The saddle -- the solid grooved body of the clip -- goes on the live side, the part carrying the load. The U-bolt goes over the dead end, the short tail. Riggers say it as never saddle a dead horse: the saddle never rides the dead end. Flip it, put the U-bolt on the live line, and it crushes the very wires doing the work. Beyond that, you use the manufacturer's number of clips, at the specified spacing, torqued to spec, and then retorqued after the first load pulls the rope to seat. Some crews get every clip right and then skip the retorque, and the connection loosens. I have caught an eye with the saddle on the dead end and pulled it before it ever lifted anything. [PAUSE / ASK] Never saddle a what?", "11": "This is the rule with the old saying attached, and it matters because clips are only as good as the way they go on. The saddle -- the solid, grooved body of the clip -- must sit on the live side of the rope, the part carrying the load, and the U-bolt goes over the dead end, the short tail. Riggers remember it as never saddle a dead horse: the saddle never goes on the dead end. Put the U-bolt against the live line and it crushes and weakens the very part doing the work. You also need the right number of clips, the right spacing, and the nuts brought up to the specified torque, then retorqued after the first load. Some folks will alternate the clips side to side, but they all face the same way, saddle on live. Someone might put the U-bolt on the live side, which is exactly the mistake the saying warns against. Some people will jam the clips together, but they need proper spacing. I have caught an eye built with a saddle on the dead end and pulled it before it ever saw a load. [PAUSE / ASK] Never saddle a what? Make your call.", "12": "The splice has a hard minimum, and it is the kind of number an inspector will check. A hand-tucked eye splice in wire rope needs at least three full tucks of each strand woven back into the body. Fewer than three and the eye can creep and pull out under load. The tucks are what let the eye grip itself. You cover or blunt the protruding strand ends so they do not slice a hand, and you size the eye so that when it goes over a load or pin, the included angle at the splice stays sixty degrees or less -- a wider eye angle pries the splice open. Fiber ropes ask for even more tucks, but for wire rope the floor you never drop below is three. I have watched an inspector count tucks on every eye before a single hook went on. [PAUSE / ASK] What is the minimum tuck count on a wire rope eye splice?", "13": "The tuck count on a splice is a hard minimum, not a suggestion, and it comes straight out of the rigging rules. A hand-tucked eye splice in wire rope has to have at least three full tucks of each strand back into the body of the rope. Fewer than that and the eye can pull out under load. The tucks are what let the spliced eye grip itself and develop its strength. Some folks will settle for one tuck, which will not hold. Someone might say two, which is still short of the minimum. Some people will jump to six, and while more tucks are fine and fiber rope splices ask for more, the wire rope minimum you must never go below is three. And the protruding strand ends get covered or blunted so they do not snag hands. On a job I watched an inspector count tucks on every spliced eye before the crew hooked anything. [PAUSE / ASK] What is the floor on tucks for a wire rope eye splice? Make your call.", "14": "Second section, and this is where the module earns its keep. Building the rope was background; now we learn exactly when a wire rope sling comes out of service. These are the criteria you apply with your own eyes before every lift. I have watched a good rigger condemn a rope in ten seconds because he knew precisely what he was looking for. [PAUSE / ASK] Ask yourself what you would look for first on a used sling.", "15": "This is the number to carry for the rest of your career. First, a rope lay is the distance it takes one strand to spiral once all the way around the rope -- mark it with tape and you have your inspection window. Within one lay, you remove the sling at ten randomly distributed broken wires, or at five broken wires in a single strand. Either one, and it is done. The single-strand number is lower on purpose, because damage all bunched in one strand is worse than the same number scattered around the rope. So you are counting two things at once: the total in the lay, and the most in any one strand. This is the criterion new riggers most often get fuzzy on, so lock both numbers in. I have watched a supervisor hand a new hand a piece of tape and have him mark one lay and count inside it until it was second nature. [PAUSE / ASK] Ten in the lay, or five in one strand -- both mean out.", "16": "This is the number to carry for the rest of your career, because it is the line between a working sling and a reject. In one rope lay -- the length it takes for a strand to make one full wrap around the rope -- a wire rope sling comes out of service at ten randomly distributed broken wires, or at five broken wires in a single strand. Either threshold, and it is done. The strand-specific number is lower because damage clustered in one strand is more serious than the same count spread around. Some folks will pull a sling for dust, which is housekeeping, not a removal criterion. Someone might yank it at one broken wire, which is worth noting and watching but is not by itself the removal point. Some people will worry about a little uneven strand tension, which is not the broken-wire rule. Count within one lay, and know both numbers. I have watched a supervisor teach new hands to mark one lay length with tape and count inside it. [PAUSE / ASK] Ten in a lay, or five in one strand -- both are removal. Make your call.", "17": "Broken wires are not the only thing that ends a rope -- damage to its shape does too, because once the strands are distorted they stop sharing the load evenly. Learn these three by sight. A kink is a permanent tight bend that has deformed the rope for good. A birdcage is where the strands spring outward like the bars of a cage, and it usually comes from shock loading or a sudden release of tension. Crushing or flattening is when the rope loses its round cross section, often from being run over or pinched. Any one of the three takes the sling out of service on the spot, because you cannot work the damage back out -- it is permanent. Some of these happen in a single bad moment. Out on a job I have pulled a birdcaged sling off a reel after somebody shock loaded it and let it snap slack. [PAUSE / ASK] Name the three shape-damage conditions.", "18": "Broken wires are not the only thing that ends a rope -- damage to its shape does too, because once the geometry is wrong the strands stop sharing load. A kink is a permanent bend that has distorted the rope; a birdcage is where the strands have sprung outward like an open cage, usually from shock or sudden release of tension; and a crushed or flattened section has lost its round cross section. Any of those takes the sling out of service, because the damage is permanent and the rope can no longer carry evenly. Some folks will pull a rope for its lubricant film, but lube is protection, not damage. Someone might remove it for a faded tag color, which is an identification issue, not a body defect, though an unreadable tag is its own removal reason. Some people will worry about extra tucks in a splice, but more than the minimum is fine. Learn the shapes of these three failures by sight. I have pulled a birdcaged sling off a reel that somebody had shock-loaded and let go slack. [PAUSE / ASK] Kink, birdcage, crush -- shape damage is removal. Make your call.", "19": "Some of the worst damage on a wire rope is on the inside, where you cannot see it, and diameter is how it gives itself away. A rope that has thinned down has usually lost material or core support -- internal wear, a failing core, or corrosion eating it from within -- and that is a removal condition. Corrosion is doubly bad because rust both weakens the wires and hides broken ones under the pitting. And heat, as we will keep saying, can ruin the strength of the steel with no outward sign at all. The move is simple: measure the diameter and compare it to the original, and do not trust a shiny surface to tell you the core is sound. On a turnaround I watched a rope that measured under size get cut open and found rotten with corrosion right down the core. [PAUSE / ASK] What does lost diameter usually mean?", "20": "Diameter is one of the honest tells on a wire rope, so a rope that has thinned down is telling you something is wrong inside. A noticeable reduction in diameter usually means the core has broken down, the inner wires are wearing, or corrosion is eating the rope from within -- and any of those is a removal condition. The outside can look almost fine while the inside is failing, which is exactly why measuring diameter matters. Some folks will wave it off if the rope still looks shiny, but shine on the surface says nothing about the core. Someone might call it harmless stretch, but a rope that lost diameter did not just get longer, it lost material or support. Some people will blame the factory rating, but a rope leaves the factory at its proper diameter. Measure it and compare to the original. On a turnaround I watched a rope that measured under size get pulled and then found rotten in the core when it was cut open. [PAUSE / ASK] Lost diameter means trouble inside. Make your call.", "21": "Two more removals to lock in. First, heat. Enough heat changes the rope steel and cooks the lubricant deep inside, and it does it without an obvious mark, so a sling that has been exposed to real heat comes out for evaluation and, in practice, out of service -- you treat its strength as unknown. And do not throw water on a hot sling to cool it, because quenching can make the metal damage worse. Second, the end fittings. The socket, the thimble, the hardware in the eye -- if any of that is cracked, bent, badly worn, or corroded, the assembly is done, because the load runs straight through those fittings. A perfect rope on a cracked fitting is a failure waiting to happen. I have seen a sling that caught flame from a nearby torch cut get pulled even though it looked untouched. [PAUSE / ASK] Why is heat damage so dangerous to judge?", "22": "Heat is a quiet killer on a steel sling, because it can wreck the strength without leaving an obvious mark. Enough heat changes the metal itself and damages the lubricant deep in the rope, and it can also cook off the core support, all without an outward sign you would notice in a glance. So a wire rope sling exposed to high heat comes out of service for evaluation -- you do not just keep running it because it still looks like a rope. Some folks will assume steel shrugs off any heat, but rope steel is heat-treated and heat undoes that. Someone might quench it with water, which can make the damage worse, not better. Some people will try to keep using it in a limited way, like baskets only, but a heat-damaged sling has no safe role. When heat has touched a sling, treat the strength as unknown, which means out. I have seen a sling that took flame from a nearby cut get pulled even though it looked untouched. [PAUSE / ASK] Heat can ruin strength with no visible sign. Make your call.", "23": "Third section. Chain slings play by different rules than rope, from how they are marked to how they fail. This is the sling you reach for when the conditions would destroy anything else. I have watched chain slings outlast everything in a forge shop where a web sling would not survive a shift. [PAUSE / ASK] Ask yourself what heat and sharp edges do to a synthetic sling versus a chain.", "24": "Chain has to tell you what it is, because you rig to its grade and you cannot eyeball that. The durable identification on an alloy steel chain sling gives its size, its grade, its rated capacity, and its manufacturer. Grade is the big one on chain. The alloy lifting grades -- things like grade eighty and grade one hundred -- are what you lift with. The cheaper hardware-store chains, proof coil and the like, are not lifting chain at all, even if they look similar, and using one for a lift is a serious mistake. So the tag is not a formality, it is the difference between a rated lifting tool and a length of chain that will fail. If it cannot tell you grade and rating, it is an unknown and it stays out. I have caught a length of plain proof-coil chain rigged as if it were alloy because nobody read the stamp. [PAUSE / ASK] What four things does a chain sling tag have to state?", "25": "A chain sling has to tell you what it is, permanently, because you rig to its grade and rating and you cannot guess those. The durable identification on an alloy steel chain sling states its size, its grade, its rated capacity, and the manufacturer. Grade matters a lot on chain -- alloy grades like eighty and one hundred are the lifting grades, and a lower-grade hardware-store chain is not a lifting chain at all. Some folks will settle for just the length, which does not tell you what it can hold. Someone might expect a truck assignment, which is shop tracking, not a rating. Some people will look for a repaint date, which is not part of the required marking. If the chain cannot tell you its grade and rating, you treat it like an unknown and keep it out of the lift. I have caught a length of plain proof-coil chain rigged as if it were alloy because nobody read the tag. [PAUSE / ASK] Size, grade, rating, maker -- all four. Make your call.", "26": "A chain sling is only as strong as its weakest fitting, so every link in the path -- the master link at the top, the coupling links, the hooks -- has to be rated at least equal to the chain. Hang a light hook on a heavy chain and you have quietly downrated the whole assembly to that hook, and you might not even know it until it lets go. And makeshift hardware is flat prohibited -- no shop-made hooks, no field-bent rebar, no bolts or rods pressed into service as fittings. Those have no rating and no place on a lifting sling. Everything in the load path carries its share, so everything has to be rated for it. Use manufactured, rated components and match them to the chain. I have watched a shop-made hook straighten right out under a load the chain itself would have carried all day. [PAUSE / ASK] What is wrong with a field-bent rebar hook?", "27": "A chain sling is only as strong as its weakest fitting, so the master link, the coupling links, and the hooks all have to be rated at least equal to the chain they are on. Put a light hook on a heavy chain and you have quietly downrated the whole assembly to that hook, and worse, you may not know it. Everything in the load path has to carry the rating. Some folks will grab any hardware that physically fits, but fitting is not the same as being rated for the load. Someone might field-bend a piece of rebar into a hook, which is a makeshift fastener and strictly prohibited on a rated sling. Some people will think a lighter fitting somehow helps capacity, but a weaker fitting only lowers it. Match every component to the chain rating and use only manufactured, rated attachments. I have watched a shop-made hook straighten out under a load the chain itself would have held all day. [PAUSE / ASK] Every fitting rated to the chain -- no weak links. Make your call.", "28": "Chain fails through its links, so the removal criteria are all about the metal. You pull a chain sling for wear beyond the limit at any point on a link, for stretch or elongation, for nicks, gouges, or cracks, and for links that are bent, twisted, or stretched. Stretch is the one to respect most: a chain that has started to elongate has been overloaded, and the links get longer and thinner right before they fail, so you measure a set number of links against the original length to catch it early. Heat damage and any repair by someone not qualified also condemn the sling. It is a link-by-link inspection -- one bad link retires the whole assembly. I have watched an inspector find a single stretched link in a long chain sling and condemn the entire thing. [PAUSE / ASK] Why is stretch such a serious finding on chain?", "29": "Chain fails differently from rope, and the tells are all about the metal of the links themselves. You remove a chain sling when a link shows wear beyond the allowed limit, stretch or elongation, nicks, gouges, cracks, or bent, twisted, or stretched links -- any of those. Stretch is a big one: a chain that has started to elongate has been overloaded, and the links get longer and thinner right before they fail. You measure a set length of links against the original to catch it. Some folks will pull a chain for dust, which just needs cleaning to inspect. Someone might worry about the factory grade stamp, but that stamp is supposed to be there and helps you identify it. Some people will remove it for its coating, which is protection, not damage. Inspect link by link and know the wear and stretch limits for that chain. I have watched an inspector find one stretched link in a long sling and condemn the whole assembly. [PAUSE / ASK] Wear, stretch, nicks, cracks -- link by link. Make your call.", "30": "Every sling family has a home, and chain owns the rough, hot, abusive corners of the work. Alloy chain takes heat that would melt a synthetic, shrugs off the abrasion and sharp edges that chew up other slings, and holds up in the dirty, heavy, repetitive service you find in foundries, mills, and heavy fabrication. That toughness is exactly why you reach for it when the conditions would kill a web sling in a shift or wear out a wire rope fast. The trade-off is weight -- chain is the heavy one to carry and rig -- and it still gets the same link-by-link inspection as everything else, no free pass for being tough. Match chain to heat and abuse. I have seen chain slings live for years in a forge shop where web slings did not last a single day. [PAUSE / ASK] What conditions send you reaching for chain?", "31": "Every sling family has a home, and the chain sling earns its keep in the rough, hot, abusive corners of the work. Alloy chain takes heat better than synthetic, shrugs off the abrasion and sharp edges that chew up other slings, and holds up in the dirty, heavy service you find in foundries, mills, and heavy fab. That durability is why it is the choice when the conditions would destroy a web sling or wear out a wire rope fast. Some folks will pick chain for being light, but chain is the heavy one to carry -- that is its trade-off. Someone might think chain never needs inspecting, but it needs the same link-by-link discipline as everything else. Some people will try to shorten it with a knot or a bolt, which is a prohibited makeshift move on any sling. Match chain to heat and abuse, and handle its weight. I have seen chain slings live for years in a forge shop where web slings lasted a single shift. [PAUSE / ASK] Heat and abrasion -- that is chain country. Make your call.", "32": "Last section. Synthetics are light, gentle on finished loads, and everywhere on a job -- and they fail in ways all their own, from a chemical splash to a single deep cut. Learn their limits and their removal rules. I have watched a web sling that looked perfect get pulled for one thing an experienced eye caught. [PAUSE / ASK] Ask yourself what a single deep cut does to a web sling's strength.", "33": "How a web sling is built tells you how to inspect it, and it comes down to the thread. The eyes and the end fittings on a synthetic web sling are formed by stitching only, laid in an even pattern with enough stitches to develop the full breaking strength of the sling. That stitching is structural -- it is not decoration, it is what holds the thing together -- which is exactly why broken or worn stitches send a web sling out of service. You never see staples, glue, or clips on a proper web sling; stitching is the only approved way. So when you inspect one, you read the stitch pattern as carefully as you read the webbing, especially right at the eyes where the load transfers. Out on a job I have pulled a web sling for a run of popped stitches at the eye even though the webbing itself looked perfect. [PAUSE / ASK] Why does popped stitching condemn a web sling?", "34": "How a web sling is put together tells you how to inspect it, and the answer is all about the thread. On a synthetic web sling, end fittings and the eyes are attached by stitching only, laid in an even pattern with enough stitches to develop the full breaking strength of the sling. The stitching is structural -- it is not decoration, it is what holds the sling together -- which is exactly why broken or worn stitches are a removal condition. Some folks will imagine staples, but you never drive metal through load-bearing webbing. Someone might think glue, but adhesive is not an approved method for forming a rated eye. Some people will picture wire rope clips, which belong on wire rope, not web. When you inspect a web sling, you read the stitch pattern as carefully as the webbing. I have pulled a web sling for a run of popped stitches at the eye even though the webbing itself looked fine. [PAUSE / ASK] Stitching is structural -- what does popped thread mean? Make your call.", "35": "Synthetics each have chemicals that eat them, and matching the material to the job keeps a sling from failing for a reason you never saw. Nylon is attacked by acids and phenolics, so nylon stays away from acid. Polyester and polypropylene are the opposite -- they are the ones you keep away from caustics, the alkalis -- and web slings with aluminum fittings also avoid caustics. So the two families guard against opposite hazards, and you have to know which fiber is in your hand before you rig near chemicals. On temperature, polyester and nylon web are good to about a hundred eighty degrees, and polypropylene a bit higher around two hundred, above which you follow the manufacturer or switch slings. I have watched a nylon sling go brittle and fail near an acid line where a polyester belonged. [PAUSE / ASK] Which fiber do you keep away from acids?", "36": "Synthetic slings each have chemicals that eat them, and matching the material to the environment keeps a sling from failing for a reason you cannot see coming. Nylon web slings must not be used where acids or phenolic chemicals are present, because those attack nylon. Polyester and polypropylene, on the other hand, are the ones you keep away from caustics, and web slings with aluminum fittings also stay away from caustics. So the two families protect against opposite chemical hazards, and you have to know which sling you are holding. Some folks will worry about daylight and air, which are just normal conditions. Someone might fear clean dry storage, which is where you want the sling. Some people will think room temperature is a threat, but the temperature limit is up around a hundred eighty degrees, not room heat. Read the sling material and match it to the chemistry on your job. I have watched a nylon sling go brittle and fail near an acid line where a polyester should have been used. [PAUSE / ASK] Nylon and acids do not mix. Make your call.", "37": "The web sling removal list is worth knowing cold, because a web sling shows its damage plainly if you actually look. You pull it for acid or caustic burns, for melting or charring anywhere on the surface, for snags, punctures, tears, or cuts, for broken or worn stitches, for distorted or damaged end fittings, and for a missing or unreadable tag. Any one of those is enough. The thing to internalize is how little it takes -- a single deep cut severs load-bearing fibers, one melted patch means the fiber was cooked, one run of popped stitches means the structure is compromised. You are not looking for a sling that is falling apart; you are looking for the one clear defect that retires it. Out on a job I have red-tagged web slings for a single deep cut on an otherwise clean, good-looking strap. [PAUSE / ASK] How much damage does it take -- how many cuts?", "38": "The removal list for web slings is worth knowing cold, because a web sling gives up its damage plainly if you look. You pull it for acid or caustic burns, for melting or charring anywhere on the surface, for snags, punctures, tears, or cuts, for broken or worn stitches, and for distorted or damaged end fittings. Any one of those and the sling is done. The one thing on the list that is not a removal reason is the opposite of damage -- a legible tag showing the correct rated capacity is exactly what you want to see, it is what keeps the sling in service. Some folks will hesitate on burns and melting, but heat and chemical damage are clear removals. Someone might question cuts and punctures, but those sever the load-bearing fibers. Some people will overlook worn stitches, but the stitching is structural. A good tag is health; the rest of the list is damage. I have red-tagged web slings for a single deep cut on an otherwise clean strap. [PAUSE / ASK] Which one is a sign of health, not damage? Make your call.", "39": "The roundsling hides its strength inside, so its cover rules are strict for a reason. The load rides on core yarns bundled inside a woven cover; the cover takes the abrasion, the core does the lifting. Many are built with a brightly colored core or a warning yarn on purpose, so that a breach is obvious -- if you can see that inner color through a cut or tear, the cover has failed its job and the sling is out of service. The whole point is that you cannot inspect the hidden core directly, so a damaged cover means a sling you can no longer verify, and unverifiable means unusable. Seeing the warning color is not reassurance that the core is bright and healthy -- it is the alarm. Out on a job I have pulled roundslings the instant any core showed through the jacket. [PAUSE / ASK] What does seeing the inner core color mean?", "40": "The roundsling hides its strength inside, so its cover damage rules are strict for a reason. When you can see the core yarns through a cut or tear in the outer cover, the protective jacket has been breached and the load-bearing core is exposed -- that sling is out of service. Many roundslings are built with a brightly colored core or a warning yarn precisely so that a breach is obvious: if you can see that inner color, the cover has failed its job. Some folks will say it is fine as long as the color looks bright, but seeing the color at all is the warning, not reassurance. Someone might think the cover just needs washing, but a tear is not dirt. Some people will imagine it is now stronger, which makes no sense -- exposed core is damage, not an upgrade. The cover exists to protect and to warn; a breach means you cannot trust what is under it. I have pulled roundslings the moment any core showed through the jacket. [PAUSE / ASK] Core showing through means what? Make your call.", "41": "We have covered four sling families and a lot of criteria, and one rule sits above all of them. A sling with a missing or unreadable identification tag is out of service, no matter its type and no matter how good it looks. The reason is simple: without the tag you cannot confirm its rating, its grade, its material, or its history, and every one of those matters to whether it is safe. Wire rope, chain, web, roundsling -- same rule for all of them. A tag you cannot read is not a paperwork problem, it is an identity problem, and you do not lift on an unknown. This is the habit that protects you when everything else about the sling looks fine. Out on a job I have red-tagged perfectly healthy-looking slings on nothing more than a tag I could not read, and never regretted one of them. [PAUSE / ASK] No readable tag -- what happens to the sling?", "42": "Sharp edges are an equal-opportunity enemy -- they cut synthetic web and roundslings, they nick and kink wire rope, and they nick and gouge chain links, and every one of those is a removal condition. The fix is the same one you learned for capacity last module: put a corner protector or a softener over the edge. One piece of gear protects whatever sling is on it, and it opens up the bend radius so you are not crushing the sling on the corner either. Cheap protection for expensive slings and, more importantly, for the load and the people under it. Keep softeners on the truck, because the edge that needs one never has one lying beside it. I have watched a bare web sling get sliced clean through on a plate edge that had no protection on the whole site. [PAUSE / ASK] What does one softener on an edge do for every sling on it?", "43": "This is the gate. Six questions, all six required, because a condemned sling that stays in the rack is exactly what puts a load on somebody. These pull from every section -- broken wires, clips, chain fittings, web damage, chemistry, and the tag rule. Reason each one out. I have watched this be the moment a rigger realizes he can now inspect a sling as well as anyone on the crew. [PAUSE / ASK] Ready to condemn some bad slings?", "44": "Across every sling family in this module, one rule sits above the rest, and it is the habit that protects you when everything else looks fine. A sling with a missing or unreadable identification tag is out of service, no matter its type or condition, because a sling you cannot positively identify is one whose rating, grade, and history you are only guessing at. Wire rope, chain, web, roundsling -- all the same on this. Some folks will worry about a little surface dust, which just needs wiping to inspect. Someone might pull a sling for its lubricant or coating, but that is protection, not a defect. Some people will hesitate at a grade or capacity stamp, but that stamp is exactly what you want to find -- it is the identification. No readable identity means no lift, every time. I have red-tagged healthy-looking slings on nothing more than a tag I could not read, and never regretted one. [PAUSE / ASK] No readable tag means what? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "45": "Edges are an equal-opportunity enemy, and the fix is the same one you learned for capacity in the last module. Put a corner protector or a softener over the sharp plate edge, and it protects both slings at once -- it keeps the edge from cutting the synthetic web and from nicking and kinking the wire rope, and it opens up the bend radius so you are not crushing either sling on a corner. One cheap piece of gear, both slings protected. Some folks will lift fast to shorten the exposure, which just adds shock on top of an edge that is still cutting. Someone might grab a smaller sling to seat in the edge, which makes the bend tighter and the cutting worse. Some people will claim chain is immune to edges, but a sharp edge nicks and gouges chain links too, and nicks are a removal condition. Protect the edge, protect every sling on it. I keep softeners on the truck for exactly this and have watched a bare web sling get sliced on a plate that had none. [PAUSE / ASK] One softener protects every sling on the edge. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "Back to the removal number, because this is the one that keeps a failing sling out of a lift. Five broken wires in a single strand within one rope lay is a removal condition all by itself, the same way ten broken wires randomly distributed in one lay is. Damage concentrated in one strand is serious, which is why the single-strand number is lower than the scattered number. Find that and the sling is done, no debate. Some folks will fixate on a lubricant film, but lube is protection, not damage. Someone might pull it for surface dust, which just needs wiping before you inspect. Some people will get nervous about the capacity tag being present, but a legible tag is exactly what keeps a sling in service. Count broken wires within one lay and know both thresholds. I have watched a rigger mark a lay length with tape and find five in one strand hiding in the count. [PAUSE / ASK] Five in one strand in a lay -- in or out? Make your call.", "47": "The clip rule again, because it is the one people reverse and pay for. The saddle, the solid grooved body, goes on the live side that carries the load, and the U-bolt straddles the dead end, the short tail. Never saddle a dead horse -- the saddle stays off the dead end. Reverse it and the U-bolt crushes the live line and steals its strength right where you need it. And you use the manufacturer's number of clips at the correct spacing, torqued and then retorqued after first load, never just one. Some folks will put the U-bolt on the live side, which is the exact error the saying guards against. Someone might use a single overtightened clip, but one clip does not form a rated eye. Some people will weld the clips, which ruins the rope with heat and is never done. Saddle on live, U-bolt on dead, right count, right torque. I have caught a reversed clip set on a fresh eye and rebuilt it before it saw load. [PAUSE / ASK] Which part rides the live line? Make your call.", "48": "This is the weakest-link rule made concrete, and it is how a strong chain gets quietly downrated. If the hook is rated below the chain, the safe capacity of the whole assembly drops to that hook, because the load path is only as strong as its weakest component. The chain being stronger does not help once the hook is the limit. That is exactly why every fitting on a chain sling has to be rated at least equal to the chain. Some folks will still claim the full chain rating, but the hook does not know or care what the chain can do. Someone might average the two, but a load path does not average, it fails at its weakest point. Some people will imagine the two components sharing and adding capacity, but they are in series, not parallel -- the weak one governs. Rate the whole path to its lowest link. I have watched an underrated hook open up on a chain that had plenty of margin left. [PAUSE / ASK] The weakest fitting sets the number -- which one governs here? Make your call.", "49": "Heat damage on a synthetic is a clear, immediate removal, because melting and charring mean the fibers themselves have been altered and you cannot trust what they will hold. A glazed, melted patch or char anywhere on the webbing takes the sling out of service, full stop. The strength loss from heat is not something you can measure by eye or patch around. Some folks will trim the melted part and keep the rest, but the heat exposure affected more than the visible patch and you cannot cut a web sling back to health. Someone might think synthetics resist heat, but polyester and nylon web have a limit around a hundred eighty degrees and melting means it was far exceeded. Some people will invent a half-capacity derate, but a made-up number on heat-damaged webbing is still a guess. Melted or charred means gone. I have watched a web sling with one glazed spot get pulled and cut so nobody could put it back in service. [PAUSE / ASK] Melted and charred web -- in or out? Make your call.", "50": "Chemistry decides this one, and picking the wrong synthetic near acid is a failure you will not see coming until it lets go. The key question is the material: nylon is attacked by acids and phenolics, so nylon has no business near an open acid line -- you want a polyester there instead, since polyester resists acids and is only vulnerable to caustics. Knowing which fiber you are holding is the whole game near chemicals. Some folks will focus on the cover color, but color is not the chemical resistance. Someone might ask the length, which has nothing to do with acid attack. Some people will read the brand name, but the brand does not change the chemistry of the fiber. Identify the fiber, then match it to the hazard. I have seen a nylon sling used near acid go weak and fail where a polyester would have held fine. [PAUSE / ASK] Near acid, which fiber do you avoid? Make your call.", "51": "This is the rule that outranks every technique in the module, and it applies to every sling type the same way. A sling with its identification tag torn off and gone is out of service until it is properly identified, because without the tag you do not know its rating, its grade, its material, or its history -- and rigging is not a guessing game. Some folks will estimate the rating off the size, but two slings the same size can have very different ratings by grade and construction. Someone might use it only for light loads to feel safe, but a made-up limit on an unknown sling is still a guess with a decimal on it. Some people will match it to a similar-looking tagged sling, which assumes the exact thing you cannot confirm. No identity, no lift -- it is that simple, and it is the same for wire rope, chain, web, and roundslings. I have red-tagged good looking slings on nothing but a missing tag and never once regretted it. [PAUSE / ASK] No tag, no identity -- what happens to the sling? Make your call.", "52": "That is Slings and Terminations, and here is what you carry out of it. A wire rope is wires into strands into a rope around a core, and the termination -- the end connection -- is usually the weakest point, ranked from the poured socket at the top down to a knot that is never allowed. On clips, saddle on the live side, U-bolt on the dead end, never saddle a dead horse. A wire rope sling comes out at ten broken wires in a lay or five in one strand, and also for kinks, birdcages, crushing, lost diameter, corrosion, heat, or damaged fittings. Chain is marked with size, grade, rating, and maker, every fitting rated to the chain, and it comes out for wear, stretch, nicks, and cracks. Synthetic web is stitched, held to about a hundred eighty degrees, kept away from the wrong chemistry, and pulled for burns, melting, cuts, or worn stitches; a roundsling with its core showing is done. And above every type: no readable tag, no lift. Next module is Specialty Rigging Hardware -- shackles, hooks, eyebolts, turnbuckles, and the fittings that connect all of this together. I have watched these inspection habits save a crew from a bad sling more than once. [PAUSE / ASK] Before you go, think of one sling on your job you will now inspect differently."};
+var GATE = ["S4_M18_q18", "S4_M18_q19", "S4_M18_q20", "S4_M18_q21", "S4_M18_q22", "S4_M18_q23", "S4_M18_q24", "S4_M18_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M18_q01", "7": "S4_M18_q02", "9": "S4_M18_q03", "11": "S4_M18_q04", "13": "S4_M18_q05", "16": "S4_M18_q06", "18": "S4_M18_q07", "20": "S4_M18_q08", "22": "S4_M18_q09", "25": "S4_M18_q10", "27": "S4_M18_q11", "29": "S4_M18_q12", "31": "S4_M18_q13", "34": "S4_M18_q14", "36": "S4_M18_q15", "38": "S4_M18_q16", "40": "S4_M18_q17", "44": "S4_M18_q18", "45": "S4_M18_q19", "46": "S4_M18_q20", "47": "S4_M18_q21", "48": "S4_M18_q22", "49": "S4_M18_q23", "50": "S4_M18_q24", "51": "S4_M18_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M18';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

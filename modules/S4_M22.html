@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Friction and Inclined-Plane Rigging | CraneQualified S4_M22</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M22" data-cq-stage="4"
+      data-cq-total="52" data-cq-gate-code="R-201C / AR-108C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M22 &middot; Friction and Inclined-Plane Rigging</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Friction and Inclined-Plane Rigging</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 8</p><p class='meta'>Gate R-201C / AR-108C -- 6-question final at 100 percent</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Define friction and estimate sliding force as coefficient times weight</li><li>Explain why static (breakaway) friction exceeds kinetic (sliding) friction</li><li>Compare rolling and sliding, and control a load on rollers</li><li>Describe the inclined plane as a simple machine and its force balance</li><li>Account for gravity plus friction moving a load up or down a ramp</li><li>Define drifting, spot high-risk conditions, and keep a load under control</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>Friction Fundamentals</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>What Friction Is</h2>
+<p><b>Friction</b> is the resistance to sliding between two surfaces pressed together -- the grip between the load and whatever it rests on.</p><p class='note'>It is not the weight itself and not speed. It is the resistance you must overcome to slide the load.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Friction, in load moving, is best described as:</p>
+<div class="quiz-group" data-qid="S4_M22_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q01',0,'fb_S4_M22_q01')">The full weight of the load pressing down on the ground</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q01',1,'fb_S4_M22_q01')">The speed at which a load can safely be moved along</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q01',2,'fb_S4_M22_q01')">The pull that a winch adds into the rigging system</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q01',3,'fb_S4_M22_q01')">The resistance to sliding between two surfaces in contact</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>The Coefficient of Friction</h2>
+<p>The <b>coefficient of friction</b> (the Greek letter <b>mu</b>) is a plain number for a <b>pair of surfaces</b>: steel on steel, steel on wood, rubber on concrete.</p><p class='note'>Higher number = more resistance = more force to slide. Greased surfaces are low; rough dry surfaces are high.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The coefficient of friction (often written as the Greek letter mu) is:</p>
+<div class="quiz-group" data-qid="S4_M22_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q02',0,'fb_S4_M22_q02')">A number for a surface pair -- higher means more resistance</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q02',1,'fb_S4_M22_q02')">The length of the rope used in the pulling system</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q02',2,'fb_S4_M22_q02')">The total weight of the whole load, measured in pounds</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q02',3,'fb_S4_M22_q02')">The angle of the ramp itself, measured out in degrees</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Static vs Kinetic Friction</h2>
+<p>Two kinds of friction matter when you move a load:</p><ul><li><b>Static (breakaway) friction</b> -- holds a still load; you fight it to start motion</li><li><b>Kinetic (sliding) friction</b> -- acts once the load is moving; it is <b>lower</b></li></ul><p class='warn'>Because static is higher, a load breaks loose suddenly and can lunge -- be ready for it.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">It takes more force to start a load sliding than to keep it moving because:</p>
+<div class="quiz-group" data-qid="S4_M22_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q03',0,'fb_S4_M22_q03')">Loads that are already moving have no friction on them at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q03',1,'fb_S4_M22_q03')">The coefficient of friction increases along with the speed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q03',2,'fb_S4_M22_q03')">The load somehow gets heavier the moment it has stopped moving</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q03',3,'fb_S4_M22_q03')">Static (breakaway) friction is higher than kinetic (sliding)</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Sizing the Sliding Force</h2>
+<p>On a <b>level surface</b>, the force to slide a load is:</p><p class='formula'>Force = coefficient of friction (mu) x Weight</p><p>Example: mu = 0.5 and a 10,000 lb load -> about 5,000 lb of pull (plus a bit more to break it loose).</p><p class='note'>This sizes your winch, rigging, and anchor.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On a level surface, the force needed to slide a load is estimated as:</p>
+<div class="quiz-group" data-qid="S4_M22_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q04',0,'fb_S4_M22_q04')">The weight minus the coefficient of friction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q04',1,'fb_S4_M22_q04')">The ramp angle times the weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q04',2,'fb_S4_M22_q04')">The coefficient of friction times the weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q04',3,'fb_S4_M22_q04')">The weight divided by the coefficient of friction</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q04"></div>
+</div></section>
+<section class="slide t-divider" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Rolling vs Sliding</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Rolling Beats Sliding</h2>
+<p><b>Rolling resistance</b> (rollers, wheels, dollies) is <b>far lower</b> than <b>sliding friction</b> -- often just a fraction.</p><p class='note'>That is why heavy loads go on pipe rollers, dollies, or skates instead of being skidded. A load you can barely drag will roll with a modest push.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Compared with sliding a load, rolling it on rollers or wheels usually takes:</p>
+<div class="quiz-group" data-qid="S4_M22_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q05',0,'fb_S4_M22_q05')">Much less force -- rolling resistance is far below sliding friction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q05',1,'fb_S4_M22_q05')">Much more force, because the rollers themselves add weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q05',2,'fb_S4_M22_q05')">No force at all at any point once the rollers have been placed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q05',3,'fb_S4_M22_q05')">Exactly the same amount of force as sliding the load would take</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>Rollers, Dollies, and Air Skates</h2>
+<p>Load-moving equipment reduces resistance in different amounts:</p><ul><li><b>Pipe rollers, dollies, skates</b> -- cut resistance way down</li><li><b>Air skates (air bearings)</b> -- float the load on a film of air, <b>nearly frictionless</b> (need a smooth, sealed floor)</li></ul><p class='warn'>The less resistance, the more the load must be actively controlled.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Among load-moving equipment, air skates (air bearings) are notable because they:</p>
+<div class="quiz-group" data-qid="S4_M22_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q06',0,'fb_S4_M22_q06')">Only work when they are used on steep inclined planes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q06',1,'fb_S4_M22_q06')">Float the load on a thin film of air -- nearly frictionless</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q06',2,'fb_S4_M22_q06')">Grip the floor hard to stop the load from drifting off</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q06',3,'fb_S4_M22_q06')">Add large amounts of extra friction for better control</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>A Load on Rollers Wants to Run</h2>
+<p class='warn'>A load on rollers has almost <b>no resistance to rolling</b> -- it will move from the slightest push, bump, or unseen slope.</p><p>Always <b>chock or restrain</b> a load on rollers whenever it is not being deliberately moved. Rollers do not hold a load; they free it to move.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A heavy load sitting on rollers on a level floor should always be:</p>
+<div class="quiz-group" data-qid="S4_M22_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q07',0,'fb_S4_M22_q07')">Chocked or restrained -- it has almost no resistance to rolling away</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q07',1,'fb_S4_M22_q07')">Left completely free, since rollers hold it in place on their own</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q07',2,'fb_S4_M22_q07')">Pushed continuously so it never gets a chance to fully stop</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q07',3,'fb_S4_M22_q07')">Tipped off the rollers whenever there is no one pushing it</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>Reducing the Force to Move</h2>
+<p>To make a heavy load easier to move on the level:</p><ul><li><b>Roll it</b> instead of sliding it -- the biggest win</li><li>If it must slide, <b>lubricate</b> the surfaces to drop the coefficient</li></ul><p class='warn'>Do not add weight on top (raises friction) or rely on speed -- both work against you.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">To reduce the force needed to move a heavy load across a level surface, the most effective step is usually to:</p>
+<div class="quiz-group" data-qid="S4_M22_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q08',0,'fb_S4_M22_q08')">Move it faster and faster to build up more momentum</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q08',1,'fb_S4_M22_q08')">Increase the coefficient of friction between the surfaces</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q08',2,'fb_S4_M22_q08')">Roll it instead of sliding it, or lubricate the sliding surfaces</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q08',3,'fb_S4_M22_q08')">Add a lot of extra weight on top of it to hold it down firmly</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q08"></div>
+</div></section>
+<section class="slide t-divider" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Inclined Planes</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>The Ramp as a Simple Machine</h2>
+<p>An <b>inclined plane</b> lets you <b>raise a load with less force</b> than a vertical lift -- by moving it over a <b>longer distance</b> along the slope.</p><p class='note'>Force goes down, distance goes up; the work is about the same. That is the bargain every simple machine makes.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An inclined plane (ramp) works as a simple machine by:</p>
+<div class="quiz-group" data-qid="S4_M22_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q09',0,'fb_S4_M22_q09')">Adding extra force onto the load itself as it travels up</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q09',1,'fb_S4_M22_q09')">Letting you raise a load with less force, over a longer distance</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q09',2,'fb_S4_M22_q09')">Removing the load's weight entirely while it is on the ramp</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q09',3,'fb_S4_M22_q09')">Making the load lighter the steeper that the ramp gets</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Ideal Mechanical Advantage of a Ramp</h2>
+<p>The <b>ideal mechanical advantage</b> of a ramp:</p><p class='formula'>Ideal MA = ramp length (along slope) / vertical height</p><p>A 12 ft ramp rising 3 ft = 4:1 -- about a quarter of the weight to push up (ignoring friction).</p><p class='note'>Longer and shallower (for a given height) = more advantage.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The ideal mechanical advantage of a ramp is:</p>
+<div class="quiz-group" data-qid="S4_M22_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q10',0,'fb_S4_M22_q10')">The weight of the load simply divided by two</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q10',1,'fb_S4_M22_q10')">The angle of the ramp itself, given in degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q10',2,'fb_S4_M22_q10')">The ramp length divided by its vertical height</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q10',3,'fb_S4_M22_q10')">The height of the ramp multiplied by its width</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Force to Go Up a Ramp</h2>
+<p>Moving a load <b>up</b> an incline fights <b>two</b> forces at once:</p><ul><li>The <b>gravity component along the slope</b> (pulling the load back down)</li><li>The <b>friction</b> between load and ramp</li></ul><p class='note'>Flat ground has only friction. A ramp adds the gravity component on top -- so up-ramp always needs more pull.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The force needed to move a load UP an inclined plane must overcome:</p>
+<div class="quiz-group" data-qid="S4_M22_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q11',0,'fb_S4_M22_q11')">Only the pull of gravity acting straight downward</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q11',1,'fb_S4_M22_q11')">Both the gravity component along the slope and the friction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q11',2,'fb_S4_M22_q11')">Neither one -- the ramp simply cancels them both out</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q11',3,'fb_S4_M22_q11')">Only the friction between the load and the ramp surface</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Steeper Ramps Cost More</h2>
+<p>As a ramp gets <b>steeper</b>, the <b>gravity component along the slope grows</b>:</p><ul><li>More force needed to move the load <b>up</b></li><li>Stronger tendency for the load to <b>run back down</b></li></ul><p class='note'>A long, shallow ramp is easier and safer than a short, steep one for the same height.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">As an inclined plane gets steeper, the force needed to move a load up it:</p>
+<div class="quiz-group" data-qid="S4_M22_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q12',0,'fb_S4_M22_q12')">Stays exactly the same regardless of the ramp angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q12',1,'fb_S4_M22_q12')">Drops, because steeper ramps are far more efficient</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q12',2,'fb_S4_M22_q12')">Rises, since the gravity component along the slope grows</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q12',3,'fb_S4_M22_q12')">Disappears entirely once the ramp passes 45 degrees</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q12"></div>
+</div></section>
+<section class="slide t-content" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Lowering: The Runaway Hazard</h2>
+<p class='warn'>Lowering a load <b>down</b> a ramp must be <b>actively controlled</b>.</p><p>Gravity now drives the load down the slope. If the gravity component <b>beats the friction</b> holding it, the load <b>runs away downhill</b> -- faster than intended, dragging the rigging and anyone below.</p><p class='note'>Never just release it. Never trust friction alone to stop it.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When lowering a load DOWN an inclined plane, the key hazard is that:</p>
+<div class="quiz-group" data-qid="S4_M22_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q13',0,'fb_S4_M22_q13')">Gravity can drive the load down faster than expected -- it runs away</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q13',1,'fb_S4_M22_q13')">The load simply becomes weightless and floats up off the ramp</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q13',2,'fb_S4_M22_q13')">The load can somehow only ever move in the upward direction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q13',3,'fb_S4_M22_q13')">Friction acting all on its own will always safely hold it still</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q13"></div>
+</div></section>
+<section class="slide t-divider" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Drifting, Anchors, and Control</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Drifting a Load</h2>
+<p><b>Drifting</b> is moving a <b>suspended</b> load horizontally using <b>two or more hoists</b> -- tightening some and slackening others so the weight passes from one to the next.</p><p class='note'>It walks a load sideways through the air when a single straight pick will not reach. A controlled hand-off, not a swing.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Drifting a load means:</p>
+<div class="quiz-group" data-qid="S4_M22_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q14',0,'fb_S4_M22_q14')">Letting a load swing completely freely on a single crane hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q14',1,'fb_S4_M22_q14')">Setting a load down and simply leaving it there unattended</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q14',2,'fb_S4_M22_q14')">Dragging a load along the ground with just a single winch</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q14',3,'fb_S4_M22_q14')">Moving a suspended load horizontally with two or more hoists</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>High-Risk Conditions</h2>
+<p>A load-moving or drifting job climbs in risk when:</p><ul><li>The <b>weight is unknown or unverified</b></li><li>The <b>center of gravity is above the attachment points</b> (wants to flip)</li><li>The load is <b>skidded or skated up or down an inclined plane</b></li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Which condition makes a load-moving or drifting job notably higher risk?</p>
+<div class="quiz-group" data-qid="S4_M22_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q15',0,'fb_S4_M22_q15')">The weight is unknown, or the CG is above the attachment points</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q15',1,'fb_S4_M22_q15')">The load is moved on a flat, level, well-prepared surface</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q15',2,'fb_S4_M22_q15')">The center of gravity sits safely below all the pick points</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q15',3,'fb_S4_M22_q15')">The load weight is clearly known and has been fully verified</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Anchors and the Snatch-Block Resultant</h2>
+<p>When a winch or tugger pulls through a <b>snatch block</b>, the anchor (<b>deadman</b>) must be rated for the <b>resultant force</b> on the block -- which can reach about <b>twice the line pull</b> at a hard reversal.</p><p class='note'>Same vector rule as the blocks module. Rate the deadman to the resultant, not the bare line pull.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When a winch or tugger pulls a load through a snatch block, the anchor (deadman) for that block must be rated for:</p>
+<div class="quiz-group" data-qid="S4_M22_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q16',0,'fb_S4_M22_q16')">Just the weight of the block itself and really nothing more</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q16',1,'fb_S4_M22_q16')">Nothing at all -- the block simply supports its own weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q16',2,'fb_S4_M22_q16')">Only half of the line pull, since the block shares the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q16',3,'fb_S4_M22_q16')">The resultant on the block -- up to about twice the line pull</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Control the Load -- Never Trust Friction</h2>
+<p class='warn'>Actively control any load that could move on its own. Keep people clear -- out from under it and <b>never downhill</b> of it.</p><p>Never trust <b>friction as a brake</b>: it is variable and can let go the instant it breaks from static to sliding, or if a surface gets wet or greased.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The safest mindset when moving or lowering a load that could run away is to:</p>
+<div class="quiz-group" data-qid="S4_M22_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q17',0,'fb_S4_M22_q17')">Rely on plain sliding friction to stop the load whenever needed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q17',1,'fb_S4_M22_q17')">Actively control it, keep clear -- never trust friction as a brake</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q17',2,'fb_S4_M22_q17')">Release it and simply let its momentum carry it on home</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q17',3,'fb_S4_M22_q17')">Stand downhill of it to guide it along as it starts to move</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>The Hardware Rules Still Apply</h2>
+<p>However you move the load -- sliding, rolling, ramping, drifting -- the <b>blocks, shackles, and slings</b> in the system must still be:</p><ul><li><b>Rated and inspected</b> to their own standards (blocks, B30.26 hardware, B30.9 slings)</li><li>Sized so the <b>weakest piece governs</b> the whole system</li></ul><p class='note'>Moving a load does not suspend the rules that protect a lift.</p>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>Worked Example: Sliding Force</h2>
+<p>Put the level-surface rule to work:</p><p class='formula'>Force = mu x Weight</p><p>A 4,000 lb load, mu = 0.5 -> about 2,000 lb of pull (plus a bit more to break it loose from rest).</p><p class='note'>Since mu is less than 1, the sliding force is less than the weight.</p>
+</div></section>
+<section class="slide t-divider" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">Whatever technique moves the load, the hardware in the system (blocks, shackles, slings) must still be:</p>
+<div class="quiz-group" data-qid="S4_M22_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q18',0,'fb_S4_M22_q18')">Used past its own rating, since load moving is only temporary anyway</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q18',1,'fb_S4_M22_q18')">Ignored completely, since only the winch really matters here</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q18',2,'fb_S4_M22_q18')">Chosen purely by whatever happens to be the closest at hand</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q18',3,'fb_S4_M22_q18')">Rated and inspected to its own standard, with the weakest piece governing</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">A 4,000 lb load sits on a level surface with a coefficient of friction of about 0.5. The force to start it sliding is roughly:</p>
+<div class="quiz-group" data-qid="S4_M22_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q19',0,'fb_S4_M22_q19')">About 2,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q19',1,'fb_S4_M22_q19')">About 40,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q19',2,'fb_S4_M22_q19')">About 400 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q19',3,'fb_S4_M22_q19')">About 8,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">On a level surface, a load weighs 10,000 lb and the coefficient of friction is about 0.6. The force to slide it is roughly:</p>
+<div class="quiz-group" data-qid="S4_M22_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q20',0,'fb_S4_M22_q20')">About 16,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q20',1,'fb_S4_M22_q20')">About 1,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q20',2,'fb_S4_M22_q20')">About 6,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q20',3,'fb_S4_M22_q20')">About 600 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A load that has been sitting still needs a hard initial pull, then slides more easily once moving. This is because:</p>
+<div class="quiz-group" data-qid="S4_M22_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q21',0,'fb_S4_M22_q21')">The coefficient of friction rises along with the load's speed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q21',1,'fb_S4_M22_q21')">Static (breakaway) friction is higher than kinetic (sliding)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q21',2,'fb_S4_M22_q21')">The load loses some of its weight as soon as it starts moving</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q21',3,'fb_S4_M22_q21')">Friction disappears completely the moment the load is moving</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A heavy load has been set on pipe rollers on a floor that looks level. Before anyone steps away, the crew must:</p>
+<div class="quiz-group" data-qid="S4_M22_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q22',0,'fb_S4_M22_q22')">Trust the rollers themselves to keep it from moving at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q22',1,'fb_S4_M22_q22')">Remove the rollers and simply let it sit down on the floor</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q22',2,'fb_S4_M22_q22')">Push it a little bit so that it keeps hold of some momentum</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q22',3,'fb_S4_M22_q22')">Chock or restrain it -- it can roll away from the slightest push</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">Moving a load UP a ramp takes more force than moving it across the same surface laid flat because:</p>
+<div class="quiz-group" data-qid="S4_M22_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q23',0,'fb_S4_M22_q23')">The load moves faster on a ramp</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q23',1,'fb_S4_M22_q23')">You must overcome gravity along the slope in addition to friction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q23',2,'fb_S4_M22_q23')">Ramps have a higher coefficient of friction than flat ground</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q23',3,'fb_S4_M22_q23')">The ramp somehow makes the load heavier</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">A load is being lowered down an inclined plane. The crew's plan must account for the fact that:</p>
+<div class="quiz-group" data-qid="S4_M22_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q24',0,'fb_S4_M22_q24')">The load simply cannot move at all unless it is actively pushed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q24',1,'fb_S4_M22_q24')">The load gets noticeably lighter as it descends down the slope</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q24',2,'fb_S4_M22_q24')">Gravity can drive the load down and run it away if not controlled</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q24',3,'fb_S4_M22_q24')">Friction acting all alone will reliably hold and stop the load</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">A crew will drift a load whose weight has not been verified and whose center of gravity sits above the attachment points. They should:</p>
+<div class="quiz-group" data-qid="S4_M22_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q25',0,'fb_S4_M22_q25')">Recognize it as high-risk and verify the weight and CG first</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q25',1,'fb_S4_M22_q25')">Just guess at the weight and then rig the whole lift for that</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q25',2,'fb_S4_M22_q25')">Proceed quickly with it before the site conditions can change</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M22_q25',3,'fb_S4_M22_q25')">Treat it as routine, since drifting is always a low risk job</button>
+</div>
+<div class="feedback" id="fb_S4_M22_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M23'}}))">Next: Below-the-Hook Lifting Device Design (BTH-1) &gt;</button><p>That is Friction and Inclined-Plane Rigging.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 52</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 52;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M22)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M22_FrictionIncline";
+var HASHES={"S4_M22_q01": "c99e6f5f", "S4_M22_q02": "077a63c3", "S4_M22_q03": "32c3585d", "S4_M22_q04": "6a9f434f", "S4_M22_q05": "8611c9ee", "S4_M22_q06": "c1edbb2c", "S4_M22_q07": "cb0f6ad0", "S4_M22_q08": "d86d43ab", "S4_M22_q09": "f3a2975d", "S4_M22_q10": "9ffdc17e", "S4_M22_q11": "139fa3b4", "S4_M22_q12": "b5c37cf0", "S4_M22_q13": "be512efd", "S4_M22_q14": "65b24305", "S4_M22_q15": "592c4c4b", "S4_M22_q16": "1b5057e7", "S4_M22_q17": "01ddd46e", "S4_M22_q18": "77bc69b9", "S4_M22_q19": "eb5e4bef", "S4_M22_q20": "84da1321", "S4_M22_q21": "8c22cf0f", "S4_M22_q22": "298b94f8", "S4_M22_q23": "46fe1ebd", "S4_M22_q24": "c04ca29d", "S4_M22_q25": "c7ab8208"};
+var GATE=["S4_M22_q18", "S4_M22_q19", "S4_M22_q20", "S4_M22_q21", "S4_M22_q22", "S4_M22_q23", "S4_M22_q24", "S4_M22_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=51;            /* completion slide (52) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (52) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M22)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Friction and Inclined-Plane Rigging, module eight of the Advanced Rigger stage. Everything so far has hung a load from a hook. This module moves it -- sliding and rolling it across the ground, pushing it up and down ramps, and drifting a suspended load sideways through the air. That is the world of bull rigging, and it runs on friction. We cover what friction is and how to put a number on it, why rolling beats sliding, how an inclined plane trades force for distance, and how to keep a load from running away from you. The load that a crane handles calmly overhead can turn into a runaway the moment it is on rollers or a ramp. I have watched a load that four hands could not budge take off downhill the instant it broke loose. [PAUSE / ASK] Before we start, ask yourself which takes more force -- starting a load moving, or keeping it moving. Hold your guess.", "2": "Six outcomes, and they follow a load from the flat ground up a ramp and through the air. First friction itself -- what it is, how to size it, and the breakaway effect that makes a load lunge when it lets go. Then rolling versus sliding, and the roller-safety rule that catches people. Then the inclined plane, where gravity joins friction and a load can run downhill. And finally drifting, the high-risk conditions, and the control habits that keep everyone safe. The gate is six questions at one hundred percent, because a load moving on the ground or a ramp has momentum and gravity working on it, and a bad assumption gets someone hurt. This is hands-on rigging where the physics is right in front of you. I have worked moves where reading the friction right was the whole plan. [PAUSE / ASK] Look at the six and pick the one you have done least.", "3": "First section, friction itself -- the resistance you fight every time you move a load across a surface, and how to turn it into a number you can plan around. Get this and the rest of the module is arithmetic. Out on a job I have watched a load break loose all at once and jump because nobody respected the breakaway. [PAUSE / ASK] Ask yourself what actually fights you when you drag a load.", "4": "Let us start with what friction actually is, because the whole module runs on it. Friction is the resistance to sliding between two surfaces that are pressed together -- the grip between the bottom of your load and whatever it is sitting on. Try to drag a load across a floor and friction is what pushes back. It is not the weight itself -- that weight is the normal force pressing the surfaces together -- and it is not about speed. Friction is purely the resistance to sliding. Keep that clean and the numbers make sense. On a job I have watched a load that a crane lifted easily fight like a mule the moment a crew tried to drag it sideways -- same weight, but now friction was in play. [PAUSE / ASK] What is friction actually resisting?", "5": "Let us start with what friction actually is, because everything in this module runs on it. Friction is the resistance to sliding between two surfaces that are pressed together -- the grip between the bottom of your load and whatever it is sitting on. When you try to drag a load across a floor, friction is what fights you. It is not the weight itself, and it is not speed. Some folks will call friction the weight pressing down, but that weight is the normal force -- friction is the resistance it creates when you try to slide. Someone might think friction is about how fast you move, but it is about resistance to sliding, not speed. Some people will think of the winch pull, but that is the force fighting friction, not friction itself. Friction is the surfaces gripping each other against sliding. On a job I have watched a load that a crane lifted easily fight like a mule the moment a crew tried to drag it sideways. [PAUSE / ASK] What is friction resisting? Make your call.", "6": "To put a number on friction, we use the coefficient of friction. It is a plain number, written as the Greek letter mu, that describes how much a particular pair of surfaces grip each other -- steel on steel, steel on wood, rubber on concrete, each has its own value. The higher the number, the more resistance, and the more force it takes to slide the load. A greased steel surface has a low coefficient; a rough dry one is high. It is separate from the weight -- the coefficient just decides how much of that weight comes back at you as friction. On a job I have watched the same load slide far easier on greased plate than on bare concrete, same weight, different coefficient. [PAUSE / ASK] Does a higher coefficient mean more resistance or less?", "7": "To put a number on friction, we use the coefficient of friction, and it is worth understanding plainly. The coefficient of friction, often written as the Greek letter mu, is a plain number that describes how much a particular pair of surfaces grip each other -- steel on steel, steel on wood, rubber on concrete. The higher the number, the more resistance, and the more force it takes to slide the load. A greased steel surface has a low number; a rough dry one has a high number. Some folks will think it is the load's weight, but weight is separate -- the coefficient just sets how much of that weight fights you as friction. Someone might think it is the ramp angle, but that is a different quantity. Some people will think it is rope length, which has nothing to do with it. It is a surface-pair number: higher means grippier. On a job I have watched the same load slide far easier on greased plate than on bare concrete -- same weight, different coefficient. [PAUSE / ASK] What does a higher coefficient of friction mean? Make your call.", "8": "Here is something you feel every time you move a load by hand. Static friction, the breakaway friction that holds a still load in place, is higher than kinetic friction, the sliding friction once the load is moving. So you push harder and harder, the load suddenly breaks loose, and then it slides easier than you expected. That sudden drop is why a load can lunge and get away from you the instant it starts -- the force you needed to break it free is now more than it takes to keep it going. So you plan for the breakaway and you are ready when it lets go. On a job I have watched a load break loose all at once and jump forward because static friction gave way. [PAUSE / ASK] Which is higher -- breakaway friction or moving friction?", "9": "Here is something you feel every time you move a load by hand. It takes more force to get a load started than to keep it going, because static friction -- the breakaway friction that holds a still load in place -- is higher than kinetic friction, the sliding friction once it is moving. So you push hard, the load suddenly breaks loose, and then it slides easier than you expected -- which can surprise you and get away from you. Some folks will think the load gets heavier when stopped, but the weight does not change. Someone might think a moving load has no friction, but it still has kinetic friction, just less than static. Some people will think the coefficient climbs with speed, but the breakaway-versus-moving difference is the real effect. Static is higher than kinetic -- hard to start, easier to keep going. On a job I have watched a load break loose all at once and lunge because static friction let go. [PAUSE / ASK] Which is higher, breakaway or moving friction? Make your call.", "10": "Let us make friction into a number you can use on a plan. On a level surface, the force to slide a load is the coefficient of friction times the weight. If the coefficient is one-half and the load is ten thousand pounds, it takes about five thousand pounds of pull to slide it -- and a little more to break it loose from a standstill, since static runs higher. Cut the coefficient in half with grease or rollers and you cut the pull in half. That one product -- coefficient times weight -- sizes your winch, your rigging, and your anchor. On a job I have watched a crew size a tugger straight off coefficient times weight and land it on the first try. [PAUSE / ASK] What two things multiply to give the sliding force?", "11": "Let us make friction into a number you can actually use. On a level surface, the force needed to slide a load is estimated as the coefficient of friction times the weight of the load. If the coefficient is one-half and the load is ten thousand pounds, it takes about five thousand pounds of pull to slide it. Cut the coefficient in half with grease or rollers and you cut the required pull in half. That simple product -- coefficient times weight -- sizes your winch, your rigging, and your anchor. Some folks will divide the weight by the coefficient, but it is a product, not a quotient. Someone might subtract the coefficient, but you cannot subtract a plain number from pounds. Some people will bring in the ramp angle, but on a level surface there is no ramp. Coefficient times weight is your sliding force. On a job I have watched a crew size a tugger straight off coefficient times weight and get it right. [PAUSE / ASK] What two things multiply to give the sliding force? Make your call.", "12": "Second section, and it holds the single biggest force-saver in load moving: rolling instead of sliding. It also holds a safety rule that catches crews every year -- a load on rollers wants to run. Out on a job I have watched a load nobody could drag roll away almost on its own. [PAUSE / ASK] Ask yourself why we bother putting a load up on rollers.", "13": "This is the single biggest reason we own rollers, so let us make it stick. Rolling a load on rollers or wheels takes far less force than sliding it, because rolling resistance is much lower than sliding friction, often just a small fraction of it. A load you could barely drag will roll with a modest push once it is up on rollers. That is exactly why crews put heavy loads on pipe rollers, dollies, or skates instead of skidding them across the ground. The force savings are dramatic, not marginal. On a job I have watched a load that four people could not drag roll easily on pipe rollers with a single hand. [PAUSE / ASK] Why do we put heavy loads on rollers?", "14": "This is the single biggest reason we own rollers, so let us make it stick. Rolling a load on rollers or wheels takes far less force than sliding it, because rolling resistance is much lower than sliding friction -- often just a small fraction of it. A load you could barely drag will roll with a modest push once it is up on rollers. That is why crews put heavy loads on pipe rollers, dollies, or skates instead of skidding them. Some folks will think rolling takes the same force, but it is dramatically less. Someone might think rollers make it harder by adding weight, but the weight they add is nothing next to the friction they remove. Some people will think it takes no force at all, but there is still some rolling resistance, just a little. Rolling beats sliding by a wide margin. On a job I have watched a load that four people could not drag roll easily on pipe rollers with one. [PAUSE / ASK] Why do we put heavy loads on rollers? Make your call.", "15": "There is a whole family of load-moving gear, and it is worth knowing the range. Pipe rollers, dollies, and skates all cut resistance way down. Air skates, also called air bearings, take it furthest -- they float the load on a thin film of air, like an air-hockey puck, so they are very nearly frictionless and let a huge load move by hand across a smooth, sealed floor. But here is the catch: the less resistance the equipment leaves, the more the load will move on its own, so the more you must control it with restraints. Frictionless is powerful and unforgiving. On a job I have watched two people walk a massive machine across a shop floor on air skates -- and rig restraints before they did. [PAUSE / ASK] Which equipment leaves the least resistance?", "16": "There is a piece of equipment that takes the rolling idea to its limit, and it is worth knowing. Air skates, also called air bearings, float the load on a thin film of air -- like an air-hockey puck -- so they are very nearly frictionless, letting a huge load be moved by hand across a smooth floor. Pipe rollers and dollies also cut resistance way down, but air skates cut it almost to nothing. Some folks will think air skates grip the floor, but they do the opposite -- they nearly eliminate grip, which is why the load must be controlled carefully. Someone might think they only work on inclines, but they need a smooth, flat, sealed floor, not a slope. Some people will think they add friction for control, but they remove it -- control comes from restraint, not the skate. Air skates float the load nearly friction-free. On a job I have watched two people walk a massive machine across a shop floor on air skates. [PAUSE / ASK] What do air skates do to friction? Make your call.", "17": "The very thing that makes rollers useful also makes them dangerous, and this rule keeps people safe. A load on rollers has almost no resistance to rolling, which means it will roll away from the smallest push, a slight slope, or a bump you did not notice -- so a load on rollers must always be chocked or restrained whenever it is not being deliberately moved. Rollers do not hold a load in place; they free it to move, which is the opposite of what people sometimes assume. A floor that looks dead level almost never is. On a job I have watched an unchocked load on rollers start to drift on a floor everyone swore was flat. [PAUSE / ASK] What do you do with a load parked on rollers?", "18": "The very thing that makes rollers useful also makes them dangerous, and this rule keeps people safe. A load on rollers has almost no resistance to rolling, which means it will roll away from the smallest push, a slight slope, or a bump -- so a load on rollers must always be chocked or restrained when it is not being deliberately moved. Rollers do not hold a load; they free it to move. Some folks will think the rollers hold it in place, but they are exactly what let it get away. Someone might say push it constantly so it never stops, but that is not control, that is a runaway waiting to happen. Some people will tip it off the rollers each time, which is unnecessary and dangerous handling. Chock it or restrain it whenever it is not being moved. On a job I have watched an unchocked load on rollers start to drift on a floor that only looked level. [PAUSE / ASK] What must you always do with a load parked on rollers? Make your call.", "19": "So how do you actually make a heavy load easier to move? You lower the resistance, and the two best ways are to roll it instead of sliding it, or, if it has to slide, to lubricate the surfaces to drop the coefficient. Rolling is the bigger win, but a greased skid plate helps a lot. Both reduce the force your winch and anchor have to supply. What you do not do is pile weight on top -- that just increases the normal force and makes friction worse -- and you do not count on speed or momentum, which hurts control. Roll it or grease it. On a job I have watched a crew swap skidding for rollers and cut their required pull to a fraction of what it was. [PAUSE / ASK] What is the most effective way to cut the force needed to move a load?", "20": "So how do you actually make a heavy load easier to move? You lower the resistance, and the two best ways are to roll it instead of sliding it, or, if it must slide, to lubricate the sliding surfaces to drop the coefficient. Rolling is the bigger win, but a greased skid plate helps a lot too. Both reduce the force your winch and anchor have to supply. Some folks will add weight on top, but that only increases the normal force and makes friction worse. Someone might raise the coefficient, which is exactly backwards -- you want it lower. Some people will try to move it faster for momentum, but speed does not reduce the force to get it going and makes control worse. Roll it or grease it -- lower the resistance. On a job I have watched a crew swap skidding for rollers and cut their required pull to a fraction. [PAUSE / ASK] What is the most effective way to cut the moving force? Make your call.", "21": "Third section, the inclined plane -- the ramp. It is a simple machine that helps you raise a load with less force, but it adds gravity to the fight and gives a load a way to run downhill. Out on a job I have watched a pull that was fine on the flat nearly stall on the ramp. [PAUSE / ASK] Ask yourself what a ramp gives you and what it costs you.", "22": "An inclined plane is one of the oldest simple machines, and the trade it makes is the key to using it. A ramp lets you raise a load with less force than lifting it straight up -- but you pay for that by moving it over a longer distance along the slope. Force goes down, distance goes up, and the total work comes out about the same. That is the bargain every simple machine makes, the same one a block and tackle makes. The ramp does not erase the weight; it spreads the effort over distance. On a job I have watched a crew ramp a load up onto a deck with a fraction of the force a vertical pick would have taken. [PAUSE / ASK] What does the ramp trade to give you less force?", "23": "An inclined plane is one of the oldest simple machines, and understanding the trade it makes is the key to using it. A ramp lets you raise a load with less force than lifting it straight up -- but you pay for that by pushing it over a longer distance along the slope. Force goes down, distance goes up; the work is about the same. That is the bargain every simple machine makes. Some folks will think the ramp removes the weight, but the weight is still there, just handled differently. Someone might think the ramp adds force to the load, but it reduces the force you must supply. Some people will think a steeper ramp makes the load lighter, but steeper actually makes it harder, as we will see. Less force over more distance -- that is the ramp's deal. On a job I have watched a crew ramp a load up to a deck with a fraction of the force a vertical lift would have needed. [PAUSE / ASK] What does a ramp trade to give you less force? Make your call.", "24": "Let us put a number on the ramp's help, the same way we did for block and tackle. The ideal mechanical advantage of a ramp is its length along the slope divided by its vertical height. A ramp twelve feet long that rises three feet has an ideal advantage of four to one -- so ignoring friction you could push the load up with about a quarter of its weight. The longer and shallower the ramp for a given height, the greater the advantage. It is the length-to-height ratio that does it, not the raw angle. On a job I have watched a long, shallow ramp make a heavy roll-up almost easy. [PAUSE / ASK] What two ramp dimensions set the advantage?", "25": "Let us put a number on the ramp's help, the same way we did for block and tackle. The ideal mechanical advantage of a ramp is its length along the slope divided by its vertical height. A ramp twelve feet long that rises three feet has an ideal advantage of four to one -- so ignoring friction, you could push the load up with about a quarter of its weight. The longer and shallower the ramp for a given height, the greater the advantage. Some folks will multiply height by width, but that is an area, not an advantage. Someone might halve the weight, but that is not how a ramp works. Some people will use the angle in degrees directly, but the advantage comes from the length-to-height ratio, not the raw angle. Length over height is the ramp's advantage. On a job I have watched a long shallow ramp make a heavy roll-up almost easy. [PAUSE / ASK] What two ramp dimensions give the advantage? Make your call.", "26": "Going up a ramp is harder than a level move for one clear reason, and you have to account for both parts. To move a load up an inclined plane, your pull has to overcome two things at once: the part of gravity that acts along the slope, trying to slide the load back down, plus the friction between the load and the ramp. Level ground has only friction; a ramp stacks the gravity component on top of it. So an incline always needs more pull than the same surface laid flat, and the plan has to size for both. On a job I have watched a pull that handled the flat easily nearly stall the moment the load started up the ramp. [PAUSE / ASK] What two forces do you fight going up a ramp?", "27": "Going up a ramp is harder than a level move for one clear reason, and you have to account for both parts. To move a load up an inclined plane, your pulling force has to overcome two things at once: the part of gravity that acts along the slope, trying to slide the load back down, plus the friction between the load and the ramp. Level ground has only friction; a ramp adds the gravity component on top of it. So an incline always needs more pull than the same surface laid flat. Some folks will count only friction, forgetting gravity is now pulling the load backward down the slope. Someone might count only gravity and forget friction is still there. Some people will think the ramp cancels both, but it cancels neither -- it just trades force for distance. Gravity along the slope plus friction -- overcome both. On a job I have watched a pull that was fine on the flat nearly stall once the load hit the ramp. [PAUSE / ASK] What two forces do you fight going up a ramp? Make your call.", "28": "The angle of a ramp changes everything, and steeper is not better. As an inclined plane gets steeper, the gravity component along the slope grows, so it takes more force to push a load up -- and the load has a stronger tendency to run back down. A shallow ramp has only a little of the weight pulling back down the slope; a steep ramp has a lot. So for the same height, a long shallow ramp is easier to push up and less eager to run away than a short steep one. On a job I have watched a crew ease a ramp to a shallower angle just to bring the pull back under control. [PAUSE / ASK] What happens to the up-slope force as the ramp steepens?", "29": "The angle of a ramp changes everything, and steeper is not better here. As an inclined plane gets steeper, the force needed to push a load up it rises, because the gravity component along the slope grows with the angle. A shallow ramp has only a little of the weight pulling back down the slope; a steep ramp has a lot. So the steeper you go, the harder the push up -- and the stronger the load's tendency to run back down. Some folks will think steeper is more efficient, but steeper costs you more force, not less. Someone might think the force stays the same regardless, but it climbs with the angle. Some people will imagine the force vanishes past forty-five degrees, but it only gets worse. Steeper means more gravity along the slope, more force up. On a job I have watched a crew ease a ramp to a shallower angle just to bring the pull back under control. [PAUSE / ASK] What happens to the up-slope force as the ramp steepens? Make your call.", "30": "Coming down a ramp brings its own danger, and it is the opposite of the problem going up. When you lower a load down an inclined plane, gravity is now helping it move -- and if the gravity component along the slope beats the friction holding it, the load will run away downhill, faster than you meant, dragging your rigging and anyone downhill of it. So lowering has to be actively controlled with a powered or restrained line, never just released, and you never trust friction alone to hold it, because friction is variable and can let go the instant it breaks from static to sliding. On a job I have watched a load on a ramp start to run the moment it broke loose, and the crew was ready on the control line. [PAUSE / ASK] What is the danger when lowering a load down a ramp?", "31": "Coming down a ramp brings its own danger, and it is the opposite of the problem going up. When you lower a load down an inclined plane, gravity is now helping it move -- and if the gravity component along the slope beats the friction holding it, the load will run away downhill, faster than you meant, dragging your rigging and anyone downhill of it. So lowering has to be actively controlled, never just released. Some folks will think the load goes weightless, but gravity is very much in play -- that is the whole hazard. Someone might trust friction alone to hold it, but friction is variable and can let go, especially once it breaks from static to sliding. Some people will think the load can only go up, but down is where gravity takes over. Control the descent -- a load can run away down a ramp. On a job I have watched a load on a ramp start to run as soon as it broke loose and the crew was ready for it. [PAUSE / ASK] What is the danger when lowering down a ramp? Make your call.", "32": "Last section: drifting a suspended load, the conditions that make a move high-risk, and the control habits that keep everyone safe. This pulls in the snatch-block resultant from the blocks module and the center of gravity from earlier. Out on a job I have watched a lift lead halt a drift to verify a weight nobody could vouch for. [PAUSE / ASK] Ask yourself how you move a suspended load sideways when one pick will not reach.", "33": "Drifting is a specific technique with a specific meaning, so let us define it cleanly. Drifting is the process of moving a suspended load horizontally using two or more hoists -- tightening some and slackening others so the weight passes from one hoist to the next, walking the load sideways through the air. It is how you move a load laterally when a single straight pick cannot reach the setting spot. It is a controlled hand-off between hoists, not a swing on one hook. On a job I have watched a crew drift a pipe spool through a building by feeding one hoist while taking up another, hand to hand. [PAUSE / ASK] How many hoists does a drift take?", "34": "Drifting is a specific technique with a specific meaning, so let us define it cleanly. Drifting is the process of moving a suspended load horizontally using two or more hoists -- tightening some and slackening others so the weight passes from one to the next, walking the load sideways through the air. It is how you move a load laterally when a single straight pick will not reach. Some folks will picture a load swinging free on one hook, but drifting is a controlled hand-off between hoists, not a swing. Someone might think of dragging a load on the ground with a winch, but drifting is a suspended, airborne move. Some people will think of parking a load, but drifting is active movement. Two or more hoists, passing the weight between them -- that is drifting. On a job I have watched a crew drift a spool through a building by feeding one hoist and taking up another. [PAUSE / ASK] How many hoists does drifting use? Make your call.", "35": "Some load-moving jobs are far riskier than others, and knowing the red flags lets you plan for them. A job climbs in risk when the load weight is unknown or unverified, when the center of gravity is above the attachment points -- which makes the load want to flip over -- or when the load has to be skidded or skated up or down an inclined plane. Any one of those turns a routine move into a serious one, and more than one together really raises the stakes. That is your cue to slow down, verify, and add engineering and oversight. On a job I have watched a crew stop and confirm a load's weight before drifting it rather than trust a number nobody could stand behind. [PAUSE / ASK] Name one condition that makes a move high-risk.", "36": "Some load-moving jobs are far riskier than others, and knowing the red flags helps you plan. A job climbs in risk when the load weight is unknown or unverified, when the center of gravity is above the attachment points -- which makes the load want to flip -- or when the load must be skidded or skated up or down an inclined plane. Any of those turns a routine move into a serious one. Some folks will call a known, verified weight high-risk, but that is exactly what lowers risk. Someone might worry about a CG safely below the pick points, but low CG is the stable, safer case. Some people will flag a flat, level, prepared surface, but that is the easy condition. Unknown weight, high CG, or an incline -- those raise the risk. On a job I have watched a crew stop and verify a load's weight before drifting it rather than guess. [PAUSE / ASK] Name one thing that makes a move higher risk. Make your call.", "37": "This ties straight back to the blocks module, because moving loads leans heavily on snatch blocks and their anchors. When a winch or tugger pulls a load through a snatch block that redirects the line, the anchor -- the deadman -- has to be rated for the resultant force on that block, which we saw can reach about twice the line pull at a hard reversal. You size the anchor to that combined force, not the bare line pull. A deadman sized only to the line pull can pull out on a sharp redirect. Same vector rule you already learned, now holding your whole move. On a job I have watched a deadman sized to the resultant hold a hard redirect that the line pull alone would have underestimated. [PAUSE / ASK] What force does the deadman have to hold?", "38": "This ties straight back to the blocks module, because moving loads leans on snatch blocks and their anchors. When a winch or tugger pulls a load through a snatch block that redirects the line, the anchor -- the deadman -- has to be rated for the resultant force on that block, which we saw can reach about twice the line pull at a hard reversal. You size the anchor to that combined force, not the bare line pull. Some folks will rate it for half the pull, but the block combines two tensions, it does not halve them. Someone might think the block supports itself and skip the anchor, but the anchor carries the whole resultant. Some people will rate it to just the block's own weight, which ignores the load entirely. Rate the deadman for the resultant, up to about double the line pull. On a job I have watched a deadman sized to the resultant hold a hard redirect that the line pull alone would have underestimated. [PAUSE / ASK] What force does the deadman have to hold? Make your call.", "39": "If there is one habit to carry out of this module, it is about respecting a load that can move on its own. You actively control a moving or lowering load at all times -- with a powered line, a restraint, chocks -- and you keep people clear, out from under it and never, ever downhill of it, because downhill is the runaway path. And you never trust friction as a brake, because friction is variable and can let go the moment it breaks from static to sliding, or if the surface gets wet or greased. Control it, stay clear, and do not bet on friction. On a job I have watched a crew keep every hand uphill and on control lines the whole time a load came down a ramp. [PAUSE / ASK] Where do you never stand relative to a load that could run?", "40": "If there is one habit to carry out of this module, it is about respecting a load that can move on its own. You actively control a moving or lowering load at all times -- with a powered line, a restraint, chocks -- and you keep people clear, especially out from under it and never downhill of it. And you never trust friction as a brake, because friction is variable and can let go the instant it breaks from static to sliding, or if a surface gets wet or greased. Some folks will lean on friction to stop a load, but friction is not a reliable brake. Someone might stand downhill to guide it, which puts them right in the runaway path -- never do that. Some people will release it and trust momentum, which is how loads get away. Control it, stay clear, do not trust friction. On a job I have watched a crew keep everyone uphill and on control lines the whole time a load came down a ramp. [PAUSE / ASK] Where do you never stand relative to the load? Make your call.", "41": "Let us close the sections by tying the moving techniques back to everything you already know about hardware. However you move the load -- sliding, rolling, ramping, drifting -- the blocks, shackles, and slings in the pulling and rigging system still have to be rated and inspected to their own standards, and the weakest piece still governs the whole system. Moving a load does not suspend the rules that protect a lift. A shackle in your pulling line is just as much a weak-link candidate as one in a vertical pick. On a job I have watched a load-move stopped to swap a light shackle that had quietly become the system's weak point. [PAUSE / ASK] Do the hardware rules relax just because you are moving the load?", "42": "Let us run one clean number to lock the friction math in before the gate. On a level surface, the force to slide a load is the coefficient of friction times the weight. Take a four thousand pound load on a surface with a coefficient of about one-half: that is about two thousand pounds of pull to keep it sliding, and a touch more to break it loose from a standstill, since static runs higher. Notice the coefficient is less than one, so the pull comes out less than the weight -- friction gives back only a share of the weight. Size your winch and anchor to that. On a job I have watched a crew size a tugger straight off coefficient times weight and hit it on the first try. [PAUSE / ASK] Half a coefficient on four thousand pounds -- what is the pull?", "43": "This is the gate. Six questions, all six, because a load on the ground or a ramp has gravity and momentum working on it, and a bad assumption gets someone hurt. They pull from every section -- sizing the sliding force, the breakaway effect, rollers, the up-ramp force balance, the runaway descent, and the high-risk conditions. Reason each one. I have watched this be the point a rigger starts respecting a load on rollers as much as a load on a hook. [PAUSE / ASK] Ready to move some loads?", "44": "Let us close by tying the moving techniques back to everything you already know about hardware. However you move the load -- sliding, rolling, ramping, drifting -- the blocks, shackles, and slings in the pulling and rigging system still have to be rated and inspected to their own standards, and the weakest piece still governs the whole system. Moving a load does not suspend the rules that protect a lift. Some folks will push hardware past its rating because a move feels temporary, but temporary overload still fails. Someone might ignore the hardware and watch only the winch, but a shackle in the line can be the weak link. Some people will grab whatever is closest, but you rig with rated, inspected gear. Rate it, inspect it, let the weakest piece govern -- same as always. On a job I have watched a load-move stopped to swap a light shackle that had quietly become the system's weak point. [PAUSE / ASK] Do the hardware rules relax during a move? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "45": "Let us run the level-surface friction number so it is concrete. The force to slide a load on the level is the coefficient of friction times the weight. Here that is about zero point five times four thousand pounds, which comes to roughly two thousand pounds of pull -- and a touch more to break it loose from a standstill, since static friction runs higher than sliding. So you would size your winch and anchor for at least that. Some folks will land near four hundred pounds, off by a factor of ten. Someone might double the weight to eight thousand, but you multiply by the coefficient, which is less than one, so the force is less than the weight, not more. Some people will get forty thousand, running the decimal the wrong way. Half of four thousand is two thousand. On a job I have watched a crew size a tugger straight off coefficient times weight and hit it. [PAUSE / ASK] Half a coefficient on four thousand pounds -- what is the pull? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "Straight application of the level-surface rule. The sliding force is the coefficient of friction times the weight: about zero point six times ten thousand pounds, which is roughly six thousand pounds of pull, plus a bit more to break it loose from rest. That six thousand is the number your winch, rigging, and anchor have to handle. Some folks will land near six hundred pounds, off by a factor of ten on the decimal. Someone might add up to sixteen thousand, but you multiply by a number less than one, so the force is less than the weight. Some people will get a thousand, dividing instead of multiplying. Point six times ten thousand is six thousand. On a job I have watched a rigger size the pull straight off coefficient times weight and get it right on the first try. [PAUSE / ASK] Point six times ten thousand pounds -- what is the pull? Make your call.", "47": "This is the breakaway effect, and recognizing it keeps a load from surprising you. A load that has been sitting still needs a harder initial pull and then slides more easily once it is moving, because static friction -- the breakaway friction of a still load -- is higher than kinetic friction, the sliding friction of a moving one. That sudden drop when it breaks loose is exactly why a load can lunge and get away from you the instant it starts. Some folks will think the load loses weight when it moves, but the weight is unchanged. Someone might think friction disappears once moving, but it only drops to the lower kinetic value. Some people will think the coefficient climbs with speed, but the real effect is breakaway versus moving. Static is higher than kinetic. On a job I have watched a load break free all at once and jump because the breakaway friction let go. [PAUSE / ASK] Which friction is higher, breakaway or moving? Make your call.", "48": "This is the roller-safety rule, and it catches people because rollers feel stable. A heavy load on pipe rollers has almost no resistance to rolling, so before anyone steps away it must be chocked or restrained -- because it will roll off the smallest push, bump, or slope you cannot even see. A floor that looks level rarely is. Some folks will trust the rollers to hold it, but rollers are what free it to move, not what holds it. Someone might push it to keep momentum, but a rolling unattended load is a runaway. Some people will pull the rollers each time, unnecessary and risky handling. Chock it or restrain it, every time it is parked. On a job I have watched an unchocked load on rollers creep on a floor everyone swore was flat. [PAUSE / ASK] What must the crew do before stepping away from a load on rollers? Make your call.", "49": "This is the inclined-plane force balance, and it is the heart of ramp work. Moving a load up a ramp takes more force than moving it across the same surface laid flat, because on the ramp you must overcome the gravity component acting along the slope -- pulling the load back downhill -- in addition to the friction you would fight on the flat. Flat ground is friction only; a ramp adds gravity on top. Some folks will say the ramp makes the load heavier, but the weight is the same -- it is the slope that adds a backward pull. Someone might blame a higher coefficient, but the surface pair has not changed; the geometry has. Some people will think it is about speed, but speed is not the issue. Gravity along the slope plus friction -- that is why up-ramp is harder. On a job I have watched a pull that handled the flat easily strain the moment the load started up the ramp. [PAUSE / ASK] What extra force does a ramp add beyond friction? Make your call.", "50": "Lowering down a ramp is where loads get away from crews, so the plan has to respect it. When a load is lowered down an inclined plane, gravity is driving it down the slope, and if that gravity component beats the friction holding it, the load will run away downhill -- so the descent must be actively controlled with a powered line or restraint, and everyone kept clear and uphill. Some folks will trust friction alone to hold and stop it, but friction is variable and can let go, especially once it breaks from static to sliding. Someone might think the load cannot move unless pushed, but gravity does the pushing on a slope. Some people will think the load lightens going down, but its weight does not change. Gravity can run it away -- control the descent. On a job I have watched a crew keep tension on a control line the whole way down a ramp so nothing could run. [PAUSE / ASK] What can happen to an uncontrolled load on a down-slope? Make your call.", "51": "Close on the risk factors, because this combination is a real warning. A load with an unverified weight and a center of gravity above the attachment points is a high-risk drift -- the unknown weight means you cannot size the rigging with confidence, and a high CG means the load wants to flip. The right move is to stop and verify the weight and pin down the CG before drifting anything. Some folks will push to go quickly, but speed on an unverified high-CG load is how things go wrong. Someone might call it routine because drifting is common, but these conditions make it anything but routine. Some people will guess the weight and rig to the guess, but a guessed weight is not a verified one. Recognize the risk, verify weight and CG first. On a job I have watched a lift lead halt a drift to confirm a weight nobody could actually vouch for. [PAUSE / ASK] What do you do before drifting an unverified, high-CG load? Make your call.", "52": "That is Friction and Inclined-Plane Rigging, and here is what you carry out. Friction is the resistance to sliding, and on the level the force to slide a load is the coefficient times the weight. Static breakaway friction is higher than kinetic sliding friction, so a load lunges when it breaks loose. Rolling beats sliding by a wide margin -- which is why a load on rollers must always be chocked, because it will run from the smallest slope. A ramp is a simple machine that trades force for distance, with an advantage of length over height; going up you fight gravity along the slope plus friction, and steeper means more of both -- and coming down, gravity can run the load away, so you control every descent and never trust friction as a brake. Drifting moves a suspended load with two or more hoists, and unknown weight or a high center of gravity makes it high-risk. Through all of it, the hardware stays rated and inspected, anchors are sized to the resultant, and people stay clear and uphill. Next module, S4_M23, closes the Advanced Rigger stage with the design of below-the-hook lifting devices, BTH-1. I have watched these skills turn a runaway waiting to happen into a controlled, planned move. [PAUSE / ASK] Before you go, think of one load-move on your job where you would now chock, verify, or control something you used to take for granted."};
+var GATE = ["S4_M22_q18", "S4_M22_q19", "S4_M22_q20", "S4_M22_q21", "S4_M22_q22", "S4_M22_q23", "S4_M22_q24", "S4_M22_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M22_q01", "7": "S4_M22_q02", "9": "S4_M22_q03", "11": "S4_M22_q04", "14": "S4_M22_q05", "16": "S4_M22_q06", "18": "S4_M22_q07", "20": "S4_M22_q08", "23": "S4_M22_q09", "25": "S4_M22_q10", "27": "S4_M22_q11", "29": "S4_M22_q12", "31": "S4_M22_q13", "34": "S4_M22_q14", "36": "S4_M22_q15", "38": "S4_M22_q16", "40": "S4_M22_q17", "44": "S4_M22_q18", "45": "S4_M22_q19", "46": "S4_M22_q20", "47": "S4_M22_q21", "48": "S4_M22_q22", "49": "S4_M22_q23", "50": "S4_M22_q24", "51": "S4_M22_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M22';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

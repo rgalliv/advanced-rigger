@@ -10,6 +10,7 @@ overwritten.
 
 | Document | What it covers |
 |---|---|
+| [`modules/STAGE_CROSSCHECK.md`](modules/STAGE_CROSSCHECK.md) | **Full-set crosscheck.** All 9 built and verified; the cycling-key defect measured gone; ACS coverage populated at 169 elements |
 | [`docs/build_audit_2026-08-07.md`](docs/build_audit_2026-08-07.md) | **Independent audit of the shipped artifacts.** 14 claims recomputed and confirmed; one high-severity defect found that the 12-point suite cannot detect |
 | [`docs/module_format_spec.md`](docs/module_format_spec.md) | Numbering, scoring model, protected registry, public/protected boundary, runtime event contract, wrong-answer behaviour, asset externalization, verification, build sequence |
 | [`docs/question_architecture.md`](docs/question_architecture.md) | Gate sizing, item-writing rules, ACS coverage mapping, gate composition targets, topic ownership |
@@ -24,13 +25,13 @@ Stage 4 currently ends at `S4_M14`. These continue the sequence.
 |---|---|---|---|
 | Center of Gravity Determination | `S4_M15` | AR-101C | **Built** 23/23 |
 | Unequal Leg Loading and Off-Level Pick Points | `S4_M16` | AR-102C | **Built** 23/23 |
-| Sling Tension Beyond the Chart | `S4_M17` | AR-103C | pending |
-| Slings and Field-Assembled Terminations | `S4_M18` | AR-104C | pending |
-| Rigging Hardware and Specialty Attachments | `S4_M19` | AR-105C | pending |
-| Blocks, Sheaves and Multi-Part Line Loading | `S4_M20` | AR-106C | pending |
-| Multi-Point Lifts and Load Sharing | `S4_M21` | AR-107C | pending |
-| Friction and Inclined-Plane Rigging | `S4_M22` | AR-108C | pending |
-| Below-the-Hook Lifting Device Design (BTH-1) | `S4_M23` | AR-109C | pending |
+| Sling Tension Beyond the Chart | `S4_M17` | AR-103C | **Built** 23/23 |
+| Slings and Field-Assembled Terminations | `S4_M18` | AR-104C | **Built** 23/23 |
+| Rigging Hardware and Specialty Attachments | `S4_M19` | AR-105C | **Built** 23/23 |
+| Blocks, Sheaves and Multi-Part Line Loading | `S4_M20` | AR-106C | **Built** 23/23 |
+| Multi-Point Lifts and Load Sharing | `S4_M21` | AR-107C | **Built** 23/23 |
+| Friction and Inclined-Plane Rigging | `S4_M22` | AR-108C | **Built** 23/23 |
+| Below-the-Hook Lifting Device Design (BTH-1) | `S4_M23` | AR-109C | **Built** 23/23 |
 
 `data-cq-stage="4"` unchanged. Salts become `CQ1:S4_M15_...`. Keys append to the existing
 `platform/cq_keys_S4.json` (112 records to 184). ACS codes renumber with the modules:

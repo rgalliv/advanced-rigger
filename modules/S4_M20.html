@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Blocks, Sheaves, and Fairleads | CraneQualified S4_M20</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M20" data-cq-stage="4"
+      data-cq-total="52" data-cq-gate-code="R-201C / AR-106C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M20 &middot; Blocks, Sheaves, and Fairleads</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Blocks, Sheaves, and Fairleads</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 6</p><p class='meta'>Gate R-201C / AR-106C -- 6-question final at 100 percent</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Name the parts of a block and sheave and describe what each does</li><li>Explain how groove fit and sheave D/d ratio protect rope life</li><li>Count parts of line and find the theoretical mechanical advantage</li><li>Define fleet angle, keep it small, and use a fairlead to lead a rope fair</li><li>Describe a snatch block and calculate the resultant load on a change-of-direction block</li><li>Apply block and sheave inspection and removal criteria</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>Blocks and Sheaves</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>Sheave vs Block</h2>
+<p>Two words people mix up:</p><ul><li><b>Sheave</b> -- the grooved wheel (pulley) the rope rides in</li><li><b>Block</b> -- the housing (shell / cheeks) that holds one or more sheaves on a pin, with a hook or shackle and often a becket</li></ul><p class='note'>A block contains sheaves. Parts: shell/cheeks, sheave(s), pin, bearing, attachment (hook/shackle), becket.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A sheave and a block differ in that:</p>
+<div class="quiz-group" data-qid="S4_M20_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q01',0,'fb_S4_M20_q01')">A sheave carries no load while a block carries all of it alone</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q01',1,'fb_S4_M20_q01')">A sheave is the housing; a block is the single grooved wheel inside</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q01',2,'fb_S4_M20_q01')">A sheave is for chain only and a block is for wire rope only</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q01',3,'fb_S4_M20_q01')">A sheave is the grooved wheel; a block is the housing that holds sheaves</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>The Becket</h2>
+<p>The <b>becket</b> is the built-in <b>anchor point on a block for dead-ending a rope</b> -- the fixed point where the rope end attaches so the rest can run through the sheaves.</p><p class='note'>When you reeve several parts of line, the dead end lands on the becket.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The becket on a block is:</p>
+<div class="quiz-group" data-qid="S4_M20_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q02',0,'fb_S4_M20_q02')">The rope-end anchor point built into the block</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q02',1,'fb_S4_M20_q02')">The grease fitting for the sheave pin</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q02',2,'fb_S4_M20_q02')">A cover that keeps dirt out of the sheave bearing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q02',3,'fb_S4_M20_q02')">The latch that keeps the rope in the groove</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Groove Fit</h2>
+<p>The sheave groove must <b>match the rope size</b> so it supports the rope's round shape without harming it:</p><ul><li><b>Too tight</b> -- pinches and crushes the rope</li><li><b>Too wide</b> -- lets the rope flatten and lose shape</li><li><b>Worn / corrugated</b> -- a channel worn by an old rope chews up the next one</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A sheave groove must fit the rope so that it:</p>
+<div class="quiz-group" data-qid="S4_M20_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q03',0,'fb_S4_M20_q03')">Is much wider than the rope so the rope can shift freely</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q03',1,'fb_S4_M20_q03')">Pinches the rope tightly to grip it against slipping</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q03',2,'fb_S4_M20_q03')">Is deep and narrow to bury the rope out of sight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q03',3,'fb_S4_M20_q03')">Supports the rope's curve without pinching or flattening it</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Sheave D/d and Rope Life</h2>
+<p>A <b>running sheave</b> bends the rope every pass, so its <b>D/d ratio</b> (sheave diameter to rope diameter) must be <b>large</b> -- much larger than a sling bent once over a pin.</p><p class='warn'>A small sheave bends the rope sharply thousands of times. That repeated flexing <b>fatigues the wires</b> and shortens rope life dramatically.</p><p class='note'>Follow the wire rope manufacturer's minimum sheave D/d; crane load sheaves are sized large on purpose. Anchored to ASME B30.5.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Running sheaves need a large D/d ratio (sheave diameter to rope diameter) mainly because:</p>
+<div class="quiz-group" data-qid="S4_M20_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q04',0,'fb_S4_M20_q04')">A large sheave is a good deal cheaper to manufacture than a small one</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q04',1,'fb_S4_M20_q04')">The rope only stays in contact with a large sheave for a shorter time</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q04',2,'fb_S4_M20_q04')">Repeated bending over a small sheave fatigues and shortens the rope's life</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q04',3,'fb_S4_M20_q04')">A large sheave simply lets the whole block spin faster under load</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q04"></div>
+</div></section>
+<section class="slide t-divider" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Reeving and Mechanical Advantage</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Parts of Line</h2>
+<p>The <b>parts of line</b> are the separate rope segments running between the fixed block and the traveling load block that <b>support the load</b>.</p><p class='note'>Count the supporting segments -- not the sheaves, not the feet of rope. Four segments holding the load block = four parts of line.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The 'parts of line' in a block-and-tackle are:</p>
+<div class="quiz-group" data-qid="S4_M20_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q05',0,'fb_S4_M20_q05')">The number of separate rope segments supporting the load block</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q05',1,'fb_S4_M20_q05')">The total length of the rope, measured out in feet</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q05',2,'fb_S4_M20_q05')">The number of times the rope is cut apart and then re-spliced</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q05',3,'fb_S4_M20_q05')">The number of sheaves in the upper fixed block, counted alone</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>Mechanical Advantage</h2>
+<p>The <b>theoretical mechanical advantage</b> equals the <b>number of parts of line</b> supporting the load.</p><p class='formula'>Line pull = Load / Parts of line  (before friction)</p><p>Four parts = 4:1 advantage; your hauling pull is about one quarter of the load.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The theoretical mechanical advantage of a block-and-tackle is equal to:</p>
+<div class="quiz-group" data-qid="S4_M20_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q06',0,'fb_S4_M20_q06')">The diameter of the largest sheave in the block</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q06',1,'fb_S4_M20_q06')">The number of parts of line supporting the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q06',2,'fb_S4_M20_q06')">The weight of the upper block plus the lower block</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q06',3,'fb_S4_M20_q06')">The length of the rope divided by the load weight</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Friction Is the Tax</h2>
+<p>The <b>actual</b> advantage is always <b>less than theoretical</b> because each sheave has friction (bearing drag and rope flexing).</p><p class='warn'>More parts multiply capacity but add friction and reduce speed. Past a point, adding parts barely helps -- friction eats the gain.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In a real block-and-tackle, the actual mechanical advantage is less than the theoretical because:</p>
+<div class="quiz-group" data-qid="S4_M20_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q07',0,'fb_S4_M20_q07')">The load block is painted a heavier color</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q07',1,'fb_S4_M20_q07')">The hauling line is always longer than the load line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q07',2,'fb_S4_M20_q07')">The rope stretches and gives some length back</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q07',3,'fb_S4_M20_q07')">Friction at each sheave eats part of the advantage</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>Worked Example: Line Pull</h2>
+<p>A load block with <b>5 parts of line</b> supports a <b>5,000 lb</b> load.</p><p class='formula'>Line pull = 5,000 / 5 = 1,000 lb  (before friction)</p><p class='note'>The 5 parts share the load; the hauling line feels about one fifth. Add friction and the real pull is somewhat higher.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A load block is rigged with 5 parts of line supporting a 5,000 lb load. Ignoring friction, the pull on the hauling line is about:</p>
+<div class="quiz-group" data-qid="S4_M20_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q08',0,'fb_S4_M20_q08')">1,000 lb, the load divided by the parts</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q08',1,'fb_S4_M20_q08')">2,500 lb, half the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q08',2,'fb_S4_M20_q08')">25,000 lb, the load times the parts</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q08',3,'fb_S4_M20_q08')">5,000 lb, the same as the load</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q08"></div>
+</div></section>
+<section class="slide t-divider" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Fleet Angle and Fairleads</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>What Fleet Angle Is</h2>
+<p>The <b>fleet angle</b> is the angle between the rope and a line <b>square (perpendicular) to the sheave or drum</b>, measured at the rope's extreme lead.</p><p class='note'>Picture the rope wanting to come straight in, square to the sheave. The fleet angle is how far off square it actually runs.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The fleet angle is the angle between the rope and:</p>
+<div class="quiz-group" data-qid="S4_M20_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q09',0,'fb_S4_M20_q09')">The other parts of line running through the tackle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q09',1,'fb_S4_M20_q09')">A line square to the sheave or drum, at the rope's lead</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q09',2,'fb_S4_M20_q09')">The ground directly below the load being hoisted</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q09',3,'fb_S4_M20_q09')">The horizontal plane of the load that is being lifted</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Keep the Fleet Angle Small</h2>
+<p>Keep the fleet angle <b>small</b>:</p><ul><li>About <b>1.5 degrees</b> to a sheave or smooth drum</li><li>About <b>2 degrees</b> to a grooved drum</li></ul><p class='warn'>Too large a fleet angle makes the rope climb the flange, rub, and wear -- and pile up badly on a drum.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The fleet angle to a sheave or drum should generally be kept:</p>
+<div class="quiz-group" data-qid="S4_M20_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q10',0,'fb_S4_M20_q10')">Exactly at 45 degrees for best rope life</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q10',1,'fb_S4_M20_q10')">At 90 degrees so the rope comes straight in</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q10',2,'fb_S4_M20_q10')">Small -- roughly a degree or two at most</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q10',3,'fb_S4_M20_q10')">As large as possible for a fast, smooth wrap</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Fairleads</h2>
+<p>A <b>fairlead</b> -- rollers or sheaves -- <b>guides a rope onto a drum or around a corner at an acceptable angle</b>, keeping the fleet angle in check and preventing chafing.</p><p class='note'>When the geometry would give a bad lead, add a fairlead to lead the rope fair.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A fairlead is used to:</p>
+<div class="quiz-group" data-qid="S4_M20_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q11',0,'fb_S4_M20_q11')">Lock the rope so it cannot pay out</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q11',1,'fb_S4_M20_q11')">Measure the tension in the hauling line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q11',2,'fb_S4_M20_q11')">Add mechanical advantage to a single line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q11',3,'fb_S4_M20_q11')">Guide a rope onto a drum or around a corner at a safe angle</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>When Fleet Angle Goes Wrong</h2>
+<p>If the fleet angle grows too large:</p><ul><li>The rope <b>climbs the sheave flange</b> instead of seating in the groove</li><li>It <b>rubs and wears</b> both the rope and the flange</li><li>On a drum it <b>piles up, crosses, and crushes</b> wraps</li></ul><p class='warn'>A wide fleet angle can even throw the rope out of the groove.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">If the fleet angle to a sheave becomes too large, the likely result is:</p>
+<div class="quiz-group" data-qid="S4_M20_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q12',0,'fb_S4_M20_q12')">The rope leads on more smoothly and actually lasts longer</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q12',1,'fb_S4_M20_q12')">Nothing changes at all; fleet angle has no practical effect</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q12',2,'fb_S4_M20_q12')">The rope climbs the flange, rubs, and wears the rope and sheave</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q12',3,'fb_S4_M20_q12')">The mechanical advantage of the whole tackle goes up</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q12"></div>
+</div></section>
+<section class="slide t-divider" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Snatch Blocks, Resultant Load, and Inspection</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>The Snatch Block</h2>
+<p>A <b>snatch block</b> has a <b>side plate (cheek) that swings open</b>, so you can drop a <b>bight (loop) of line into it without threading the rope end</b>.</p><p class='note'>That lets you add it anywhere along a line to <b>redirect the pull</b> -- change the direction the rope runs -- without re-reeving.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A snatch block is distinctive because it:</p>
+<div class="quiz-group" data-qid="S4_M20_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q13',0,'fb_S4_M20_q13')">Contains no sheave at all and simply slides the rope across a fixed bar</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q13',1,'fb_S4_M20_q13')">Opens on one side so a bight of line drops in without threading the end</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q13',2,'fb_S4_M20_q13')">Can only ever be rigged as the fixed upper block, never anywhere else</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q13',3,'fb_S4_M20_q13')">Multiplies the line pull by exactly two times on every single use</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q13"></div>
+</div></section>
+<section class="slide t-content" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>The Resultant Load</h2>
+<p>A change-of-direction block feels the <b>resultant</b> -- the <b>vector sum of the two line tensions</b> coming into the sheave -- not just the line tension.</p><p class='warn'>The sharper the turn, the larger the resultant. The block and its anchor must carry that combined force.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The load a change-of-direction (snatch) block and its anchor actually feel is:</p>
+<div class="quiz-group" data-qid="S4_M20_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q14',0,'fb_S4_M20_q14')">Essentially zero, because the block only changes the line's direction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q14',1,'fb_S4_M20_q14')">Always just half the line tension, because the block shares the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q14',2,'fb_S4_M20_q14')">The resultant (vector sum) of the two line tensions, set by the angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q14',3,'fb_S4_M20_q14')">Always exactly equal to the plain line tension, no matter the angle</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>180 Degrees: About Twice the Line Pull</h2>
+<p>The resultant depends on the turn:</p><table class='rate'><tr><th>Change of direction</th><th>Resultant on block</th></tr><tr><td>Gentle deflection</td><td>small</td></tr><tr><td>90 degrees</td><td>about 1.4 x line tension</td></tr><tr><td>180 degrees (full reversal)</td><td>about 2 x line tension</td></tr></table><p class='warn'>A full reversal is the worst case: the block and anchor feel about double the line pull.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When a snatch block reverses a line back on itself in a full 180-degree turn, the load on the block is about:</p>
+<div class="quiz-group" data-qid="S4_M20_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q15',0,'fb_S4_M20_q15')">Zero, since the directions cancel out</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q15',1,'fb_S4_M20_q15')">Half the line tension</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q15',2,'fb_S4_M20_q15')">Ten times the line tension</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q15',3,'fb_S4_M20_q15')">Two times the line tension</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Rate the Block and the Anchor</h2>
+<p>Because a snatch block can see up to <b>twice the line tension</b>, <b>rate both the block and its anchor for the resultant</b> -- not the line pull.</p><p class='warn'>The anchor (padeye, beam, deadman) must hold the full combined force. Sizing it to the line pull alone can let it fail on a sharp redirect.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Because a snatch block can see up to twice the line tension, the rigger must:</p>
+<div class="quiz-group" data-qid="S4_M20_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q16',0,'fb_S4_M20_q16')">Ignore the anchor entirely, since the block holds itself in place</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q16',1,'fb_S4_M20_q16')">Rate the block and its anchor for the resultant, not the line pull</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q16',2,'fb_S4_M20_q16')">Rate only the rope, since the block itself never governs the lift</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q16',3,'fb_S4_M20_q16')">Assume the block load is always well below the plain line pull</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Sheave Inspection and Removal</h2>
+<p>Remove a <b>sheave</b> from service for:</p><ul><li><b>Worn, corrugated, or cracked grooves</b>, or grooves worn out of round</li><li>Cracked or chipped <b>flanges</b></li><li>A sheave that <b>will not turn freely</b> -- a failing bearing or pin</li></ul><p class='note'>Spin each sheave by hand. A dragging sheave grinds rope instead of rolling it.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A sheave should be removed from service when it:</p>
+<div class="quiz-group" data-qid="S4_M20_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q17',0,'fb_S4_M20_q17')">Has worn, corrugated, or cracked grooves, or will not turn freely</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q17',1,'fb_S4_M20_q17')">Carries a clearly legible manufacturer rated-capacity stamp</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q17',2,'fb_S4_M20_q17')">Has a clean groove that correctly matches the rope diameter</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q17',3,'fb_S4_M20_q17')">Turns freely and quietly on a sound, well-greased bearing</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>Block Inspection and Removal</h2>
+<p>Remove the <b>block</b> from service for:</p><ul><li>Cracked, bent, or distorted <b>cheeks or shell</b></li><li>A worn or bent <b>sheave pin</b></li><li>A damaged, worn, or opened <b>hook or shackle</b></li><li>Missing or broken <b>keepers/guards</b>; missing or illegible rating</li></ul>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>90 Degrees: About 1.4 Times</h2>
+<p>Filling in the resultant curve: a <b>90-degree</b> change of direction gives a resultant of about <b>1.4 times</b> the line tension (the square root of two).</p><p class='note'>A right-angle redirect already puts about 40 percent more than the line pull into the block and anchor -- climbing to 2x at a full reversal.</p>
+</div></section>
+<section class="slide t-divider" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">A block itself should be removed from service for:</p>
+<div class="quiz-group" data-qid="S4_M20_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q18',0,'fb_S4_M20_q18')">A clean, legible working-load-limit marking</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q18',1,'fb_S4_M20_q18')">A sheave that rolls smoothly on a sound bearing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q18',2,'fb_S4_M20_q18')">A hook or shackle in good condition with a clear rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q18',3,'fb_S4_M20_q18')">Cracked or distorted cheeks, a worn pin, or a damaged hook</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">At a 90-degree change of direction, a snatch block feels a resultant of about:</p>
+<div class="quiz-group" data-qid="S4_M20_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q19',0,'fb_S4_M20_q19')">About 1.4 times the line tension</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q19',1,'fb_S4_M20_q19')">Half the line tension</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q19',2,'fb_S4_M20_q19')">The line tension unchanged, since 90 degrees is neutral</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q19',3,'fb_S4_M20_q19')">About 3 times the line tension</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A load block is reeved with 4 parts of line. Ignoring friction, its theoretical mechanical advantage is:</p>
+<div class="quiz-group" data-qid="S4_M20_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q20',0,'fb_S4_M20_q20')">8 to 1, twice the parts of line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q20',1,'fb_S4_M20_q20')">4 to 1, equal to the parts of line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q20',2,'fb_S4_M20_q20')">1 to 1, no advantage at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q20',3,'fb_S4_M20_q20')">2 to 1, regardless of the parts</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A wire rope is run over a sheave that is far too small in diameter for the rope. The main consequence is:</p>
+<div class="quiz-group" data-qid="S4_M20_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q21',0,'fb_S4_M20_q21')">The rope actually gains capacity from the tighter wrap</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q21',1,'fb_S4_M20_q21')">Nothing at all, since the sheave size does not affect the rope</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q21',2,'fb_S4_M20_q21')">The rope fatigues from the sharp repeated bending and fails early</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q21',3,'fb_S4_M20_q21')">The sheave spins faster and that saves wear on the rope</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A rope leads onto a drum at a fleet angle that has grown well past a couple of degrees. The rigger should expect:</p>
+<div class="quiz-group" data-qid="S4_M20_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q22',0,'fb_S4_M20_q22')">The rope to climb, rub the flange, and pile up or wear badly</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q22',1,'fb_S4_M20_q22')">The rope tension to drop on its own</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q22',2,'fb_S4_M20_q22')">A cleaner, longer-lasting wrap on the drum</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q22',3,'fb_S4_M20_q22')">No effect, since fleet angle does not matter on a drum</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">A snatch block turns a line through nearly a full 180-degree reversal. The block and its anchor should be rated for about:</p>
+<div class="quiz-group" data-qid="S4_M20_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q23',0,'fb_S4_M20_q23')">The line tension only, since a block never adds load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q23',1,'fb_S4_M20_q23')">Twice the line tension, the resultant of the reversal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q23',2,'fb_S4_M20_q23')">Half of the line tension, since the block shares it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q23',3,'fb_S4_M20_q23')">One-quarter of the line tension</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">A rigger needs to redirect a line mid-run without pulling the rope's end out of the rig. The right tool is:</p>
+<div class="quiz-group" data-qid="S4_M20_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q24',0,'fb_S4_M20_q24')">A fixed eyebolt threaded directly onto the running line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q24',1,'fb_S4_M20_q24')">A wedge socket clamped down onto the running line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q24',2,'fb_S4_M20_q24')">A turnbuckle spliced into the middle of the running line</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q24',3,'fb_S4_M20_q24')">A snatch block, which opens to take the bight of the line</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">During inspection, a sheave in a block will not rotate freely and drags on its pin. The rigger should:</p>
+<div class="quiz-group" data-qid="S4_M20_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q25',0,'fb_S4_M20_q25')">Oil it once and return it to service without inspection</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q25',1,'fb_S4_M20_q25')">Add more load so the sheave breaks free and spins</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q25',2,'fb_S4_M20_q25')">Remove the block from service; the bearing or pin is failing</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M20_q25',3,'fb_S4_M20_q25')">Keep using it -- a stiff sheave grips the rope better</button>
+</div>
+<div class="feedback" id="fb_S4_M20_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M21'}}))">Next: Multi-Point Lifts and Load Sharing &gt;</button><p>That is Blocks, Sheaves, and Fairleads.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 52</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 52;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M20)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M20_BlocksSheaves";
+var HASHES={"S4_M20_q01": "ed5460d2", "S4_M20_q02": "af786c6e", "S4_M20_q03": "9305e43c", "S4_M20_q04": "5b29f94a", "S4_M20_q05": "30e10643", "S4_M20_q06": "f5051505", "S4_M20_q07": "d7928b40", "S4_M20_q08": "1db766a8", "S4_M20_q09": "13588284", "S4_M20_q10": "fcc5dd4b", "S4_M20_q11": "183863ea", "S4_M20_q12": "571459e1", "S4_M20_q13": "5e5d15cf", "S4_M20_q14": "b8393647", "S4_M20_q15": "b2ab88f3", "S4_M20_q16": "8f86e4a4", "S4_M20_q17": "99e5c8c8", "S4_M20_q18": "d2848260", "S4_M20_q19": "eef70a92", "S4_M20_q20": "472367e5", "S4_M20_q21": "2ab0dfb3", "S4_M20_q22": "ac857d84", "S4_M20_q23": "81ff5790", "S4_M20_q24": "0096bdbb", "S4_M20_q25": "e7616d2f"};
+var GATE=["S4_M20_q18", "S4_M20_q19", "S4_M20_q20", "S4_M20_q21", "S4_M20_q22", "S4_M20_q23", "S4_M20_q24", "S4_M20_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=51;            /* completion slide (52) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (52) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M20)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Blocks, Sheaves, and Fairleads, module six of the Advanced Rigger stage. So far you have sized slings and inspected the hardware that connects them. This module is about how a line is carried, multiplied, and redirected. We cover blocks and the sheaves inside them, how reeving a rope back and forth gives you mechanical advantage, how the sheave size and the fleet angle protect the rope, and how a snatch block redirects a line -- and how much load that redirect puts on the block and its anchor. That last part surprises people, because a block can feel more load than the rope itself. This is the module that turns a pile of blocks and rope into a system you understand. I have watched a rigger multiply a hand pull into tons with nothing but blocks and rope. [PAUSE / ASK] Before we start, guess how much load a snatch block feels when it turns a line all the way back on itself. Hold your guess.", "2": "Six outcomes, and they walk the rope from the wheel it rides on to the anchor it pulls against. First the hardware -- blocks and sheaves and what keeps them from destroying rope. Then the payoff, mechanical advantage, where reeving turns a small pull into a big one. Then fleet angle and fairleads, which keep the rope leading clean. And finally the snatch block and the resultant load, which is where a redirect can quietly double the force on an anchor. The gate is six questions at one hundred percent, because a miscounted advantage or an under-rated snatch block anchor is how these systems fail. This is real rigging power, the stuff that moves loads a crane cannot reach. I have worked jobs where the whole move came down to a few well-placed blocks. [PAUSE / ASK] Look at the six and pick the one you want most.", "3": "First section, the hardware itself -- blocks and the sheaves inside them. Get the names and the parts straight, and understand what actually protects the rope where it rides, because a block that looks fine can be quietly killing rope. Out on a job I have watched a worn sheave shred a brand new rope in a couple of shifts. [PAUSE / ASK] Ask yourself what the difference is between a sheave and a block.", "4": "Let us nail the two words, because people use them loosely and it causes real mix-ups when ordering and rigging. A sheave is the grooved wheel -- the pulley the rope actually rides in. A block is the whole assembly: a housing called the shell or the cheeks, holding one or more sheaves on a pin that turns on a bearing, with an attachment like a hook or a shackle, and often a becket for dead-ending a line. So the block is everything, and the sheave is just the wheel inside it. When you say sheave you mean the wheel; when you say block you mean the housing and everything in it. On a job I watched a hand order a single sheave when the whole block needed replacing, and the mix-up cost a trip to the supply house. [PAUSE / ASK] Which word means the wheel, and which means the housing?", "5": "Let us get the two words straight, because people use them loosely and it causes confusion. A sheave is the grooved wheel -- the pulley the rope actually rides in. A block is the whole assembly: a housing, called the shell or the cheeks, that holds one or more sheaves on a pin, with a way to attach it, a hook or a shackle, and often a becket. So a block contains sheaves; a sheave is just the wheel. Some folks will flip the two and call the housing the sheave, but the sheave is the wheel inside. Someone might think the sheave carries no load, but it carries the rope and its tension directly. Some people will split them by rope type, but both work with wire rope. Sheave is the wheel, block is the housing around it. On a job I watched a new hand order a sheave when he needed a whole block, and the words cost him a trip. [PAUSE / ASK] Which one is the grooved wheel? Make your call.", "6": "The becket is a small feature with a specific job, and it comes up the moment you reeve more than a couple of parts. It is the anchor point built into a block for dead-ending a rope -- the fixed point where you attach the end of the rope so the rest can run back and forth through the sheaves. Reeve a four-part tackle and the dead end of your rope ties off on the becket while the running part goes to the winch or your hands. It is easy to overlook until you need somewhere to land that dead end. Not every block has one, so you check. On a job I watched a rigger reeve a multi-part tackle and land the dead end clean on the becket without a second thought. [PAUSE / ASK] What does the dead end of the rope tie off to?", "7": "The becket is a small feature with a specific job in reeving, so it is worth knowing by name. The becket is the anchor point built into a block for dead-ending a rope -- the fixed point where the end of the rope is attached so the rest can run through the sheaves. When you reeve a tackle with several parts of line, the dead end lands on the becket. Some folks will think it is a dust cover for the bearing, but that is a seal, not a becket. Someone might call it the grease fitting, but that is the zerk for lubricating the pin. Some people will think it is a latch holding the rope in the groove, but that is a keeper or guard. The becket is where the rope end ties off. On a job I watched a rigger reeve a four-part tackle and land the dead end neatly on the becket. [PAUSE / ASK] Where does the dead end of the rope attach on a block? Make your call.", "8": "The groove profile matters more than people expect, because a bad groove ruins good rope. The groove has to fit the rope size so it cradles the round of the rope across the bottom -- supporting it without pinching it or letting it flatten. Too tight and it pinches and crushes; too wide and the rope flattens and loses its shape; and a worn, corrugated groove, one where an old rope has cut a smaller channel into it, chews up the next rope you put in. A sheave is not supposed to grip the rope, it is supposed to let it roll through supported. So when you inspect, you look at the groove as hard as anything. On a job I watched a corrugated old sheave chew a fresh rope to pieces in just a few shifts. [PAUSE / ASK] What are the two ways a groove can be the wrong size?", "9": "The groove profile matters more than people think, because a bad fit ruins rope. The groove has to match the rope size so it supports the round of the rope across the bottom without pinching it or letting it flatten. A groove that is too tight pinches and crushes the rope; one that is too wide lets the rope flatten and lose its shape; and a worn, corrugated groove -- one that has had a rope wear a smaller channel into it -- chews up the next rope you run in it. Some folks think the groove should pinch the rope to grip it, but a sheave is not supposed to grip, it is supposed to let the rope roll through. Someone might want it deep and narrow, but that binds the rope. Some people will want it much wider so the rope shifts, but a loose fit flattens the rope. Support the curve, do not pinch or flatten. On a job I watched a corrugated old sheave shred a new rope in a matter of shifts. [PAUSE / ASK] What is a groove supposed to do for the rope? Make your call.", "10": "The D/d idea comes back here, but now it is about fatigue instead of a single bend. A running sheave bends the rope every time it passes over, over and over, so the sheave diameter compared to the rope diameter has to be large -- much larger than the minimum you would tolerate for a sling bent just once over a pin. A small sheave bends the rope sharply thousands of times, and that repeated flexing fatigues the wires from the inside and shortens the rope's life dramatically. That is exactly why crane and hoist sheaves are big relative to their rope -- the manufacturer sizes them for rope life, and the crane standard backs it up. On a job I watched a rope run over an undersized sheave wear out in a fraction of the life it should have had. [PAUSE / ASK] Why does a running sheave need a bigger D/d than a sling over a pin?", "11": "Here is where the D/d idea from the sling module comes back, but now it is about fatigue, not a single bend. A running sheave bends the rope every time it passes over, again and again, so the sheave diameter compared to the rope diameter, the D over d, has to be large -- much larger than the minimum you would accept for a sling bent once over a pin. A small sheave bends the rope sharply thousands of times, and that repeated flexing fatigues the wires and shortens the rope's life dramatically. That is why crane and hoist sheaves are big relative to their rope. Some folks think it is about manufacturing cost, but the reason is rope life. Someone might think contact time matters, but it is the sharpness and repetition of the bend. Some people will think it is about spin speed, but speed is not the issue. Big sheave, long rope life. On a job I watched a rope run over an undersized sheave wear out in a fraction of its expected life. [PAUSE / ASK] Why does a small running sheave kill a rope? Make your call.", "12": "Second section, and this is the payoff -- how running a rope back and forth through blocks multiplies your pull into real force. It is simple once you learn to count the right thing. Out on a job I have watched a crew move a load with a hand line that a person could never budge directly. [PAUSE / ASK] Ask yourself what you actually count to get mechanical advantage.", "13": "Everything about mechanical advantage rests on this one count, so let us make it clean. The parts of line are the separate rope segments that run between the fixed block and the traveling load block and actually hold the load up. If four rope segments support the load block, you have four parts of line. You count the segments carrying the load -- not the number of sheaves, not the feet of rope. That is the number that matters. People trip here by counting sheaves instead of supporting segments, and the two are not always the same. Point at each segment holding the traveling block and count them. On a job I watched a rigger teach a new hand to count parts by literally pointing at each supporting segment. [PAUSE / ASK] What do you count for parts of line?", "14": "This is the count that everything about mechanical advantage rests on, so let us define it cleanly. The parts of line are the separate rope segments that run between the fixed block and the traveling load block and actually support the load. If four rope segments hold up the load block, you have four parts of line. You count the segments carrying the load, not the sheaves and not the feet of rope. Some folks count only the sheaves in the upper block, but the parts are the supporting segments, which is a different number. Someone might think of splices, but the rope is one continuous piece reeved back and forth. Some people will measure total rope length, but that is not the count that matters. Count the segments holding the load block up. On a job I watched a rigger count parts of line by pointing at each segment supporting the traveling block. [PAUSE / ASK] What exactly are you counting for parts of line? Make your call.", "15": "Mechanical advantage sounds like engineering, but it falls right out of the count. The theoretical mechanical advantage equals the number of parts of line supporting the load. Four parts gives a four-to-one advantage, which means your pull on the hauling end is roughly the load divided by four, before we account for friction. The parts share the load, so each part -- and your hauling line -- feels only a fraction of it. That is the whole magic of a block-and-tackle: trade a longer pull for a lighter one. Count the supporting parts and you have your advantage. On a job I watched a four-part reeve let a crew move a load with about a quarter of the pull it would have taken direct. [PAUSE / ASK] Four parts of line -- what is the advantage?", "16": "Mechanical advantage sounds fancy, but it comes straight from the count you just learned. The theoretical mechanical advantage of a block-and-tackle equals the number of parts of line supporting the load. Four parts of line gives you a four-to-one theoretical advantage, which means the pull you need on the hauling end is roughly the load divided by four -- before we account for friction. The parts share the load, so each one, and your pull, feels a fraction of it. Some folks will reach for the sheave diameter, but that is about rope life, not advantage. Someone might add up block weights, which is not it. Some people will divide rope length by load, which is not a real relationship. Count the supporting parts, and that is your theoretical advantage. On a job I watched a crew rig a four-part tackle and move a load with roughly a quarter of the pull. [PAUSE / ASK] Where does the mechanical advantage number come from? Make your call.", "17": "Theory and reality part ways here, and the gap is friction. Every sheave the rope runs over has friction -- bearing drag and the rope flexing -- and each one eats a few percent of your advantage. So a four-part tackle does not give you a clean four-to-one; the real advantage is a bit less, and the more sheaves you add, the more friction you stack up. That is the trade-off with parts of line: more parts multiply your capacity but cost you speed and pile up friction, and there is a point where adding another part barely helps because friction eats the gain. So you use enough parts, not the most parts. On a job I watched a heavily reeved tackle drag so hard from friction that a simpler reeve would have pulled easier. [PAUSE / ASK] What is the cost of adding more sheaves?", "18": "Theory and reality differ here, and the gap has a name: friction. Every sheave the rope runs over has friction in its bearing and from the rope flexing, and each one eats a few percent of your advantage. So a four-part tackle does not quite give you a clean four-to-one -- the real advantage is somewhat less, and the more sheaves you add, the more friction you stack up. That is the trade-off with parts of line: more parts multiply your capacity but cost you speed and friction, and there is a point where adding parts barely helps. Some folks blame rope stretch, but stretch is not where the advantage goes. Someone might joke about paint, which of course does nothing. Some people will point at line length, but length is not the loss. Friction at each sheave is the tax you pay. On a job I watched a many-part tackle bog down so much from friction that a lighter reeve would have pulled easier. [PAUSE / ASK] What eats the advantage in a real tackle? Make your call.", "19": "Let us run a number so the advantage stops being abstract. Five parts of line support a five thousand pound load, so the theoretical advantage is five to one. The pull on the hauling end is the load divided by the parts: five thousand over five is about one thousand pounds, before friction. The five parts split the load, so your line feels about a fifth of it. Add the friction of five sheaves and the real pull creeps up somewhat, but the theoretical number gets you close and tells you the reeve is worth it. Load over parts, every time. On a job I watched a crew take a load that no one could pull direct and walk it in on a five-part hand line. [PAUSE / ASK] Five thousand pounds over five parts -- what is the pull?", "20": "Let us put a number on the advantage so it is concrete. Five parts of line support the load, so the theoretical mechanical advantage is five to one. The pull you need on the hauling end is the load divided by the parts: five thousand pounds divided by five parts is about one thousand pounds of pull, ignoring friction. The five parts share the load, so your hauling line only feels a fifth. Some folks will say the pull equals the whole load, forgetting the tackle does any work at all. Someone might halve it out of habit, but there are five parts, not two. Some people will multiply and get twenty-five thousand, running the math upside down -- the tackle divides your effort, it does not multiply it. Load over parts is your pull. On a job I watched a crew move a heavy piece with a hand pull because the parts of line divided it down. [PAUSE / ASK] Load over parts -- what is the pull here? Make your call.", "21": "Third section, fleet angle and fairleads -- the small angle that decides whether a rope leads onto a sheave or drum cleanly or grinds itself to pieces. It is easy to overlook and expensive to ignore. Out on a job I have watched a rope climb a sheave flange and wear a groove into it from a bad lead. [PAUSE / ASK] Ask yourself what happens when a rope comes onto a sheave off to one side.", "22": "Fleet angle is a specific measurement, and the reference is what people get wrong. The fleet angle is the angle between the rope and a line square, perpendicular, to the sheave or drum the rope is leading onto -- measured at the extreme lead, the worst-case position. Picture the rope wanting to come straight in, dead square to the sheave; the fleet angle is how far off square it actually runs. It is not measured to the ground or to the load, it is measured to square-with-the-sheave. Keep that reference and the rest makes sense. On a job I watched a rigger sight down a rope to a drum and eyeball whether the fleet angle was creeping too wide. [PAUSE / ASK] Fleet angle is measured off square to what?", "23": "Fleet angle is a specific measurement, and getting the reference right is the whole point. The fleet angle is the angle between the rope and a line square, perpendicular, to the sheave or the drum it is leading onto -- measured at the extreme lead, where the rope comes in at its worst angle. Picture the rope wanting to come straight in, square to the sheave; the fleet angle is how far off square it actually is. Some folks measure to the ground, but the reference is the sheave or drum, not the earth. Someone might measure to the other parts of line, which is not it. Some people will measure to the load's horizontal, but that is the sling angle idea, a different thing. Off square to the sheave or drum -- that is fleet angle. On a job I watched a rigger sight down a rope to a drum and judge whether the fleet angle was getting too wide. [PAUSE / ASK] Fleet angle is measured off square to what? Make your call.", "24": "There is a right size for a fleet angle, and it is small -- a degree or two at most. Roughly a degree and a half to a sheave or a smooth drum, and about two degrees to a grooved drum. Stay in that band and the rope leads on clean and spools right. Let it grow past that and the rope climbs the flange of the sheave, rubs, and wears both itself and the sheave; on a drum, too big a fleet angle piles the wraps unevenly and can cross and crush them. So small is the goal, and when the geometry will not give you small, you do something about it -- which is where fairleads come in next. On a job I watched a rope with a wide fleet angle grind a bright wear line into a sheave flange. [PAUSE / ASK] Roughly how many degrees is a good fleet angle?", "25": "There is a right size for a fleet angle, and it is small. You keep the fleet angle down to roughly a degree or two at most -- about a degree and a half to a sheave or a smooth drum, and around two degrees to a grooved drum. Keep it in that band and the rope leads on cleanly. Let it get too large and the rope climbs the flange of the sheave, rubs, and wears itself and the sheave; on a drum, too large a fleet angle piles the wraps badly. Some folks think a big fleet angle gives a smooth wrap, but big is exactly the problem. Someone might say forty-five degrees, which is enormous for a fleet angle and would tear things up. Some people will say ninety degrees straight in, but the fleet angle is measured off square, so square is zero, not ninety. Small -- a degree or two. On a job I watched a rope climb a sheave flange and start to wear because the fleet angle had opened up too far. [PAUSE / ASK] Big fleet angle or small? Make your call.", "26": "A fairlead is the practical fix for a bad lead, so it pairs right with fleet angle. A fairlead is a device -- rollers or sheaves -- that guides a rope onto a drum or around a corner at an acceptable angle, keeping the fleet angle small and stopping the rope from chafing on an edge or piling up badly on the drum. When the layout of a job would otherwise give you a nasty lead, you set a fairlead in the path to straighten it out and lead the rope fair. That is literally where the name comes from -- leading the rope fair. On a job I watched a fairlead tame a rough rope lead onto a winch drum that would have chewed the rope otherwise. [PAUSE / ASK] What does a fairlead do for a rope's lead?", "27": "A fairlead solves the fleet-angle problem in the real world, so it pairs naturally with what we just covered. A fairlead is a device -- rollers or sheaves -- that guides a rope onto a drum or around a corner at an acceptable angle, keeping the fleet angle in check and stopping the rope from chafing on an edge or piling up badly on the drum. When the geometry would otherwise give you a bad lead, you put a fairlead in to straighten it out. Some folks think a fairlead adds mechanical advantage, but it only guides the rope, it does not multiply force. Someone might think it locks the rope, but that is a brake or a clamp. Some people will think it measures tension, but that is a load cell or dynamometer. A fairlead just leads the rope fair -- straight and clean. On a job I watched a fairlead tame a nasty rope lead onto a winch drum. [PAUSE / ASK] What job does a fairlead do for the rope? Make your call.", "28": "Let us see the failure clearly, because it is gradual and easy to miss until the damage is done. When the fleet angle gets too large, the rope no longer seats in the groove -- it comes in at a steep side angle, climbs the flange of the sheave, and rubs against it, grinding both the rope and the flange. On a drum, a wide fleet angle piles the wraps unevenly, crosses them, and crushes the rope. A really bad fleet angle can even throw the rope right out of the groove. So a fleet angle you let grow is a slow rope-and-sheave killer. On a job I watched a rope with too wide a fleet angle start climbing the flange and polishing a wear line into it. [PAUSE / ASK] What does the rope do when the fleet angle is too wide?", "29": "This is the consequence of ignoring fleet angle, and it is worth seeing clearly. When the fleet angle to a sheave gets too large, the rope no longer leads straight into the groove -- it comes in at a steep side angle, climbs up the flange of the sheave, and rubs against it. That grinds both the rope and the sheave flange, wearing them out, and it can even let the rope jump the groove. So a fleet angle that is too wide is a rope-and-sheave killer. Some folks think a bigger fleet angle leads on more smoothly, but it does the opposite. Someone might think fleet angle has no real effect, but it very much does over time. Some people will imagine it boosts mechanical advantage, but fleet angle has nothing to do with advantage. Too wide, and the rope climbs and wears. On a job I watched a rope with a wide fleet angle grind a shiny wear line into a sheave flange. [PAUSE / ASK] What does a too-wide fleet angle do to the rope? Make your call.", "30": "Last section, and it holds the idea that surprises people most: a block that redirects a line can feel more load than the rope itself. We cover the snatch block, the resultant load it and its anchor carry, and how to inspect blocks and sheaves. Out on a job I have watched a snatch block anchor nearly pull out because it was sized to the line pull instead of the resultant. [PAUSE / ASK] Ask yourself how much load a block feels when it turns a line back on itself.", "31": "The snatch block earns its name from how it opens, and that feature is what makes it so useful in the field. A snatch block has a side plate, a cheek, that swings open, so you can drop a bight -- a loop -- of the line right into it without threading the rope end all the way through. That means you can add it anywhere along a running line to redirect the pull, to change the direction the rope runs, without re-reeving the whole rig. It is the tool for steering a line around a corner or an obstruction on the fly. On a job I watched a rigger drop a snatch block onto a live line mid-pull to walk a load around a column. [PAUSE / ASK] What lets you add a snatch block without threading the rope end?", "32": "The snatch block earns its own name because of how it opens, and that feature is what makes it so handy. A snatch block has a side plate, a cheek, that swings open, so you can drop a bight -- a loop -- of the line into it without having to thread the rope end all the way through. That lets you add it anywhere along a line to redirect the pull, change the direction the rope runs, without re-reeving the whole rig. Some folks will picture a block with no sheave sliding the rope over a bar, but a snatch block has a real sheave. Someone might think it is only ever the fixed upper block, but its whole point is going in anywhere to redirect. Some people will assume it always doubles the pull, but the load it sees depends on the angle, which is next. Opens on one side, takes the bight, redirects the line. On a job I watched a rigger drop a snatch block onto a line mid-run to pull a load around a corner. [PAUSE / ASK] What makes a snatch block easy to add to a line? Make your call.", "33": "Here is the idea that keeps a snatch block from tearing loose, and it is worth getting exactly right. The load a change-of-direction block feels is not just the line tension -- it is the resultant, the vector sum, of the two line tensions coming into the sheave. The block has to hold both parts of the rope, and their combined pull is what it and its anchor actually carry. And the sharper the block turns the line, the larger that combined pull gets. So a gentle deflection is light, but a hard turn stacks the two tensions toward each other into a big resultant. This is the number that sizes your anchor, not the bare line pull. On a job I watched a snatch block anchor sized to the resultant hold a redirect that would have overloaded an anchor sized to the line alone. [PAUSE / ASK] What two forces add up into the resultant?", "34": "This is the idea that keeps a snatch block from tearing loose, so it is worth getting exactly. The load a snatch block and its anchor feel is not just the line tension -- it is the resultant, the vector sum, of the two line tensions coming into the sheave, and that depends on how sharply the block turns the line. The block has to hold both parts of the rope, and their combined pull is what it and its anchor carry. Some folks assume the block just feels the line tension, but two lines pull on it, not one. Someone might think it feels half, but a change-of-direction block does not divide the load, it combines two tensions. Some people will say zero because it only redirects, but redirecting takes real force. It is the vector sum, and the sharper the turn, the bigger it gets. On a job I watched a snatch block anchor sized for the resultant, not the line pull, and it held. [PAUSE / ASK] What load does the block anchor actually carry? Make your call.", "35": "Let us put numbers on the resultant so it is real, from gentle to worst case. A gentle deflection barely adds anything. At a ninety degree turn, the two tensions are at right angles and their vector sum is about one and four-tenths times the line tension. And at a full one-hundred-eighty degree reversal, where the rope comes right back on itself, the two tensions point the same way and add to about two times the line tension. That reversal is the worst case -- the block and its anchor feel about double the rope's pull. So the sharper the turn, the closer to double you get, topping out at two. On a job I watched a hard-reversed snatch block put close to twice the line pull straight into its anchor. [PAUSE / ASK] A full reversal loads the block about how many times the line pull?", "36": "Here is the number that makes the resultant real, and it is the worst case. When a snatch block turns the line all the way around, a full one-hundred-eighty degree reversal, the two line tensions point the same direction and add together, so the block and its anchor feel about two times the line tension. That is the maximum. At a ninety degree turn it is about one and four-tenths times the tension, and at a gentle deflection it is small -- the sharper the turn, the closer to double. Some folks think the directions cancel to zero, but they add, they do not cancel. Someone might say half, but the block combines the pulls, it does not split them. Some people will guess ten times, which is far too high -- two is the ceiling for a single reversal. Full reversal, about double the line pull. On a job I watched a hard-reversed snatch block put nearly twice the line pull into its anchor. [PAUSE / ASK] A full reversal loads the block about how much? Make your call.", "37": "This is where the resultant becomes a real rigging decision. Because a change-of-direction block can feel up to twice the line tension, you size both the block and its anchor for that resultant, not for the bare line pull. The anchor -- the padeye, the beam, the deadman you tie the block to -- has to hold the full combined force, which on a hard reversal is nearly double what the rope alone carries. Rate that anchor to the line pull and skip the resultant, and a sharp redirect can pull it right out. So you do the vector math, or you use the worst-case double, and you size the anchor to that. On a job I watched an anchor sized only to the line pull nearly tear out of a beam on a sharp redirect. [PAUSE / ASK] Do you rate the anchor to the line pull or the resultant?", "38": "This is where the resultant becomes a rigging decision, not just a physics fact. Because a change-of-direction block can feel up to twice the line tension, you size the block and its anchor for that resultant, not for the bare line pull. The anchor point -- the padeye, the beam, the deadman you tie the block to -- has to hold the full combined force, which at a hard reversal is nearly double what the rope alone is carrying. Under-rate the anchor to the line pull and it can let go. Some folks will rate only the rope and forget the block governs, but the block and anchor see more than the rope in a sharp turn. Some people will assume the block load is less than the line pull, exactly backwards. Someone might ignore the anchor entirely, but the anchor is where these forces land. Rate block and anchor for the resultant. On a job I watched an anchor sized only to the line pull nearly pull out of a beam on a sharp redirect. [PAUSE / ASK] What do you rate to the resultant? Make your call.", "39": "Sheaves wear in ways that quietly destroy rope, so the removal criteria zero in there. You pull a sheave for worn or corrugated grooves, where a rope has cut a smaller channel into it, for cracked or chipped grooves or flanges, for a groove worn out of round, and for a sheave that will not turn freely, which usually means the bearing or pin is failing. A sheave is supposed to roll; one that drags grinds the rope instead. The simplest check is to spin each sheave by hand and feel whether it turns free and quiet or drags and grinds. On a job I watched an inspector spin every sheave in a block and condemn the one that would not turn. [PAUSE / ASK] What is the quick hand check on a sheave?", "40": "Sheaves wear in ways that quietly destroy rope, so the removal criteria focus there. You pull a sheave for worn or corrugated grooves -- where a rope has cut a smaller channel into the groove -- for cracked or chipped grooves or flanges, for a groove worn out of round, and for a sheave that will not turn freely, which usually means a failing bearing. A sheave that drags instead of rolling grinds the rope. Some folks would pull a sheave that turns freely and quietly, but that is exactly what a good sheave does. Someone might remove one whose groove matches the rope, but a correct groove is what you want. Some people would condemn it for a legible rating stamp, but that stamp keeps it in service. Bad grooves or a sheave that will not spin -- those are the removals. On a job I watched an inspector spin every sheave by hand and pull the one that would not turn. [PAUSE / ASK] What does a sheave that will not turn freely tell you? Make your call.", "41": "The block body has its own removal list, separate from the sheave inside it. You retire a block for cracked, bent, or distorted cheeks or shell, for a worn or bent sheave pin, for a damaged, worn, or opened hook or shackle, for missing or broken keepers and guards, and for a missing or illegible rating. The hook on a block gets the same scrutiny as any hook -- throat spread, twist, wear. So you inspect the whole block: the housing, the pin, the attachment, and the guards, on top of spinning the sheave. Any one bad and the block is out. On a job I watched a block condemned for a hook that had started to open, even though its sheave rolled perfectly. [PAUSE / ASK] Name one block-body condition that means removal.", "42": "Let us fill in the middle of the resultant curve, because the right-angle redirect comes up constantly. When a snatch block turns the line through ninety degrees, the two tensions are at right angles to each other, and their vector sum works out to about one and four-tenths times the line tension -- the square root of two, if you like the math. So a right-angle turn already puts about forty percent more than the line pull into the block and its anchor. From there it climbs to about double at a full reversal. So even a ninety degree redirect is not free -- plan the anchor for that extra forty percent. On a job I watched a right-angle snatch pull put noticeably more into its anchor than the line itself carried. [PAUSE / ASK] A ninety degree turn adds roughly what fraction?", "43": "This is the gate. Six questions, all six, because a miscounted advantage or an under-rated snatch block anchor is exactly how these systems come apart. They pull from every section -- mechanical advantage, sheave D/d, fleet angle, the resultant load, the snatch block, and inspection. Reason each one. I have watched this be the point a rigger starts seeing blocks and rope as a system instead of a pile of parts. [PAUSE / ASK] Ready to work some blocks?", "44": "The block body has its own removal criteria, separate from the sheave inside it. You retire a block for cracked, bent, or distorted cheeks or shell, for a worn or bent sheave pin, for a damaged, worn, or opened hook or shackle, for missing or broken keepers and guards, and for a missing or illegible rating. Any of those and the block is done. Some folks would pull a block whose hook is in good shape with a clear rating, but that is a healthy block. Someone might condemn one whose sheave rolls smoothly, but smooth rolling is good. Some people would remove it for a clean legible rating mark, which is exactly what you want to see. Cracked cheeks, worn pin, damaged hook -- those are the removals. On a job I watched a block condemned for a hook that had started to open, even though the sheave was fine. [PAUSE / ASK] Name one block condition that means removal. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "45": "Let us fill in the middle of the resultant curve, because ninety degrees comes up all the time. When a snatch block turns the line through a right angle, ninety degrees, the two tensions are at ninety degrees to each other and their vector sum works out to about one and four-tenths times the line tension -- the square root of two, if you like the math. So a right-angle redirect puts about forty percent more than the line pull into the block and its anchor. Some folks think ninety degrees is neutral and changes nothing, but it already adds forty percent. Someone might say half, but the block combines the pulls. Some people will jump to three times, but the ceiling is two times at a full reversal, so ninety degrees is well under that. About one point four at a right angle, climbing to two at a reversal. On a job I watched a right-angle snatch pull load its anchor felt noticeably more than the line itself. [PAUSE / ASK] A right-angle turn adds about how much? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "Straight application of the rule you built in section two. Four parts of line support the load block, so the theoretical mechanical advantage is four to one, equal to the number of supporting parts. That means your hauling pull is roughly the load divided by four, before friction. The count of supporting parts is the advantage, plain and simple. Some folks will say one to one, forgetting the tackle does anything. Someone might default to two to one no matter the reeve, but the number tracks the parts, and here there are four. Some people will double the parts to eight, but you do not double it -- the advantage is the parts themselves. Four parts, four to one. On a job I watched a crew reeve four parts and haul a load with about a quarter of the effort. [PAUSE / ASK] Four parts gives what advantage? Make your call.", "47": "This is the sheave D/d rule as a removal-level concern. A wire rope run over a sheave that is far too small for it bends sharply every single pass, and that repeated sharp bending fatigues the wires and fails the rope early -- long before its normal life. The whole reason running sheaves are sized large relative to the rope is to keep that bend gentle enough for good fatigue life. Some folks think a tight wrap gains capacity, but bending only costs strength and life. Someone might think sheave size does not matter, but it is one of the biggest factors in rope life. Some people will imagine a small sheave saves rope wear, but it does the opposite. Too-small sheave, fatigued rope, early failure. On a job I watched a rope over an undersized sheave give out in a fraction of the life it should have had. [PAUSE / ASK] What does a too-small sheave do to the rope? Make your call.", "48": "Fleet angle again, this time at the failure end. When the fleet angle grows well past the degree or two you want, the rope no longer leads on square -- it comes in at a side angle, climbs the flange of the sheave or piles up unevenly on the drum, and rubs and wears the rope and the metal. On a drum, a bad fleet angle can even cross wraps and crush the rope. So a fleet angle that has opened up too far is a wear-and-damage problem. Some folks think a bigger fleet angle wraps cleaner, but it does the opposite. Someone might think fleet angle does not matter on a drum, but it drives how the rope spools. Some people will imagine the tension drops on its own, which is not a thing. Too-wide fleet, climbing and wear. On a job I watched a wide fleet angle pile a rope badly on one end of a winch drum. [PAUSE / ASK] A fleet angle grown too wide causes what? Make your call.", "49": "This is the resultant rule at its worst case, and the one that sizes your anchor. A snatch block turning a line through nearly a full reversal has the two line tensions pointing almost the same way, so they add to about twice the line tension -- and that resultant is what the block and its anchor must be rated for. You do not rate the anchor to the bare line pull on a sharp reversal; you rate it to the roughly doubled resultant. Some folks will rate it to half, but the block combines the two pulls, it does not split them. Someone might rate it to the line tension only, forgetting the second part of the rope pulls too. Some people will go to a quarter, which is far too low. Twice the line pull at a reversal -- rate to that. On a job I watched a reversal anchor sized to double the line pull hold exactly as it should. [PAUSE / ASK] Rate the reversal anchor to about how much? Make your call.", "50": "This is the snatch block's signature job, so recognize when it is the answer. To redirect a running line mid-rig without threading the rope end through anything, you reach for a snatch block, because it opens on one side and takes a bight -- a loop -- of the line dropped right in. Close it up and you have added a change-of-direction point anywhere along the rope. Some folks might try a fixed eyebolt, but you cannot thread a running line through a closed eye mid-run, and an eyebolt is a pick point, not a sheave. Someone might splice in a turnbuckle, but that adjusts length, it does not redirect a running line. Some people will grab a wedge socket, which terminates a rope end, the opposite of what you need. The snatch block opens, takes the bight, redirects. On a job I watched a crew drop a snatch block onto a live line to steer a load around an obstruction. [PAUSE / ASK] Which tool opens to take a bight mid-line? Make your call.", "51": "A sheave that will not spin is telling you something has failed inside, and it is a removal. When a sheave drags on its pin instead of turning freely, the bearing or the pin is failing, and a dragging sheave grinds the rope instead of letting it roll -- so the block comes out of service until it is repaired or replaced. Some folks will keep using it, thinking a stiff sheave grips the rope, but a sheave is meant to roll, not grip, and a dragging one chews rope. Someone might add load to force it to spin, which just damages rope and sheave. Some people will squirt oil on it and skip the real inspection, but a bad bearing needs more than a shot of oil and a look. A sheave that will not turn freely is a removal. On a job I watched an inspector condemn a whole block because one sheave dragged on its pin. [PAUSE / ASK] A sheave that will not turn freely -- in or out? Make your call.", "52": "That is Blocks, Sheaves, and Fairleads, and here is what you carry out. A sheave is the grooved wheel, a block is the housing that holds it, and the becket is where you dead-end a line. The groove must fit the rope, and a running sheave needs a big D/d, because a small sheave fatigues rope with every pass. Mechanical advantage equals the parts of line supporting the load, so line pull is load over parts -- minus the friction each sheave charges. Keep the fleet angle small, a degree or two, or the rope climbs the flange and wears; a fairlead leads it fair. And the big one: a snatch block redirects a line by taking the bight, but it and its anchor feel the resultant of both line tensions -- about one point four times at ninety degrees, about two times at a full reversal -- so you rate the anchor to the resultant, not the line pull. Inspect sheaves for bad grooves and bad bearings, blocks for cracked cheeks and worn pins and damaged hooks. Next module is Multi-Point Lifts and Load Sharing, where more than one pick point shares a load. I have watched these block skills move loads no single crane could reach. [PAUSE / ASK] Before you go, think of one place on your job where a snatch block anchor should be sized for the resultant."};
+var GATE = ["S4_M20_q18", "S4_M20_q19", "S4_M20_q20", "S4_M20_q21", "S4_M20_q22", "S4_M20_q23", "S4_M20_q24", "S4_M20_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M20_q01", "7": "S4_M20_q02", "9": "S4_M20_q03", "11": "S4_M20_q04", "14": "S4_M20_q05", "16": "S4_M20_q06", "18": "S4_M20_q07", "20": "S4_M20_q08", "23": "S4_M20_q09", "25": "S4_M20_q10", "27": "S4_M20_q11", "29": "S4_M20_q12", "32": "S4_M20_q13", "34": "S4_M20_q14", "36": "S4_M20_q15", "38": "S4_M20_q16", "40": "S4_M20_q17", "44": "S4_M20_q18", "45": "S4_M20_q19", "46": "S4_M20_q20", "47": "S4_M20_q21", "48": "S4_M20_q22", "49": "S4_M20_q23", "50": "S4_M20_q24", "51": "S4_M20_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M20';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

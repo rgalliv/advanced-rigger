@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Below-the-Hook Lifting Device Design (BTH-1) | CraneQualified S4_M23</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M23" data-cq-stage="4"
+      data-cq-total="52" data-cq-gate-code="R-201C / AR-109C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M23 &middot; Below-the-Hook Lifting Device Design (BTH-1)</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Below-the-Hook Lifting Device Design (BTH-1)</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 9</p><p class='meta'>Gate R-201C / AR-109C -- 6-question final at 100 percent -- STAGE CAPSTONE</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Explain what ASME BTH-1 covers and how it splits work with B30.20</li><li>Describe a below-the-hook device as an engineered, rated product</li><li>Distinguish Design Category A (factor 2) from Category B (factor 3)</li><li>Explain Service Classes 0-4 as fatigue life (load cycles)</li><li>Read the required markings and account for combined weight vs the hoist</li><li>Inspect, and never modify, an engineered lifter -- and know when to pull it</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>What BTH-1 Is and Why It Exists</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>What BTH-1 Covers</h2>
+<p><b>ASME BTH-1</b> -- 'Design of Below-the-Hook Lifting Devices' -- is the <b>design standard</b> for devices that hang below the crane hook: spreader beams, lifting beams, C-hooks, coil grabs, and more.</p><p class='note'>It is written for the engineer who designs the device -- not a wage sheet, not a paint code.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">ASME BTH-1 is best described as the standard that covers:</p>
+<div class="quiz-group" data-qid="S4_M23_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q01',0,'fb_S4_M23_q01')">The color code painted on sling legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q01',1,'fb_S4_M23_q01')">The design of below-the-hook lifting devices</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q01',2,'fb_S4_M23_q01')">The fuel type a mobile crane must burn</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q01',3,'fb_S4_M23_q01')">The wage rates for riggers on a job site</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>BTH-1 and B30.20 Work Together</h2>
+<p>Two standards cover a below-the-hook device across its life:</p><ul><li><b>BTH-1</b> -- the <b>design</b> (structural and mechanical engineering)</li><li><b>B30.20</b> -- <b>marking, construction, inspection, testing, and operation</b></li></ul><p class='note'>The engineer designs to BTH-1; the device is then marked and run under B30.20. Partners, not duplicates.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">BTH-1 and ASME B30.20 divide the work this way:</p>
+<div class="quiz-group" data-qid="S4_M23_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q02',0,'fb_S4_M23_q02')">BTH-1 covers design; B30.20 covers marking, inspection, and operation</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q02',1,'fb_S4_M23_q02')">B30.20 covers the design; BTH-1 covers only fuel and power</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q02',2,'fb_S4_M23_q02')">Both of them cover only the paint and the labeling of the devices</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q02',3,'fb_S4_M23_q02')">Both are full design standards that completely duplicate each other</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>An Engineered Product, Not Shop Rigging</h2>
+<p>A below-the-hook device is an <b>engineered product</b> -- designed to a standard, rated for a specific load, and tested.</p><p class='warn'>It is not something you improvise, weld together, or modify. Its capacity is only valid because it was built and tested that way.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A below-the-hook lifting device (spreader, lifting beam, C-hook) should be understood as:</p>
+<div class="quiz-group" data-qid="S4_M23_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q03',0,'fb_S4_M23_q03')">An unrated accessory you can weld on as needed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q03',1,'fb_S4_M23_q03')">A quick shop-built part you improvise on the spot</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q03',2,'fb_S4_M23_q03')">An engineered product designed to a standard and rated</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q03',3,'fb_S4_M23_q03')">A piece of the load itself, not rigging</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>The Rigger's Role</h2>
+<p>Your job with an engineered lifter:</p><ul><li><b>Operate it within its rating and design</b></li><li><b>Never</b> redesign, cut, weld, or modify it</li><li>If it does not fit, get the <b>right device</b> or a <b>qualified engineer</b></li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The rigger's role with an engineered below-the-hook device is to:</p>
+<div class="quiz-group" data-qid="S4_M23_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q04',0,'fb_S4_M23_q04')">Operate it within its rating and design, never altering it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q04',1,'fb_S4_M23_q04')">Redesign the whole thing every time that the load changes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q04',2,'fb_S4_M23_q04')">Modify it out in the field to make it fit the given pick</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q04',3,'fb_S4_M23_q04')">Ignore its rating whenever the crane can lift more</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q04"></div>
+</div></section>
+<section class="slide t-divider" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Design Categories A and B</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>What Sets the Design Category</h2>
+<p>A device's <b>Design Category</b> is set by <b>how predictable and well-defined its loads and conditions are</b> -- how sure the engineer can be about what it will actually see in service.</p><p class='note'>Known, controlled loads point one way; uncertain or harsh service points another.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In BTH-1, the Design Category of a device is set by:</p>
+<div class="quiz-group" data-qid="S4_M23_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q05',0,'fb_S4_M23_q05')">The particular color the manufacturer decides to paint it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q05',1,'fb_S4_M23_q05')">The name of the specific crew that will end up using it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q05',2,'fb_S4_M23_q05')">How predictable and well-defined its loads and conditions are</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q05',3,'fb_S4_M23_q05')">The particular day of the week on which it was built</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>Category A: Factor of 2</h2>
+<p><b>Design Category A</b> -- loads and conditions <b>well-defined and predictable</b>:</p><p class='formula'>Design factor = 2 (against yield strength)</p><p class='note'>The leaner factor, allowed because the service is well understood.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Design Category A is used when loads and conditions are well-defined, and it carries:</p>
+<div class="quiz-group" data-qid="S4_M23_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q06',0,'fb_S4_M23_q06')">A design factor that changes hourly</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q06',1,'fb_S4_M23_q06')">A design factor of 10 (against yield)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q06',2,'fb_S4_M23_q06')">A design factor of 2 (against yield)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q06',3,'fb_S4_M23_q06')">No design factor at all</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Category B: Factor of 3</h2>
+<p><b>Design Category B</b> -- loads or conditions <b>less predictable or more severe</b>:</p><p class='formula'>Design factor = 3 (against yield strength)</p><p class='warn'>The larger, more conservative factor. More uncertainty demands more margin.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Design Category B -- for less predictable or more severe service -- carries:</p>
+<div class="quiz-group" data-qid="S4_M23_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q07',0,'fb_S4_M23_q07')">A noticeably smaller design factor than Category A uses</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q07',1,'fb_S4_M23_q07')">A design factor of 3 (against yield), more conservative than A</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q07',2,'fb_S4_M23_q07')">The exact same design factor that Category A itself uses</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q07',3,'fb_S4_M23_q07')">No design factor at all, since the service is severe</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>What the Design Factor Means</h2>
+<p>The <b>design factor</b> is the <b>margin between working stress and the material's yield</b> -- the point where metal permanently deforms.</p><p class='note'>Factor of 2 = about twice that margin; factor of 3 = more still. It is the engineered cushion against overload, surprises, and wear -- not a count, a speed, or a price.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The design factor in BTH-1 represents:</p>
+<div class="quiz-group" data-qid="S4_M23_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q08',0,'fb_S4_M23_q08')">The margin between working stress and the material's yield</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q08',1,'fb_S4_M23_q08')">The top speed at which the device is allowed to travel</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q08',2,'fb_S4_M23_q08')">The total number of slings a device can hold at once</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q08',3,'fb_S4_M23_q08')">The purchase cost of the device measured in dollars</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q08"></div>
+</div></section>
+<section class="slide t-divider" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Service Classes 0-4</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>Service Class Is Fatigue Life</h2>
+<p>A device's <b>Service Class</b> describes its <b>fatigue life</b> -- the number of <b>load cycles</b> it is designed to withstand.</p><p class='note'>Every pick-and-set is a cycle. Metal cycled enough times can crack from fatigue even below its rated load.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In BTH-1, the Service Class of a device describes its:</p>
+<div class="quiz-group" data-qid="S4_M23_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q09',0,'fb_S4_M23_q09')">The top color the device happens to show under bright light</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q09',1,'fb_S4_M23_q09')">The resale value the device holds after about ten years</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q09',2,'fb_S4_M23_q09')">The total weight of the device measured out in kilograms</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q09',3,'fb_S4_M23_q09')">Fatigue life -- the number of load cycles it is designed for</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>The Service Class Scale</h2>
+<p>BTH-1 defines <b>Service Classes 0 through 4</b> by load cycles:</p><ul><li><b>Class 0</b> -- up to about 20,000 cycles (lowest duty)</li><li>Classes 1, 2, 3 -- progressively more cycles</li><li><b>Class 4</b> -- over 2,000,000 cycles (highest duty)</li></ul><p class='note'>Higher class number = more cycles = more fatigue-resistant design.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The lowest service class, Service Class 0, is designed for:</p>
+<div class="quiz-group" data-qid="S4_M23_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q10',0,'fb_S4_M23_q10')">Exactly one single load cycle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q10',1,'fb_S4_M23_q10')">Up to about 20,000 load cycles</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q10',2,'fb_S4_M23_q10')">Over two million load cycles</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q10',3,'fb_S4_M23_q10')">Unlimited load cycles forever</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Reading the Class Direction</h2>
+<p>Moving from <b>Class 0 up toward Class 4</b>:</p><ul><li><b>More load cycles</b>, greater fatigue life</li><li>Does <b>not</b> change how heavy a single pick can be -- that is the <b>rated load</b></li></ul><p class='note'>Class answers 'how many times'; rated load answers 'how heavy'.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Moving from Service Class 0 up toward Service Class 4 means the device is designed for:</p>
+<div class="quiz-group" data-qid="S4_M23_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q11',0,'fb_S4_M23_q11')">Lighter loads only, never heavier ones</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q11',1,'fb_S4_M23_q11')">The same cycles, just a different color</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q11',2,'fb_S4_M23_q11')">More load cycles and greater fatigue life</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q11',3,'fb_S4_M23_q11')">Fewer load cycles and less fatigue life</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Undersized Class = Fatigue Cracks</h2>
+<p class='warn'>Put a <b>low-service-class</b> device on a <b>high-cycle</b> job and it can <b>fatigue-crack well before the rated load is ever exceeded</b>.</p><p>Fatigue adds up cycle by cycle -- it does not care that each pick is under capacity. Match the class to the job's duty cycle.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Putting a low-service-class device on a high-repetition, high-cycle job risks:</p>
+<div class="quiz-group" data-qid="S4_M23_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q12',0,'fb_S4_M23_q12')">Somehow making the device grow lighter with each cycle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q12',1,'fb_S4_M23_q12')">Only cosmetic paint wear building up slowly over time</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q12',2,'fb_S4_M23_q12')">Nothing at all -- service class does not affect real use</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q12',3,'fb_S4_M23_q12')">Fatigue cracking well before the rated load is ever exceeded</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q12"></div>
+</div></section>
+<section class="slide t-content" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Picking a Device: Category and Class</h2>
+<p>Choosing a below-the-hook device means matching <b>both</b>:</p><ul><li><b>Design Category</b> -- to how predictable and severe the loads and conditions are</li><li><b>Service Class</b> -- to how many cycles of duty it will see</li></ul><p class='note'>Rated load alone is not enough. Category and class complete the picture.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Choosing a below-the-hook device for a job means matching:</p>
+<div class="quiz-group" data-qid="S4_M23_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q13',0,'fb_S4_M23_q13')">Only the crane's overall paint scheme and nothing else</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q13',1,'fb_S4_M23_q13')">Both its Design Category and Service Class to loads and duty</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q13',2,'fb_S4_M23_q13')">Nothing at all -- any rated device fits any job just fine</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q13',3,'fb_S4_M23_q13')">Only its outer paint color to match the company logo well</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q13"></div>
+</div></section>
+<section class="slide t-divider" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Marking, Operation, and the Rigger's Duties</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Required Markings</h2>
+<p>Under <b>B30.20</b>, an engineered device is marked with its <b>rated load</b> plus:</p><ul><li>Manufacturer name and contact, serial number</li><li>Device weight (if over 100 lb)</li><li><b>BTH-1 Design Category</b> and <b>BTH-1 Service Class</b></li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Under B30.20, an engineered below-the-hook device must be marked with its rated load plus:</p>
+<div class="quiz-group" data-qid="S4_M23_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q14',0,'fb_S4_M23_q14')">Its BTH-1 Design Category and Service Class, plus the maker</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q14',1,'fb_S4_M23_q14')">Nothing else whatsoever beyond just the rated load itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q14',2,'fb_S4_M23_q14')">The names of every person who has ever used the device</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q14',3,'fb_S4_M23_q14')">Only a small smiley face stuck on for the crew's morale</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Rated Load Is a Hard Limit</h2>
+<p class='warn'>The <b>rated load</b> is the maximum the device is engineered to lift -- a <b>hard limit you never exceed</b>.</p><p>Exceeding it eats into the design factor invisibly. If the load is heavier, you get a bigger device -- never a hopeful pick.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The rated load marked on a below-the-hook device is:</p>
+<div class="quiz-group" data-qid="S4_M23_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q15',0,'fb_S4_M23_q15')">Only valid on the first lift of the day</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q15',1,'fb_S4_M23_q15')">The weight of the device itself, not the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q15',2,'fb_S4_M23_q15')">A hard limit you never exceed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q15',3,'fb_S4_M23_q15')">A rough suggestion you may exceed if careful</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Count the Combined Weight</h2>
+<p>Against the <b>crane's capacity chart</b>, count the <b>combined weight</b>:</p><p class='formula'>Load + below-the-hook device + rigging</p><p class='warn'>A heavy spreader or lifting beam plus slings adds up fast -- the crane feels every pound. Do not check the bare load alone.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When checking the crane's capacity for a lift using a below-the-hook device, you must count:</p>
+<div class="quiz-group" data-qid="S4_M23_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q16',0,'fb_S4_M23_q16')">The combined weight of the load, the device, and the rigging</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q16',1,'fb_S4_M23_q16')">Only the device's own weight, and never the load itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q16',2,'fb_S4_M23_q16')">Only the bare weight of the load itself, nothing else</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q16',3,'fb_S4_M23_q16')">Nothing -- the crane simply handles any weight at all</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Inspect Each Shift</h2>
+<p>A below-the-hook device is <b>inspected each shift</b> for:</p><ul><li>Structural <b>deformation, cracks, and excessive wear</b></li><li>Loose or missing <b>guards, fasteners, nameplates</b></li><li>Legible <b>markings</b> and working controls</li></ul><p class='warn'>Anything that looks like a hazard = out of service until a qualified person clears it.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A below-the-hook device should be inspected:</p>
+<div class="quiz-group" data-qid="S4_M23_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q17',0,'fb_S4_M23_q17')">Only by the manufacturer, and just once every decade</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q17',1,'fb_S4_M23_q17')">Only after it has already visibly failed during a lift</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q17',2,'fb_S4_M23_q17')">Just once when it is brand new and then never again after</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q17',3,'fb_S4_M23_q17')">Each shift, for deformation, cracks, wear, and legible marks</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>Damaged or Unmarked: Take It Out of Service</h2>
+<p class='warn'>Damaged device, or <b>missing/unreadable markings</b> (rated load, category, class) = <b>out of service</b> until a <b>qualified person</b> evaluates it.</p><p>Do not lift with what you cannot verify. Do not repaint a rating you cannot confirm. Do not field-weld a fix.</p>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>A Realistic Find</h2>
+<p>You find a spreader beam with a <b>clear rated load</b> but <b>no readable Design Category or Service Class</b>.</p><p class='warn'>Hold it out of service until it is verified. The missing category and class are required markings -- without them you cannot confirm it suits your loads and duty cycle.</p>
+</div></section>
+<section class="slide t-divider" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete -- STAGE CAPSTONE</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">If a below-the-hook device is damaged, or its markings are missing or unreadable, you should:</p>
+<div class="quiz-group" data-qid="S4_M23_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q18',0,'fb_S4_M23_q18')">Weld a quick patch onto it in the field and continue on</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q18',1,'fb_S4_M23_q18')">Take it out of service until a qualified person evaluates it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q18',2,'fb_S4_M23_q18')">Repaint all the markings yourself and just keep lifting</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q18',3,'fb_S4_M23_q18')">Use it anyway, as long as the crane can lift the weight</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">A crew finds a spreader beam with a clear rated load but no readable Design Category or Service Class. They should:</p>
+<div class="quiz-group" data-qid="S4_M23_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q19',0,'fb_S4_M23_q19')">Hold it out of service until it is properly verified</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q19',1,'fb_S4_M23_q19')">Paint on a category and class they think are right</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q19',2,'fb_S4_M23_q19')">Use it, since the rated load is all that matters</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q19',3,'fb_S4_M23_q19')">Guess the category and class from its size</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">Between the two standards, which statement is correct?</p>
+<div class="quiz-group" data-qid="S4_M23_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q20',0,'fb_S4_M23_q20')">B30.20 designs the whole device, and BTH-1 only paints it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q20',1,'fb_S4_M23_q20')">BTH-1 governs the design; B30.20 governs marking and operation</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q20',2,'fb_S4_M23_q20')">Neither one really applies to spreader or lifting beams</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q20',3,'fb_S4_M23_q20')">Both are identical, interchangeable standards in practice</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">Comparing the two design categories:</p>
+<div class="quiz-group" data-qid="S4_M23_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q21',0,'fb_S4_M23_q21')">Neither category has any real design factor built into it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q21',1,'fb_S4_M23_q21')">Category A actually uses a larger factor than Category B does</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q21',2,'fb_S4_M23_q21')">Both of the categories end up using the exact same factor</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q21',3,'fb_S4_M23_q21')">Category A uses a factor of 2; Category B uses 3, more conservative</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">The Service Class of a below-the-hook device is fundamentally about:</p>
+<div class="quiz-group" data-qid="S4_M23_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q22',0,'fb_S4_M23_q22')">The eventual resale price the device will fetch later on</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q22',1,'fb_S4_M23_q22')">The particular paint color that was chosen by the maker</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q22',2,'fb_S4_M23_q22')">How many load cycles the device is built for (fatigue life)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q22',3,'fb_S4_M23_q22')">The single heaviest load that it can ever lift at once</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">Checking a crane's chart for a lift with a heavy lifting beam, the weight you must use is:</p>
+<div class="quiz-group" data-qid="S4_M23_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q23',0,'fb_S4_M23_q23')">Just the bare weight of the actual load itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q23',1,'fb_S4_M23_q23')">Just the weight of the lifting beam all alone</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q23',2,'fb_S4_M23_q23')">Zero, since the beam is hanging below the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q23',3,'fb_S4_M23_q23')">The load plus the beam plus the rigging, combined</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">A below-the-hook device does not quite fit the pick. The correct action is to:</p>
+<div class="quiz-group" data-qid="S4_M23_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q24',0,'fb_S4_M23_q24')">Grind off a part of it so that it can clear the load below</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q24',1,'fb_S4_M23_q24')">Bolt on an unrated extension that you fabricate yourself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q24',2,'fb_S4_M23_q24')">Get the right device or a qualified engineer -- never modify it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q24',3,'fb_S4_M23_q24')">Cut it apart and then re-weld it out in the field to fit</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">A spreader beam turns up with its rated-load and category markings worn away and unreadable. You should:</p>
+<div class="quiz-group" data-qid="S4_M23_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q25',0,'fb_S4_M23_q25')">Remove it from service until a qualified person verifies it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q25',1,'fb_S4_M23_q25')">Use it at roughly half of what you guess its rating is</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q25',2,'fb_S4_M23_q25')">Repaint the numbers from memory and just keep working</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M23_q25',3,'fb_S4_M23_q25')">Estimate its rating purely from how sturdy the thing looks</button>
+</div>
+<div class="feedback" id="fb_S4_M23_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Module Complete -- Advanced Rigger Stage Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'STAGE_COMPLETE'}}))">Next: Advanced Rigger Stage Complete &gt;</button><p>That is Below-the-Hook Lifting Device Design -- and that closes the Advanced Rigger stage.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 52</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 52;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M23)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M23_BelowTheHookBTH1";
+var HASHES={"S4_M23_q01": "7e88f3f7", "S4_M23_q02": "fef18c39", "S4_M23_q03": "16640c8c", "S4_M23_q04": "10b35b7f", "S4_M23_q05": "1ad50cb6", "S4_M23_q06": "b764e07c", "S4_M23_q07": "d4d76a41", "S4_M23_q08": "7d44275b", "S4_M23_q09": "09cae795", "S4_M23_q10": "41d4a075", "S4_M23_q11": "269f4cc3", "S4_M23_q12": "aa36bacd", "S4_M23_q13": "7cb09020", "S4_M23_q14": "fd852c5e", "S4_M23_q15": "e212a5bf", "S4_M23_q16": "c28203c0", "S4_M23_q17": "3a23ec42", "S4_M23_q18": "6b15f9cd", "S4_M23_q19": "50a374c1", "S4_M23_q20": "f877176e", "S4_M23_q21": "11e99ae7", "S4_M23_q22": "51c59271", "S4_M23_q23": "5c4b8605", "S4_M23_q24": "b2ea6ed7", "S4_M23_q25": "ae5cc316"};
+var GATE=["S4_M23_q18", "S4_M23_q19", "S4_M23_q20", "S4_M23_q21", "S4_M23_q22", "S4_M23_q23", "S4_M23_q24", "S4_M23_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=51;            /* completion slide (52) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (52) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M23)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Below-the-Hook Lifting Device Design, module nine, and the capstone that closes the Advanced Rigger stage. Back in the multi-point module you met spreader beams, lifting beams, and equalizer beams and learned they are below-the-hook lifting devices. This module explains the engineering standard behind them -- ASME BTH-1 -- so you can read, trust, and correctly operate an engineered lifter without pretending to design one. We cover what BTH-1 is and how it splits work with B30.20, the two design categories and their safety factors, the service classes that set fatigue life, and the marking, operation, and inspection duties that fall to you. You will not be doing the engineering, but you will be trusting it every time you hang a load on one of these devices -- so you need to know what the stamp on the side is telling you. I have watched a rigger read a device's whole engineering story off a single tag. [PAUSE / ASK] Before we start, ask yourself what a spreader beam's stamp should tell you beyond how much it can lift. Hold your guess.", "2": "Six outcomes, and they turn a mysterious stamped beam into something you fully understand. First what BTH-1 is and how it partners with B30.20. Then the mindset that a below-the-hook device is engineered, not improvised. Then the two design categories and their factors, and the service classes that set how many cycles a device can take. And finally the markings, the combined-weight check against the crane, the shift inspection, and the hard rule against modifying an engineered lifter. The gate is six questions at one hundred percent, because trusting a device you do not understand is how loads and people get hurt. This is the module that lets you look at an engineered lifter and know exactly what you are holding. I have worked lifts where reading the device's ratings right was the whole safety case. [PAUSE / ASK] Look at the six and pick the one you would most want to nail down.", "3": "First section: what ASME BTH-1 actually is, how it divides the work with B30.20, and the mindset that a below-the-hook device is engineered equipment you operate but never redesign. Out on a job I have watched a crew reject a homemade beam in favor of a properly engineered one. [PAUSE / ASK] Ask yourself who designs the device hanging under your hook.", "4": "Let us start with what BTH-1 is, because its full name tells you its job. ASME BTH-1, the Design of Below-the-Hook Lifting Devices, is the engineering standard for how a spreader beam, a lifting beam, a C-hook, a coil grab, or any device that hangs below the crane hook gets designed to carry its load safely. It is a design standard, written for the engineer who builds the device. You will not design to it, but you will operate devices built to it, so you need to know what it promises. Think of it as the blueprint rulebook behind the beam. On a job I have watched a spreader stamped to BTH-1 do exactly the work its designer intended, no surprises. [PAUSE / ASK] What does BTH-1 design?", "5": "Let us start with what BTH-1 actually is, because its name tells you its job. ASME BTH-1 is the standard for the design of below-the-hook lifting devices -- the engineering rulebook for how a spreader beam, a lifting beam, a C-hook, or any other device that hangs below the crane hook gets designed to carry its load safely. It is a design standard, written for the engineer who builds the device, not a wage sheet or a paint code. You will not design to it yourself, but you will operate devices built to it, so you need to know what it promises. Some folks will think of pay rates, but BTH-1 is about engineering. Someone might think of a sling color code, which is a different thing entirely. Some people will guess crane fuel, which has nothing to do with it. BTH-1 designs the lifter below the hook. On a job I have watched a spreader stamped to BTH-1 do exactly the work its designer intended. [PAUSE / ASK] What does BTH-1 design? Make your call.", "6": "Two standards work together on these devices, and it helps to know which does what. BTH-1 covers the design -- the structural and mechanical engineering. B30.20 covers the rest of the device's life: marking, construction, inspection, testing, and operation. So the engineer designs to BTH-1, and the device is then marked, inspected, and operated under B30.20. They are partners, not duplicates -- one builds it right, the other keeps it used right. You live mostly in the B30.20 world, but you trust the BTH-1 world every time you pick. On a job I have watched an inspector check a device against B30.20 while trusting BTH-1 for its underlying design. [PAUSE / ASK] Which standard governs the device's design?", "7": "Two standards work together on below-the-hook devices, and it helps to know which does what. BTH-1 covers the design -- the structural and mechanical engineering of the device. B30.20 covers the rest of its life: marking, construction, inspection, testing, and operation. So the engineer designs to BTH-1, and the device is then marked, inspected, and operated under B30.20. They are partners, not duplicates -- one builds it right, the other keeps it used right. Some folks will think both are just about paint and labels, but design is real engineering. Someone might think they duplicate each other, but they cover different phases. Some people will flip them, but B30.20 is the operational volume, not the design one. Design is BTH-1; marking and operation is B30.20. On a job I have watched an inspector check a device against B30.20 while trusting BTH-1 for its design. [PAUSE / ASK] Which standard governs the device's design? Make your call.", "8": "Here is a mindset that keeps you out of trouble. A below-the-hook lifting device -- a spreader, a lifting beam, a C-hook, a coil grab -- is an engineered product, designed to a standard and rated for a specific load, not something you improvise or weld together on the spot. It came from an engineer's calculations, and its capacity is only valid because it was built and tested that way. Treat it with the same respect you give the crane itself. The moment someone modifies it in the field, that rating stops meaning anything. On a job I have watched a crew reject a homemade beam and wait for a properly engineered, rated one. [PAUSE / ASK] Is an engineered lifter something you can improvise?", "9": "Here is a mindset that keeps you out of trouble around these devices. A below-the-hook lifting device -- a spreader beam, a lifting beam, a C-hook, a coil grab -- is an engineered product, designed to a standard and rated for a specific load, not something you improvise or weld together on the spot. It came from an engineer's calculations, and its capacity is only valid because it was built and tested that way. Treat it as engineered equipment, the same respect you give the crane. Some folks will picture a quick shop-built part, but an engineered lifter is not improvised. Someone might call it an unrated accessory to modify at will, but modifying it voids the engineering. Some people will think it is part of the load, but it is rigging, and rated rigging at that. It is an engineered, rated device. On a job I have watched a crew reject a homemade beam in favor of a properly engineered one. [PAUSE / ASK] What kind of thing is a below-the-hook device? Make your call.", "10": "Let us be clear about your job with one of these devices, because it has firm limits. Your role is to operate the device within its rating and its design, and never to alter it. You do not redesign it when the load changes, you do not cut or weld to fit a pick, and you do not lean on the crane's bigger capacity to justify going past the device's own rating. If the device does not fit the job, you get the right device or a qualified engineer, not a torch. Operate within the engineering; do not try to become the engineer. On a job I have watched a lift lead send for the correct lifter rather than modify the one on hand. [PAUSE / ASK] What do you never do to an engineered lifter?", "11": "Let us be clear about your job with one of these devices, because it has firm limits. Your role as a rigger is to operate the device within its rating and its design -- and never to alter it. You do not redesign it when the load changes, you do not cut or weld on it to fit a pick, and you do not lean on the crane's bigger capacity to justify going past the device's own rating. If the device does not fit the job, you get the right device or a qualified engineer, not a torch. Operate within the engineering; do not become the engineer. Some folks will want to redesign on the fly, but that is not a rigger's call. Someone might modify it in the field, which voids its rating. Some people will chase the crane's capacity, but the device's rating still governs. Operate it as engineered, unaltered. On a job I have watched a lift lead send for the correct lifter rather than modify the one on hand. [PAUSE / ASK] What is the one thing you never do to an engineered lifter? Make your call.", "12": "Second section: the two BTH-1 design categories and the safety factors behind them -- the number that says how much margin the engineer built into the device. Out on a job I have watched an uncertain, rough lift steered to the more conservative category. [PAUSE / ASK] Ask yourself whether a more predictable job should need more margin or less.", "13": "BTH-1 sorts devices into Design Categories, and the basis is worth understanding. A device's Design Category is set by how predictable and well-defined its loads and operating conditions are -- how sure the engineer can be about what the device will actually see. When the loads and environment are known and controlled, that points to one category; when they are uncertain or harsh, that points to another. It is about certainty of service, and that certainty decides how much margin gets built in. On a job I have watched a device chosen with its real service conditions clearly in mind. [PAUSE / ASK] What decides a device's Design Category?", "14": "BTH-1 sorts devices into Design Categories, and the basis is worth understanding. A device's Design Category is set by how predictable and well-defined its loads and operating conditions are -- how sure the engineer can be about what the device will actually see in service. When the loads and environment are known and controlled, that is one category; when they are uncertain or harsh, that is another. It is about certainty of service, not paint or crew or calendar. Some folks will guess the paint color, but color is cosmetic. Someone might think it is about who uses it, but the category is engineered in. Some people will guess the build date, which is unrelated. Predictability of the loads and conditions sets the category. On a job I have watched a device chosen with its service conditions clearly in mind. [PAUSE / ASK] What determines a device's Design Category? Make your call.", "15": "Design Category A is the category for the more certain, well-defined jobs, and it comes with a specific margin. When the loads and conditions are accurately defined and predictable, the device is designed as Category A, which carries a design factor of two against the material's yield strength. That factor is the cushion between the working stress and the point where the metal would start to permanently deform. Two is the leaner factor, and it is allowed precisely because the service is well understood. On a job I have watched a well-characterized repetitive lift handled by a Category A device. [PAUSE / ASK] What design factor goes with the well-defined category?", "16": "Design Category A is the category for the more certain, well-defined jobs, and it comes with a specific margin. When the loads and conditions are accurately defined and predictable, the device is designed as Category A, which carries a design factor of two against the material's yield strength. That factor is the cushion between the working stress and the point where the metal would start to permanently deform. Two is the leaner factor, allowed because the service is well understood. Some folks will think there is no design factor, but every structural device has one. Someone might imagine it changes hour to hour, but it is fixed by the category. Some people will reach for a factor of ten, but that is far beyond BTH-1's structural factors. Category A carries a factor of two. On a job I have watched a well-characterized repetitive lift handled by a Category A device. [PAUSE / ASK] What design factor goes with the well-defined category? Make your call.", "17": "Design Category B is the category for the less certain, harsher jobs, and it is built more conservatively for good reason. When the loads or conditions are less predictable or more severe, the device is designed as Category B, which carries a design factor of three against yield -- larger than Category A's factor of two. The extra margin covers the extra uncertainty: when you are less sure what the device will see, you build in more cushion. So B is the more conservative category, not the leaner one. On a job I have watched an uncertain, rough lift call for the more conservative device. [PAUSE / ASK] Which category is more conservative, and by what factor?", "18": "Design Category B is the category for the less certain, harsher jobs, and it is built more conservatively for good reason. When the loads or conditions are less predictable or more severe, the device is designed as Category B, which carries a design factor of three against yield -- larger than Category A's factor of two. The extra margin covers the extra uncertainty: when you are less sure what the device will see, you build in more cushion. So B is the more conservative category, not the leaner one. Some folks will think severe service means a smaller factor, but it is the opposite -- more uncertainty, more margin. Someone might think there is no factor at all, but there always is. Some people will think A and B share a factor, but they differ, two versus three. Category B carries the larger factor of three. On a job I have watched an uncertain, rough lift call for the more conservative device. [PAUSE / ASK] Which category is more conservative, and by what factor? Make your call.", "19": "Let us make sure the idea of a design factor is solid, because it is the heart of the categories. The design factor is the margin between the stress the device carries in normal work and the stress at which the material would yield -- start to permanently bend. A factor of two means roughly twice that margin to yield; a factor of three, more still. It is the engineered cushion against overload, surprises, and wear, and a bigger factor means a bigger cushion. It is not a count of slings, a travel speed, or a price tag. On a job I have watched an engineer explain a device's factor as its cushion against the unexpected. [PAUSE / ASK] What does the design factor measure?", "20": "Let us make sure the idea of a design factor is solid, because it is the heart of the categories. The design factor is the margin between the stress the device carries in normal work and the stress at which the material would yield -- start to permanently bend. A factor of two means the device is built with roughly twice that margin to yield; a factor of three, more still. It is the engineered cushion against overload, surprises, and wear, and a bigger factor means a bigger cushion. It is not a count of slings, a speed, or a price. Some folks will think it counts slings, but it is a stress margin. Someone might think it is a travel speed, but it is structural. Some people will think it is cost, but it is safety margin. The design factor is the margin to yield. On a job I have watched an engineer explain a device's factor as its cushion against the unexpected. [PAUSE / ASK] What does the design factor measure? Make your call.", "21": "Third section: the service classes, which set how many load cycles a device is designed for -- its fatigue life. This is the rating that protects against cracks you never see coming. Out on a job I have watched a cracked lifter pulled from a high-cycle line before anyone got hurt. [PAUSE / ASK] Ask yourself whether a device can wear out even if you never overload it.", "22": "Alongside the Design Category, BTH-1 assigns a Service Class, and it answers a different question. The Service Class describes the device's fatigue life -- the number of load cycles it is designed to withstand before fatigue becomes a concern. Every time a device picks and sets a load, that is one cycle, and metal that is cycled enough times can crack from fatigue even below its rated load. So the Service Class tells you how many cycles of duty the device was engineered for. It is a completely separate question from how heavy a single pick can be. On a job I have watched a high-cycle production lift call for a device rated to many cycles. [PAUSE / ASK] What does the Service Class describe?", "23": "Alongside the Design Category, BTH-1 assigns a Service Class, and it answers a different question. The Service Class describes the device's fatigue life -- the number of load cycles it is designed to withstand before fatigue becomes a concern. Every time a device picks and sets a load, that is a cycle, and metal that is cycled enough times can crack from fatigue even below its rated load. So the Service Class tells you how many cycles of duty the device was engineered for. It is about cycles, not color, resale, or bare weight. Some folks will guess color, but that is cosmetic. Someone might think of resale value, but this is engineering. Some people will think of weight, but weight is a separate marking. Service Class is about load cycles and fatigue. On a job I have watched a high-cycle production lift call for a device rated to many cycles. [PAUSE / ASK] What does the Service Class describe? Make your call.", "24": "Let us anchor the scale end to end. BTH-1 defines Service Classes zero through four by the number of load cycles. Class zero is the lowest, designed for up to about twenty thousand cycles -- a device used relatively infrequently. Classes one, two, and three step up through progressively more cycles, and Class four is the highest, built for well over two million cycles. So the higher the class number, the more cycles the device can take and the more fatigue-resistant it is. It is a duty scale, low to high. On a job I have watched a high-cycle line served by a top-class device chosen on purpose. [PAUSE / ASK] Which end of the scale takes the most cycles?", "25": "Let us anchor the bottom of the service-class scale. Service Class 0 is the lowest, designed for up to about twenty thousand load cycles -- suitable for a device that will be used relatively infrequently over its life. It is not one-and-done, and it is certainly not unlimited; it is a device for lighter-duty, lower-cycle work. If you put a Class 0 device on a high-repetition production job, you would use up its fatigue life fast. Match the class to the duty. Some folks will think Class 0 means unlimited cycles, but that is the top of the scale, not the bottom. Someone might think it means a single cycle, but it carries many thousands. Some people will jump to millions, but that is the highest class. Class 0 is up to about twenty thousand cycles. On a job I have watched a low-use device serve fine at the bottom of the scale. [PAUSE / ASK] About how many cycles is the lowest class good for? Make your call.", "26": "The service-class numbers run in a clear direction, and knowing it lets you read a stamp at a glance. As you move from Class zero up toward Class four, the device is designed for more load cycles and greater fatigue life. But it does not change how heavy a single pick can be -- that is the rated load, a different number. So the class answers how many times, and the rated load answers how heavy. Keep those two straight and a device's stamp reads clearly. On a job I have watched a high-cycle line matched to a high service class while the rated load was set by the actual weights. [PAUSE / ASK] Does a higher class mean heavier picks, or more of them?", "27": "The service-class numbers run in a clear direction, and knowing it lets you read a stamp at a glance. As you move from Service Class 0 up toward Service Class 4, the device is designed for more load cycles and greater fatigue life -- Class 4 being the highest, built for well over two million cycles. Higher number, more cycles, more fatigue resistance. It does not change how heavy a single pick can be -- that is the rated load -- it changes how many times the device can safely repeat the work. Some folks will think higher class means fewer cycles, but it is the reverse. Someone might think it is just a color change, but it is real fatigue design. Some people will tie it to load weight, but weight is the rated load, not the class. Higher class means more cycles. On a job I have watched a high-cycle line served by a top-class device. [PAUSE / ASK] Which way does fatigue life go as the class number rises? Make your call.", "28": "Here is why the Service Class is not just paperwork -- it guards against a failure you cannot see coming. Put a low-service-class device on a high-repetition, high-cycle job and you risk fatigue cracking well before you ever exceed the rated load. Fatigue does not care that each pick is under capacity; it adds up cycle by cycle until a crack starts and grows. That is exactly what the higher classes are built to resist. So the class has to match the duty cycle of the job, not just the weight. On a job I have watched a cracked lifter pulled from a high-cycle line for exactly this reason. [PAUSE / ASK] What can happen to an under-classed device on a high-cycle job?", "29": "Here is why the Service Class is not just paperwork -- it protects against a failure mode you cannot see coming. If you put a low-service-class device on a high-repetition, high-cycle job, you risk fatigue cracking well before you ever exceed the rated load. Fatigue does not care that each pick is under capacity; it adds up cycle by cycle until a crack starts and grows. That is exactly what the higher service classes are built to resist. So the class has to match the duty cycle of the job. Some folks will say the class does not affect real use, but fatigue is very real. Someone might expect only cosmetic wear, but cracks are structural. Some people will imagine the device lightening, which makes no sense. Undersized class means fatigue cracking under rated loads. On a job I have watched a cracked lifter pulled from a high-cycle line for exactly this reason. [PAUSE / ASK] What can happen to an under-classed device on a high-cycle job? Make your call.", "30": "Let us pull the two BTH-1 ideas together into how you actually pick a device. You match both its Design Category and its Service Class to the job -- the category to how predictable and severe the loads and conditions are, and the class to how many cycles of duty the device will see. A well-defined light-cycle job and a harsh high-cycle job can call for very different devices even at the same rated load. Rated load alone is not the whole story; category and class complete it. On a job I have watched a planner pick a device on category and class, not just capacity. [PAUSE / ASK] What two BTH-1 ratings do you match to the job?", "31": "Let us pull the two BTH-1 ideas together into how you actually pick a device. You match both its Design Category and its Service Class to the job -- the category to how predictable and severe the loads and conditions are, and the class to how many cycles of duty the device will see. A well-defined light-cycle job and a harsh high-cycle job may call for very different devices even at the same rated load. Rated load alone is not enough; category and class complete the picture. Some folks will match only color to a logo, but that is cosmetic. Someone might match the crane's paint, which is irrelevant. Some people will think any rated device fits anywhere, but category and class matter. Match category and class to the loads and duty. On a job I have watched a planner pick a device on category and class, not just capacity. [PAUSE / ASK] What two BTH-1 ratings do you match to the job? Make your call.", "32": "Last section: the markings B30.20 requires, the combined-weight check against the crane, the shift inspection, and the hard rules -- never exceed the rating, never modify the device, pull it if you cannot verify it. Out on a job I have watched an unmarked lifter tagged out until it could be verified. [PAUSE / ASK] Ask yourself what a device's tag has to tell you before you trust it.", "33": "B30.20 sets what a device must tell you right on its body, and the list is practical. Along with its rated load, an engineered below-the-hook device is marked with its manufacturer and contact information, a serial number, its own weight if it is over a hundred pounds, and -- importantly -- its BTH-1 Design Category and its BTH-1 Service Class. So the stamp tells you not just how much it can lift, but the engineering basis behind it. If those markings are missing or unreadable, you cannot verify what you are holding. On a job I have watched a rigger read a device's category and class straight off the tag. [PAUSE / ASK] Besides rated load, what engineering info is marked on the device?", "34": "B30.20 sets what a device must tell you right on its body, and the list is practical. Along with its rated load, an engineered below-the-hook device is marked with its manufacturer and contact information, a serial number, its own weight if it is over a hundred pounds, and -- importantly -- its BTH-1 Design Category and its BTH-1 Service Class. So the stamp tells you not just how much it can lift, but the engineering basis behind it. If those markings are missing or unreadable, you cannot verify what you are holding. Some folks will expect nothing beyond the rating, but the category and class are required too. Someone might joke about a morale sticker, but the markings are safety data. Some people will imagine a user list, which is not it. Rated load plus category, class, maker, serial, and weight. On a job I have watched a rigger read a device's category and class straight off the tag. [PAUSE / ASK] Besides rated load, what engineering info is marked on the device? Make your call.", "35": "The rated load on a device is a bright line, so let us treat it as one. The rated load is the maximum the device is engineered and permitted to lift, and it is a hard limit you never exceed -- not a suggestion, not a number you stretch when you are being careful. Exceeding it eats into the design factor that keeps the device safe, and it does so invisibly. If the load is heavier than the rating, you get a bigger device, not a hopeful pick. On a job I have watched a lift stopped cold because the load outweighed the device's rating. [PAUSE / ASK] How much can you exceed a rated load?", "36": "The rated load on a device is a bright line, so let us treat it as one. The rated load is the maximum load the device is engineered and permitted to lift, and it is a hard limit you never exceed -- not a suggestion, not a number you stretch when you are being careful. Exceeding it eats into the design factor that keeps the device safe, and does it invisibly. If the load is heavier than the rating, you get a bigger device, not a hopeful pick. Some folks will treat it as a rough suggestion, but it is a firm ceiling. Someone might think it only applies to the first lift, but it applies to every lift. Some people will confuse it with the device's own weight, but that is a separate marking. Rated load is a hard limit, always. On a job I have watched a lift stopped cold because the load outweighed the device's rating. [PAUSE / ASK] How much can you exceed a rated load? Make your call.", "37": "This is a step crews forget, and it can quietly overload a crane. When you check whether the hoisting equipment can handle a lift that uses a below-the-hook device, you must count the combined weight of the load, the device itself, and all the rigging -- not just the bare load. A heavy spreader or lifting beam and its slings can add up fast, and the crane feels every pound of it. So the number you check against the crane's chart is the total: load plus device plus rigging. On a job I have watched a heavy lifting beam eat into the crane's chart capacity in a way a crew nearly missed. [PAUSE / ASK] What all goes into the weight the crane must handle?", "38": "This is a step crews forget, and it can quietly overload a crane. When you check whether the hoisting equipment can handle a lift that uses a below-the-hook device, you must count the combined weight of the load, the device itself, and all the rigging -- not just the bare load. A heavy spreader beam and its slings can add up fast, and the crane feels every pound of it. So the number you check against the crane's chart is the total, load plus device plus rigging. Some folks will count only the load, forgetting the beam's own weight. Someone might count only the device, forgetting the load. Some people will assume the crane covers anything, but its chart has limits. Count the load, the device, and the rigging together. On a job I have watched a heavy lifting beam eat into the crane's chart capacity in a way a crew nearly missed. [PAUSE / ASK] What all goes into the weight the crane must handle? Make your call.", "39": "Like every piece of rigging you have studied, an engineered lifter earns an inspection routine, and it is a regular one. A below-the-hook device is inspected each shift for structural deformation, cracks, and excessive wear on any part, for loose or missing guards, fasteners, and nameplates, and for markings that are still legible. Anything you find that looks like a hazard takes the device out of service until a qualified person clears it. Inspection is routine and frequent, not a one-time or after-the-fact event. On a job I have watched a device removed at a shift check for a crack no one had seen the day before. [PAUSE / ASK] How often does a below-the-hook device get inspected?", "40": "Like every piece of rigging you have studied, an engineered lifter earns an inspection routine, and it is a regular one. A below-the-hook device is inspected each shift for structural deformation, cracks, and excessive wear on any part, for loose or missing guards, fasteners, and nameplates, and for markings that are still legible. Anything you find that looks like a hazard takes the device out of service until a qualified person clears it. Inspection is routine and frequent, not a one-time or after-the-fact event. Some folks will inspect it once when new and forget it, but wear accumulates. Someone might wait until it visibly fails, which is far too late. Some people will leave it all to a once-a-decade factory visit, but shift inspection is on you. Inspect each shift, pull it if damaged. On a job I have watched a device removed at a shift check for a crack no one had seen the day before. [PAUSE / ASK] How often does a below-the-hook device get inspected? Make your call.", "41": "Let us close the duties with the rule for when something is wrong. If a below-the-hook device is damaged, or if its markings -- its rated load, category, or class -- are missing or unreadable, you take it out of service until a qualified person evaluates it. You do not lift with a device you cannot verify, and you do not fix it yourself, because repainting a rating you cannot confirm or welding a field patch both defeat the engineering. Out of service, evaluated by someone qualified, back only when cleared. On a job I have watched an unmarked lifter tagged out until it could be properly verified. [PAUSE / ASK] What do you do with a damaged or unmarked device?", "42": "Let us test the marking rule against a realistic find before the gate. A crew turns up a spreader beam with a clear rated load but no readable Design Category or Service Class. The right move is to hold it out of service until it is properly verified, because the missing category and class are required markings -- without them you cannot confirm the device suits the loads and the duty cycle of your job. A rated load alone does not tell you whether it fits harsh or high-cycle service. You verify before you trust. On a job I have watched a lifter with half its stamp gone set aside until it was confirmed. [PAUSE / ASK] Is a readable rated load, by itself, enough to trust a device?", "43": "This is the gate, and it closes the Advanced Rigger stage. Six questions, all six, because trusting an engineered lifter you do not understand is how loads and people get hurt. They pull from every section -- the BTH-1 and B30.20 split, the design categories and their factors, the service classes and fatigue, the combined-weight check, and the rules against modifying or using an unverifiable device. Reason each one. I have watched this be the point a rigger stops seeing a spreader as just a bar and starts reading its whole engineering story. [PAUSE / ASK] Ready to close out the stage?", "44": "Let us close the duties with the rule for when something is wrong. If a below-the-hook device is damaged, or if its markings -- its rated load, category, or class -- are missing or unreadable, you take it out of service until a qualified person evaluates it. You do not lift with a device you cannot verify, and you do not fix it yourself, because repainting a rating you cannot confirm or welding a field patch both defeat the engineering. Out of service, evaluated by someone qualified, back only when cleared. Some folks will use it anyway on the crane's strength, but the device is the question, not the crane. Someone might repaint the markings, but you cannot invent a verified rating. Some people will weld a field patch, which alters an engineered device. Take it out of service and get it evaluated. On a job I have watched an unmarked lifter tagged out until it could be properly verified. [PAUSE / ASK] What do you do with a damaged or unmarked device? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "45": "Let us test the marking rule against a realistic find. A crew turns up a spreader beam with a clear rated load but no readable Design Category or Service Class. The right move is to hold it out of service until it is properly verified, because the missing category and class are required markings -- without them you cannot confirm the device is right for the loads and the duty cycle of your job. A rated load alone does not tell you whether it suits harsh or high-cycle service. Some folks will use it on the rating alone, but the category and class are required for a reason. Someone might guess them from the size, but guessing is not verifying. Some people will paint on values they assume, but inventing markings is worse than none. Hold it out of service and verify it. On a job I have watched a lifter with half its stamp gone set aside until it was confirmed. [PAUSE / ASK] What do you do with a device missing its category and class? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "This is the division of labor between the two standards, and it is worth having cold. BTH-1 governs the design of the below-the-hook device -- its structural and mechanical engineering. B30.20 governs the rest: how it is marked, inspected, tested, and operated. The engineer designs to BTH-1; the device lives its working life under B30.20. Some folks will flip them and say B30.20 does the design, but it is the operational volume. Someone might call them identical, but they cover different phases. Some people will think neither applies to beams, but both apply squarely to spreader and lifting beams. BTH-1 designs; B30.20 marks and operates. On a job I have watched both standards in play on one spreader -- designed to one, operated under the other. [PAUSE / ASK] Which standard is the design standard? Make your call.", "47": "This is the heart of the design categories, so reason it through. Category A, for well-defined and predictable service, uses a design factor of two against yield. Category B, for less predictable or more severe service, uses a design factor of three -- the larger, more conservative factor, because more uncertainty demands more margin. So A is the leaner factor and B the heavier one. Some folks will give A the larger factor, but it is B that is more conservative. Someone might think both share one factor, but they differ, two versus three. Some people will say neither has a factor, but both do. A is two, B is three, B more conservative. On a job I have watched an uncertain lift steered to the higher-factor category. [PAUSE / ASK] Which category carries the larger design factor? Make your call.", "48": "Do not mix up the two BTH-1 ratings, so let us keep this one sharp. The Service Class is fundamentally about how many load cycles the device is designed for -- its fatigue life -- running from Class 0 at the low end up to Class 4 for well over two million cycles. It is not about the single heaviest pick, which is the rated load, and it is not about color or price. Class answers how many times; rated load answers how heavy. Some folks will guess paint color, but that is cosmetic. Someone might tie it to the heaviest lift, but that is the rated load. Some people will think resale value, but this is fatigue engineering. Service Class is about load cycles. On a job I have watched a high-cycle duty matched to a high service class on purpose. [PAUSE / ASK] What does the Service Class count? Make your call.", "49": "This is the combined-weight rule, and forgetting it is how cranes get quietly overloaded. When you check the crane's capacity chart for a lift that uses a heavy lifting beam, the weight you use is the load plus the beam plus all the rigging, combined -- everything hanging on that hook. A heavy beam and its slings can take a real bite out of the chart, and the crane carries every pound. Some folks will use only the bare load, forgetting the beam. Someone might use only the beam, forgetting the load. Some people will count it as zero because it hangs below the hook, but the hook still feels it. Add the load, the beam, and the rigging. On a job I have watched a heavy beam pull a lift right up against the crane's chart limit. [PAUSE / ASK] What all counts against the crane's chart? Make your call.", "50": "Here is the rule that protects both you and the device's engineering. When a below-the-hook device does not quite fit the pick, you get the right device or bring in a qualified engineer -- you never modify an engineered lifter yourself. Cutting, welding, grinding, or bolting on a fabricated extension all change the device from what the engineer analyzed, and its rating no longer means anything. The fix is the correct equipment or qualified engineering, not a field modification. Some folks will re-weld it to fit, but that voids the design. Someone might grind part away, which weakens it unpredictably. Some people will bolt on a homemade extension, which is unrated. Get the right device or an engineer; do not modify. On a job I have watched a crew send for the proper lifter rather than take a grinder to the one on hand. [PAUSE / ASK] Who modifies an engineered lifter, and how? Make your call.", "51": "Close on the markings rule, because an unverifiable device is a real hazard. When a spreader beam turns up with its rated-load and category markings worn away and unreadable, you remove it from service until a qualified person verifies it. Without legible markings you cannot confirm its rating, its Design Category, or its Service Class, and a device you cannot verify is a device you cannot trust. You do not estimate, you do not guess a half-rating, and you do not repaint numbers from memory. Out of service, verified by someone qualified, back only when confirmed. Some folks will eyeball the rating from how sturdy it looks, but looks are not a rating. Someone might use half a guess, but a guess is not verified. Some people will repaint from memory, inventing a rating. Remove it and have it verified. On a job I have watched an unreadable beam tagged out on the spot. [PAUSE / ASK] What do you do with a beam whose markings are gone? Make your call.", "52": "That is Below-the-Hook Lifting Device Design, and with it you have closed the Advanced Rigger stage. Here is what you carry out. ASME BTH-1 is the design standard for below-the-hook lifting devices, and it partners with B30.20, which covers marking, inspection, and operation. A below-the-hook device is an engineered, rated product -- you operate it, you never redesign or modify it. Its Design Category reflects how predictable the service is: Category A, well-defined, carries a design factor of two; Category B, less predictable or more severe, carries a more conservative factor of three. Its Service Class, zero through four, sets its fatigue life in load cycles, and an under-classed device can crack under repetition even below its rated load. The device is marked with its rated load, category, and class; you never exceed the rated load, you count the combined weight of load, device, and rigging against the crane, you inspect each shift, and you pull any device that is damaged or that you cannot verify. Step back and look at the whole stage: center of gravity, unequal legs, sling tension, terminations, hardware, blocks, multi-point lifts, friction and inclined planes, and now the engineered devices that tie it together. You are an advanced rigger now. I have watched these skills turn good hands into the person a crew trusts to plan the hard lift. [PAUSE / ASK] Before you go, think of one thing from this whole stage you will use on your very next lift."};
+var GATE = ["S4_M23_q18", "S4_M23_q19", "S4_M23_q20", "S4_M23_q21", "S4_M23_q22", "S4_M23_q23", "S4_M23_q24", "S4_M23_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M23_q01", "7": "S4_M23_q02", "9": "S4_M23_q03", "11": "S4_M23_q04", "14": "S4_M23_q05", "16": "S4_M23_q06", "18": "S4_M23_q07", "20": "S4_M23_q08", "23": "S4_M23_q09", "25": "S4_M23_q10", "27": "S4_M23_q11", "29": "S4_M23_q12", "31": "S4_M23_q13", "34": "S4_M23_q14", "36": "S4_M23_q15", "38": "S4_M23_q16", "40": "S4_M23_q17", "44": "S4_M23_q18", "45": "S4_M23_q19", "46": "S4_M23_q20", "47": "S4_M23_q21", "48": "S4_M23_q22", "49": "S4_M23_q23", "50": "S4_M23_q24", "51": "S4_M23_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M23';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

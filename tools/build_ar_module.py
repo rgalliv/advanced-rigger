@@ -15,8 +15,12 @@ Usage: python3 build_ar_module.py <module_key> <src_dir> <out_dir>
 """
 import json, re, sys, random
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
 
 REVIEW_OFFSET = 17
+
+# Gate sequences already in use platform-wide. A new gate must not reuse one.
+from ar_configs import MODULES
 
 # Gate sequences already in use platform-wide. A new gate must not reuse one.
 KNOWN_GATE_SEQS = {
@@ -24,40 +28,6 @@ KNOWN_GATE_SEQS = {
     "ACBDCA",    # S4_M02
     "DABDCA",    # S4_M03-M09 and EM_M01 (the shared-key defect)
     "ABDCABCD",  # S4_M15
-}
-
-M16_ACS = {
-    1: ["S4.M16.K4", "S4.M16.R1"], 2: ["S4.M16.K4"], 3: ["S4.M16.K3", "S4.M16.R2"],
-    4: ["S4.M16.K1", "S4.M16.S1"], 5: ["S4.M16.K1"], 6: ["S4.M16.K2"], 7: ["S4.M16.K3"],
-    8: ["S4.M16.S2"], 9: ["S4.M16.K5"], 10: ["S4.M16.K5"], 11: ["S4.M16.K5", "S4.M16.S3"],
-    12: ["S4.M16.S3"], 13: ["S4.M16.K6", "S4.M16.R4"], 14: ["S4.M16.R2"], 15: ["S4.M16.R2"],
-    16: ["S4.M16.R5", "S4.M16.S4"], 17: ["S4.M16.S5"],
-    # gate q18-q25
-    18: ["S4.M16.K7", "S4.M16.S4"], 19: ["S4.M16.K4", "S4.M16.R1"], 20: ["S4.M16.S2"],
-    21: ["S4.M16.R1", "S4.M16.K4"], 22: ["S4.M16.K1", "S4.M16.K3"],
-    23: ["S4.M16.S3", "S4.M16.K5"], 24: ["S4.M16.R2", "S4.M16.R3"],
-    25: ["S4.M16.R5", "S4.M16.S4"],
-}
-
-MODULES = {
-    "S4_M16": dict(
-        src="S4_M02", dst="S4_M16",
-        title="Unequal Leg Loading and Off-Level Pick Points",
-        salt="CQ1:S4_M16_UnequalLegLoading",
-        gate_code="R-201C / AR-102C",
-        old_next="S4_M03", next="S4_M17",
-        next_label="Sling Tension Beyond the Chart",
-        total=46,
-        # tail permutation: old slides 36,37,38,39 become 38,39,36,37 so the two
-        # trailing formative checks land inside a contiguous t-gate block
-        permute_from=36, permute_order=[38, 39, 36, 37],
-        promoted={36: 1, 37: 2},          # old slide -> Final Question ordinal
-        old_gate_slides=range(40, 46),    # existing t-gate slides, renumber FQ1-6 -> FQ3-8
-        acs_prefix="S4.M16",
-        acs_counts=dict(K=7, R=5, S=5),
-        item_acs=M16_ACS,
-        seed=20260808,
-    ),
 }
 
 
@@ -80,7 +50,7 @@ def slide_blocks(html):
     return html[:spans[0]], blocks, html[end:]
 
 
-def design_key(cfg):
+def design_key(cfg, used):
     rnd = random.Random(cfg["seed"])
     L = "ABCD"
     for _ in range(500000):
@@ -88,7 +58,7 @@ def design_key(cfg):
         rnd.shuffle(gate)
         if any(gate[i] == gate[i - 1] for i in range(1, 8)):
             continue
-        if "".join(L[g] for g in gate) in KNOWN_GATE_SEQS:
+        if "".join(L[g] for g in gate) in used:
             continue
         need = [7, 6, 6, 6]
         for g in gate:
@@ -107,7 +77,8 @@ def design_key(cfg):
     raise SystemExit("no conforming key found")
 
 
-def build(key, src_dir, out_dir):
+def build(key, src_dir, out_dir, used=None):
+    used = KNOWN_GATE_SEQS if used is None else used
     cfg = MODULES[key]
     src, dst = Path(src_dir), Path(out_dir)
     dst.mkdir(parents=True, exist_ok=True)
@@ -144,7 +115,7 @@ def build(key, src_dir, out_dir):
         opts.append([f[i] for i in range(4)])
         correct.append(f[old_key[oq]])
 
-    new_idx = design_key(cfg)
+    new_idx = design_key(cfg, used)
 
     rnd = random.Random(cfg["seed"] + 7)
     new_opts = []
@@ -245,9 +216,17 @@ def build(key, src_dir, out_dir):
         lines += [f"## Slide {n}", "", new_narr[str(n)], ""]
     (dst / f"{cfg['dst']}_instructor_script.md").write_text("\n".join(lines), encoding="utf-8")
 
-    print(f"built {cfg['dst']}: gate={''.join('ABCD'[new_idx[i]] for i in range(17,25))} "
-          f"dist={[new_idx.count(i) for i in range(4)]} slides={total}")
+    gseq = "".join("ABCD"[new_idx[i]] for i in range(17, 25))
+    used.add(gseq)
+    print(f"built {cfg['dst']}: gate={gseq} dist={[new_idx.count(i) for i in range(4)]} "
+          f"slides={total} acs_gate={len(manifest['acs_coverage']['gate'])} "
+          f"taught_only={len(manifest['acs_coverage']['taught_only'])}")
+    return gseq
 
 
 if __name__ == "__main__":
-    build(sys.argv[1], sys.argv[2], sys.argv[3])
+    key, src_dir, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+    used = set(KNOWN_GATE_SEQS)
+    keys = sorted(MODULES) if key == "all" else [key]
+    for k in keys:
+        build(k, src_dir, out_dir, used)

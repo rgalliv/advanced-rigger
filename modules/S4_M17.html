@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sling Tension and Specialty Slings | CraneQualified S4_M17</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M17" data-cq-stage="4"
+      data-cq-total="53" data-cq-gate-code="R-201C / AR-103C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M17 &middot; Sling Tension and Specialty Slings</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Sling Tension and Specialty Slings</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 3</p><p class='meta'>Gate R-201C / AR-103C -- 6-question final at 100 percent</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Derive the Load Angle Factor from the rigging triangle and from the sine of the sling angle</li><li>Apply the tension multipliers at 90, 60, 45, and 30 degrees and explain the 30-degree floor</li><li>Distinguish the sling-to-horizontal angle from the included angle and avoid the load-chart trap</li><li>Use the D/d ratio and its efficiency values to derate a sling bent over a small diameter</li><li>Apply vertical, choker, and basket hitch efficiencies correctly</li><li>Match specialty sling types -- roundsling, metal mesh, and others -- to the load and the hazard</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>The Load Angle Factor, Derived</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>From a Number to an Understanding</h2>
+<p>In the last module the <b>Load Angle Factor (LAF)</b> was a value you looked up or were given. Here we build it from scratch so you can reconstruct it on any job, with any geometry, without a table.</p><p>The chain of reasoning for every angled pick:</p><ol class='rank'><li>Find the <b>share of load</b> on the leg (weight and geometry)</li><li>Find the <b>Load Angle Factor</b> from the leg's angle</li><li>Multiply: <b>leg tension = LAF x share of load</b></li></ol><p class='note'>Sharing the load was M02. The Load Angle Factor is this module. They are two separate multipliers and both must be applied.</p>
+</div></section>
+<section class="slide t-content" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>The Sling-to-Horizontal Angle</h2>
+<p>The angle that sets tension is the <b>sling-to-horizontal angle</b>: the angle between the sling leg and the horizontal plane of the load.</p><ul><li>Leg straight up = <b>90 degrees</b> (no lean, least tension)</li><li>Leg leaning out to a wider pick point = <b>smaller angle</b> (more tension)</li></ul><p class='warn'>Do not measure from vertical. The angle from vertical is the complement -- it reads 30 when the true sling-to-horizontal is 60, and that swap will size your slings wrong.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The sling angle that drives leg tension is measured between the sling leg and:</p>
+<div class="quiz-group" data-qid="S4_M17_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q01',0,'fb_S4_M17_q01')">The vertical centerline dropping from the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q01',1,'fb_S4_M17_q01')">The horizontal plane of the load surface</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q01',2,'fb_S4_M17_q01')">The face of the load the sling rests against</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q01',3,'fb_S4_M17_q01')">The other sling leg on the opposite side</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>LAF = Leg Length / Height</h2>
+<p>The house formula, and the one printed in the rigger reference booklet:</p><p class='formula'>Load Angle Factor = Leg Length (L) / Vertical Height (H)</p><ul><li><b>L</b> = the slant length of the sling leg, pick point to hook</li><li><b>H</b> = the vertical distance from the load up to the hook (headroom)</li></ul><p>Example: a 20 ft leg with 15 ft of headroom gives LAF = 20 / 15 = <b>1.33</b>. Each leg feels 1.33 times its share.</p><p class='note'>The factor is always 1 or greater. A factor below 1 means you measured something backwards.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The Load Angle Factor for a sling leg is calculated as:</p>
+<div class="quiz-group" data-qid="S4_M17_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q02',0,'fb_S4_M17_q02')">The load weight divided by the leg count</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q02',1,'fb_S4_M17_q02')">Vertical height divided by the leg length</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q02',2,'fb_S4_M17_q02')">Leg length divided by the vertical height</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q02',3,'fb_S4_M17_q02')">The span divided by the vertical height</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Why L/H Equals 1/sin(angle)</h2>
+<p>The tape-measure shortcut and the trigonometry are the same thing.</p><p>In the rigging triangle, the sine of the sling-to-horizontal angle is:</p><p class='formula'>sin(angle) = H / L  (opposite over hypotenuse)</p><p>So its inverse is:</p><p class='formula'>1 / sin(angle) = L / H = Load Angle Factor</p><p class='note'>This is why a shallow angle explodes tension: as the angle drops, its sine drops, and 1 divided by a small number gets large fast.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The Load Angle Factor is mathematically the same as:</p>
+<div class="quiz-group" data-qid="S4_M17_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q03',0,'fb_S4_M17_q03')">One divided by the sine of the sling-to-horizontal angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q03',1,'fb_S4_M17_q03')">The sine of the sling-to-horizontal angle by itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q03',2,'fb_S4_M17_q03')">The cosine of the sling-to-horizontal angle itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q03',3,'fb_S4_M17_q03')">The tangent of the included angle measured at the hook</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>The Tension Multipliers</h2>
+<p>Four sling-to-horizontal angles worth memorizing, with their Load Angle Factors:</p><table class='rate'><tr><th>Angle to horizontal</th><th>Load Angle Factor</th><th>Feel</th></tr><tr><td>90 degrees (vertical)</td><td>1.00</td><td>least tension</td></tr><tr><td>60 degrees</td><td>1.155</td><td>mild</td></tr><tr><td>45 degrees</td><td>1.414</td><td>noticeable</td></tr><tr><td>30 degrees</td><td>2.00</td><td>tension doubles</td></tr></table><p class='note'>These come straight from 1/sin(angle). Anchored to the sling-angle basis in ASME B30.9.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">At a sling-to-horizontal angle of 30 degrees, the tension in each leg is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q04',0,'fb_S4_M17_q04')">Equal to the share of load on that leg</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q04',1,'fb_S4_M17_q04')">Half the share of load on that leg</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q04',2,'fb_S4_M17_q04')">Two times the share of load on that leg</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q04',3,'fb_S4_M17_q04')">1.15 times the share of load on that leg</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q04"></div>
+</div></section>
+<section class="slide t-content" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Worked Example: Two Multipliers</h2>
+<p>A 12,000 lb load on a symmetric 3-leg bridle, each leg at 20 ft length with 15 ft of headroom.</p><ol class='rank'><li><b>Share of load:</b> 12,000 / 3 legs = <b>4,000 lb</b> per leg</li><li><b>Load Angle Factor:</b> 20 / 15 = <b>1.33</b></li><li><b>Leg tension:</b> 1.33 x 4,000 = <b>5,320 lb</b> per leg</li></ol><p class='note'>Size the sling for 5,320 lb (times any dynamic factor), not the 4,000 lb share. The angle added over 1,300 lb per leg.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A 12,000 lb load hangs on three legs sharing evenly, each leg at a Load Angle Factor of 1.33. Each leg's tension is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q05',0,'fb_S4_M17_q05')">12,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q05',1,'fb_S4_M17_q05')">3,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q05',2,'fb_S4_M17_q05')">4,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q05',3,'fb_S4_M17_q05')">5,320 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>The Curve: Why Shallow Bites</h2>
+<p>The Load Angle Factor does not rise evenly as the angle drops -- it rises slowly at first, then runs away near the bottom.</p><table class='rate'><tr><th>Angle</th><th>Factor</th></tr><tr><td>60 degrees</td><td>1.15</td></tr><tr><td>45 degrees</td><td>1.41</td></tr><tr><td>30 degrees</td><td>2.00</td></tr><tr><td>20 degrees</td><td>2.92</td></tr><tr><td>10 degrees</td><td>5.76</td></tr></table><p class='warn'>The danger is not linear. It ambushes you at the low end -- a nearly horizontal pull can multiply tension several times over.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">As the sling-to-horizontal angle gets smaller, the tension in each leg:</p>
+<div class="quiz-group" data-qid="S4_M17_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q06',0,'fb_S4_M17_q06')">Falls steadily toward zero</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q06',1,'fb_S4_M17_q06')">Rises, and rises faster the lower the angle goes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q06',2,'fb_S4_M17_q06')">Rises at a steady, even rate the whole way down</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q06',3,'fb_S4_M17_q06')">Stays the same until it reaches 30 degrees</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>The 30-Degree Floor</h2>
+<p>Most standards, load charts, and employers set <b>30 degrees to horizontal as a working minimum</b> for sling angles.</p><p>The reason is the curve: below 30 degrees you pay a steep tension penalty for a small gain in reach or headroom. You overload slings, hardware, and pick points to save a little vertical room -- a bad trade.</p><p class='note'>When the geometry pushes you below 30, the fix is to change the geometry -- move the pick points in, add headroom, or use a spreader bar -- not to accept the tension.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The 30-degree sling-to-horizontal angle is treated as a working floor mainly because:</p>
+<div class="quiz-group" data-qid="S4_M17_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q07',0,'fb_S4_M17_q07')">It is the only angle that load charts are ever printed for</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q07',1,'fb_S4_M17_q07')">Hooks are only rated to open up at angles shallower than that</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q07',2,'fb_S4_M17_q07')">Below it, leg tension climbs steeply for little practical gain</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q07',3,'fb_S4_M17_q07')">A sling physically cannot bend any tighter than that angle</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q07"></div>
+</div></section>
+<section class="slide t-divider" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Sling-to-Horizontal vs Included Angle</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>The Included Angle</h2>
+<p>The <b>included angle</b> is the angle between the two sling legs, measured at the hook where they meet.</p><ul><li>Wide, flat V = <b>large</b> included angle</li><li>Legs nearly parallel and vertical = <b>small</b> included angle</li></ul><p class='warn'>This is a different measurement from the sling-to-horizontal angle. Confusing the two is the most common angle error in rigging.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The included angle of a two-leg bridle is the angle measured:</p>
+<div class="quiz-group" data-qid="S4_M17_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q08',0,'fb_S4_M17_q08')">Between the two sling legs where they meet at the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q08',1,'fb_S4_M17_q08')">Between a single leg and the horizontal load surface</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q08',2,'fb_S4_M17_q08')">Between a sling leg and the vertical hook centerline</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q08',3,'fb_S4_M17_q08')">Between the load edge and whichever sling leg is nearest</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q08"></div>
+</div></section>
+<section class="slide t-content" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>The Relationship -- and the Trap at 60</h2>
+<p>For a symmetric two-leg pick:</p><p class='formula'>Included angle = 180 - (2 x sling-to-horizontal angle)</p><table class='rate'><tr><th>Sling-to-horizontal</th><th>Included angle</th></tr><tr><td>30 degrees</td><td>120 degrees</td></tr><tr><td>45 degrees</td><td>90 degrees</td></tr><tr><td>60 degrees</td><td>60 degrees</td></tr></table><p class='warn'>At 60 degrees -- and only there -- both angles read the same number. That coincidence is exactly what sets the trap.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">For a symmetric two-leg pick, a 60-degree sling-to-horizontal angle produces an included angle of:</p>
+<div class="quiz-group" data-qid="S4_M17_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q09',0,'fb_S4_M17_q09')">30 degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q09',1,'fb_S4_M17_q09')">120 degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q09',2,'fb_S4_M17_q09')">90 degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q09',3,'fb_S4_M17_q09')">60 degrees</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>The Load-Chart Trap</h2>
+<p><b>Load charts and standards quote the sling-to-horizontal angle</b> -- leg to the level. Always.</p><p>If a rigger reads a charted 60 degrees as the <i>included</i> angle and builds 60 degrees between the legs, each leg is actually at only <b>30 degrees to horizontal</b>:</p><ul><li>Planned factor (60 to horizontal): <b>1.155</b></li><li>Actual factor (30 to horizontal): <b>2.00</b></li><li>Result: nearly <b>double</b> the tension, chart looking honored</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A load chart lists sling capacity at a 60-degree angle. A rigger reads that as the included angle and rigs so the legs form 60 degrees between them. The result is:</p>
+<div class="quiz-group" data-qid="S4_M17_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q10',0,'fb_S4_M17_q10')">The legs sit at only 30 degrees to horizontal, so tension is far higher than planned</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q10',1,'fb_S4_M17_q10')">Nothing changes at all, because the two angles are always exactly equal anyway</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q10',2,'fb_S4_M17_q10')">The rigging exactly matches the chart and no adjustment is needed at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q10',3,'fb_S4_M17_q10')">The legs come out steeper than planned, so the tension is actually lower and safer</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q10"></div>
+</div></section>
+<section class="slide t-divider" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>The D/d Ratio and Bearing Efficiency</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>What the D/d Ratio Is</h2>
+<p>The <b>D/d ratio</b> measures how sharply a sling bends where it wraps something.</p><ul><li><b>D</b> = diameter of the object the sling body bends around (pin, shackle bow, load corner, hook saddle)</li><li><b>d</b> = diameter of the sling's own body (the rope)</li></ul><p>A large D/d is a gentle bend. A small D/d is a tight bend, and a tight bend costs capacity -- the outer fibers of the rope are stretched hard while the inner ones go slack.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">In the D/d ratio for a wire rope sling, the letter D refers to:</p>
+<div class="quiz-group" data-qid="S4_M17_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q11',0,'fb_S4_M17_q11')">The diameter of the hoist drum on the crane itself</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q11',1,'fb_S4_M17_q11')">The distance measured between the two pick points</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q11',2,'fb_S4_M17_q11')">The overall depth of the load that is being lifted</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q11',3,'fb_S4_M17_q11')">The diameter of the object the sling body bends around</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>The Efficiency Values</h2>
+<p>Wire rope sling strength efficiency by D/d ratio (from the rigger reference booklet):</p><table class='rate'><tr><th>D/d ratio</th><th>Efficiency</th></tr><tr><td>25 : 1</td><td>100 percent</td></tr><tr><td>20 : 1</td><td>92 percent</td></tr><tr><td>15 : 1</td><td>88 percent</td></tr><tr><td>10 : 1</td><td>86 percent</td></tr><tr><td>4 : 1</td><td>75 percent</td></tr><tr><td>2 : 1</td><td>65 percent</td></tr><tr><td>1 : 1</td><td>50 percent</td></tr></table><p class='note'>At 1:1 -- the pin as thin as the rope -- the sling holds only half its rating.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">According to the wire rope sling efficiency values, a D/d ratio of 1 to 1 gives the sling about:</p>
+<div class="quiz-group" data-qid="S4_M17_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q12',0,'fb_S4_M17_q12')">50 percent of its rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q12',1,'fb_S4_M17_q12')">75 percent of its rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q12',2,'fb_S4_M17_q12')">100 percent of its rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q12',3,'fb_S4_M17_q12')">92 percent of its rated capacity</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q12"></div>
+</div></section>
+<section class="slide t-content" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>Protecting the Bend</h2>
+<p>Sharp corners and small-diameter contact do two kinds of damage: they cut the sling, and they tighten the D/d ratio and steal capacity.</p><p>The fix is the same for both:</p><ul><li><b>Corner protectors and softeners</b> -- put a larger radius between sling and edge</li><li><b>Saddles and blocks</b> -- widen the effective D at the contact point</li></ul><p class='note'>The cheap piece of gear protects the expensive one. Keep softeners on the truck.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">To protect sling capacity when a load has sharp corners, the rigger should:</p>
+<div class="quiz-group" data-qid="S4_M17_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q13',0,'fb_S4_M17_q13')">Lift a little faster so the sharp corner bears load only briefly</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q13',1,'fb_S4_M17_q13')">Use softeners or larger-radius contact to open the D/d ratio</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q13',2,'fb_S4_M17_q13')">Choke the sling down tighter so that it cannot shift at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q13',3,'fb_S4_M17_q13')">Rate the sling at its full vertical capacity regardless</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q13"></div>
+</div></section>
+<section class="slide t-divider" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Specialty Slings and Hitch Efficiencies</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>The Three Hitch Efficiencies</h2>
+<p>The same sling has three different working capacities depending on how it is hitched:</p><table class='rate'><tr><th>Hitch</th><th>Capacity vs vertical</th><th>Why</th></tr><tr><td>Vertical</td><td>100 percent</td><td>baseline, straight pull</td></tr><tr><td>Choker</td><td>about 75 percent</td><td>sharp bend at the choke point</td></tr><tr><td>Basket (vertical legs)</td><td>up to 200 percent</td><td>two supporting parts</td></tr></table><p class='note'>Anchored to the sling ratings in ASME B30.9. The basket doubling holds only while the legs are vertical.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A vertical hitch is rated at 100 percent of the sling's capacity. A choker hitch is rated at about:</p>
+<div class="quiz-group" data-qid="S4_M17_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q14',0,'fb_S4_M17_q14')">200 percent of the sling capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q14',1,'fb_S4_M17_q14')">110 percent of the sling capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q14',2,'fb_S4_M17_q14')">100 percent of the sling capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q14',3,'fb_S4_M17_q14')">75 percent of the sling capacity</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>The Basket Hitch in Detail</h2>
+<p>A basket cradles the load, giving <b>two supporting parts</b> of sling. With both legs truly vertical, capacity is up to <b>200 percent</b> of the vertical rating.</p><p class='warn'>The moment the legs spread to reach around the load, they take on a sling angle -- and the Load Angle Factor from Section 1 cuts the basket capacity right back down.</p><p>A wide basket is not a 200 percent basket. Apply the angle factor to the spread legs exactly as you would for a bridle.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A basket hitch can reach up to 200 percent of the sling's vertical capacity, but only when:</p>
+<div class="quiz-group" data-qid="S4_M17_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q15',0,'fb_S4_M17_q15')">The choke angle stays above 120 degrees</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q15',1,'fb_S4_M17_q15')">Both legs of the basket hang vertically</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q15',2,'fb_S4_M17_q15')">The load is lighter than five thousand pounds</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q15',3,'fb_S4_M17_q15')">The sling is synthetic rather than wire rope</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Basket Worked Example</h2>
+<p>A wire rope sling rated <b>10,000 lb vertical</b>, used in a basket:</p><ul><li><b>Legs vertical:</b> up to 2 x 10,000 = <b>20,000 lb</b></li><li><b>Legs at 45 degrees to horizontal:</b> the spread applies a factor; the effective capacity drops well below 20,000 lb</li></ul><p class='note'>Never rate a spread basket at the full doubled number. The angle is always working against you once the legs lean.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A wire rope sling is rated at 10,000 lb vertical. Used in a basket hitch with both legs vertical, its capacity is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q16',0,'fb_S4_M17_q16')">20,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q16',1,'fb_S4_M17_q16')">7,500 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q16',2,'fb_S4_M17_q16')">10,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q16',3,'fb_S4_M17_q16')">5,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Endless Roundslings</h2>
+<p>An <b>endless roundsling</b> is a continuous loop of load-bearing yarns inside a woven protective cover.</p><ul><li>The <b>core yarns</b> carry the load; the <b>cover</b> takes abrasion and carries nothing</li><li>Conforms around a load, rotates to spread wear, grips gently on finished surfaces</li><li>Works in vertical, choker, and basket hitches</li></ul><p class='warn'>The load-bearing core is hidden. A cut or damaged cover means you cannot verify the core -- remove it from service.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An endless roundsling differs from a flat web sling mainly in that it:</p>
+<div class="quiz-group" data-qid="S4_M17_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q17',0,'fb_S4_M17_q17')">Can never be safely used in a choker hitch under any circumstances</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q17',1,'fb_S4_M17_q17')">Has no rated lifting capacity and is meant for tag lines only</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q17',2,'fb_S4_M17_q17')">Is a continuous loop of load-bearing yarns inside a protective cover</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q17',3,'fb_S4_M17_q17')">Must always be paired with a wire rope sling to carry the load</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>Metal Mesh and Matching the Type</h2>
+<p><b>Metal mesh slings</b> -- woven wire and cross rods -- resist heat, sharp edges, and abrasion that would destroy a synthetic.</p><p>Match the sling to the hazard:</p><table class='rate'><tr><th>Load / hazard</th><th>Reach for</th></tr><tr><td>Heat, sharp edges, abrasion</td><td>metal mesh</td></tr><tr><td>Delicate or polished finish</td><td>synthetic web or roundsling</td></tr><tr><td>General-purpose, rugged</td><td>wire rope</td></tr></table><p class='note'>The metal fabric can mark a fine finish -- do not reach for it on delicate surfaces.</p>
+</div></section>
+<section class="slide t-content" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h2>The Pre-Use Discipline</h2>
+<p>No matter the sling type, the lift-day check never changes:</p><ol class='rank'><li>Confirm a <b>legible identification tag</b></li><li>Read the <b>rated capacity for the exact hitch and angle</b> you will use</li><li>Inspect the body for damage per the sling type</li></ol><p class='warn'>No readable tag = out of service. A sling you cannot identify is a sling you cannot trust, no matter how good it looks.</p>
+</div></section>
+<section class="slide t-divider" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">A metal mesh sling is most appropriate when the load involves:</p>
+<div class="quiz-group" data-qid="S4_M17_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q18',0,'fb_S4_M17_q18')">Delicate polished surfaces that would mark or scratch easily</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q18',1,'fb_S4_M17_q18')">Situations where no identification tag is required at all</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q18',2,'fb_S4_M17_q18')">Only very light loads weighing under about a hundred pounds</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q18',3,'fb_S4_M17_q18')">Heat, sharp edges, or abrasion that would destroy a synthetic</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">Before every lift, regardless of sling type, the rigger must confirm the sling's:</p>
+<div class="quiz-group" data-qid="S4_M17_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q19',0,'fb_S4_M17_q19')">Identification tag and rated capacity for the hitch used</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q19',1,'fb_S4_M17_q19')">Purchase price and the name of the original vendor</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q19',2,'fb_S4_M17_q19')">The manufacture location and the lot color code only</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q19',3,'fb_S4_M17_q19')">The color checked against a seasonal inspection code</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A 16,000 lb load is picked on two legs at 30 degrees to horizontal, sharing evenly. The tension in each leg is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q20',0,'fb_S4_M17_q20')">8,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q20',1,'fb_S4_M17_q20')">9,200 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q20',2,'fb_S4_M17_q20')">16,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q20',3,'fb_S4_M17_q20')">4,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A load chart quotes sling capacity at 45 degrees. To honor it, the rigger measures 45 degrees:</p>
+<div class="quiz-group" data-qid="S4_M17_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q21',0,'fb_S4_M17_q21')">Between the sling leg and vertical</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q21',1,'fb_S4_M17_q21')">Between the sling leg and the horizontal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q21',2,'fb_S4_M17_q21')">Between the two sling legs at the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q21',3,'fb_S4_M17_q21')">From the load edge to the sling</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A wire rope sling bends around a pin whose diameter equals four times the rope diameter. Its efficiency is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q22',0,'fb_S4_M17_q22')">75 percent of the rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q22',1,'fb_S4_M17_q22')">92 percent of the rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q22',2,'fb_S4_M17_q22')">100 percent of the rated capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q22',3,'fb_S4_M17_q22')">50 percent of the rated capacity</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">A sling rated 6,000 lb vertical is used in a choker hitch. Its working capacity is about:</p>
+<div class="quiz-group" data-qid="S4_M17_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q23',0,'fb_S4_M17_q23')">9,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q23',1,'fb_S4_M17_q23')">6,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q23',2,'fb_S4_M17_q23')">12,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q23',3,'fb_S4_M17_q23')">4,500 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">The safest specialty sling for lifting a hot forging with sharp scale edges is:</p>
+<div class="quiz-group" data-qid="S4_M17_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q24',0,'fb_S4_M17_q24')">A nylon flat web sling</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q24',1,'fb_S4_M17_q24')">A metal mesh sling</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q24',2,'fb_S4_M17_q24')">A polyester roundsling</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q24',3,'fb_S4_M17_q24')">A single-part cotton rope</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">A rigger picks up a sling and finds the identification tag is worn completely illegible. The correct action is:</p>
+<div class="quiz-group" data-qid="S4_M17_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q25',0,'fb_S4_M17_q25')">Use it at half capacity to stay conservative</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q25',1,'fb_S4_M17_q25')">Compare it to a tagged sling of similar size and match the rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q25',2,'fb_S4_M17_q25')">Remove the sling from service until it is properly identified</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M17_q25',3,'fb_S4_M17_q25')">Estimate the rating from the sling's diameter and use it</button>
+</div>
+<div class="feedback" id="fb_S4_M17_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-53" data-idx="53">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M18'}}))">Next: Slings and Terminations &gt;</button><p>That is Sling Tension and Specialty Slings.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 53</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 53;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M17)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M17_SlingTension";
+var HASHES={"S4_M17_q01": "3e4d5b0e", "S4_M17_q02": "9fe49392", "S4_M17_q03": "145dd4eb", "S4_M17_q04": "f2330390", "S4_M17_q05": "77bfe764", "S4_M17_q06": "da30120b", "S4_M17_q07": "d30e658d", "S4_M17_q08": "2f7e86c2", "S4_M17_q09": "130bfe90", "S4_M17_q10": "df47b4bb", "S4_M17_q11": "ea9076f5", "S4_M17_q12": "88f93e71", "S4_M17_q13": "a36bc37d", "S4_M17_q14": "1bba45ca", "S4_M17_q15": "2519285b", "S4_M17_q16": "446c976d", "S4_M17_q17": "3bdee560", "S4_M17_q18": "b7065cf6", "S4_M17_q19": "df8c7fc4", "S4_M17_q20": "fc6b663e", "S4_M17_q21": "700d4874", "S4_M17_q22": "143124d6", "S4_M17_q23": "17becf04", "S4_M17_q24": "c01fe49f", "S4_M17_q25": "b799f431"};
+var GATE=["S4_M17_q18", "S4_M17_q19", "S4_M17_q20", "S4_M17_q21", "S4_M17_q22", "S4_M17_q23", "S4_M17_q24", "S4_M17_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=52;            /* completion slide (53) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (53) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M17)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Sling Tension and Specialty Slings, module three of the Advanced Rigger stage. Last module you learned to work out how much load lands in each sling leg, and I handed you the Load Angle Factor as a number to plug in. This module opens that number up. First we derive where the Load Angle Factor comes from, so it stops being magic and becomes something you can reconstruct on any job. Then we clear up the single most common angle mistake in this trade -- the difference between the angle to horizontal and the angle between the legs. Then we get into how sharply a sling bends and what that costs, the D-over-d ratio. And we finish with the specialty slings, the roundslings and the metal mesh and the rest, each with rules of its own. By the end you will size a sling against a load chart with real confidence. I have watched this be the module where the chart finally makes sense to a rigger. [PAUSE / ASK] Before we start, guess the tension in one leg of a two-leg pick at thirty degrees holding ten thousand pounds. Hold that number.", "2": "Six outcomes, and notice the shape of them. The first three are about angle and tension -- the math that makes a load chart usable. The next two are about what happens where the sling actually touches the load, the bend and the hitch. And the last is judgment -- picking the right tool for the load in front of you. This is an advanced module, so we build on what you already know: you can find a center of gravity, you can share a load across legs. Now we make each leg's number honest. The gate at the end is six questions at one hundred percent, because a sling sized on the wrong angle is a sling that fails with the paperwork looking fine. I have worked with riggers who could run these factors in their head after a season of reps -- it comes with practice. [PAUSE / ASK] Look at the six and pick the one you are least sure of right now.", "3": "First section. We are going to take the Load Angle Factor apart and rebuild it, so it stops being a number off a card and becomes something you own. Out on a job the geometry never matches the table exactly, and the rigger who can reconstruct the factor from a tape measure is the one who gets it right. [PAUSE / ASK] Ask yourself where the factor even comes from before we build it.", "4": "Last module you learned to split a load across the legs -- the share of load. But sharing is only half the story, because a leg that leans carries more than its share. The extra comes from the angle, and that multiplier is the Load Angle Factor. I handed it to you as a number before. Now we are going to build it, so that on a job with a geometry no table covers, you can still get it right. The whole method is three steps: get the share, get the angle factor, multiply them. Miss either multiplier and your sling is undersized. The share we did. The factor is today. Keep them separate in your head, because they are two different things that both make the leg tension bigger. On a plant job I watched a rigger nail the load share, feel good about it, and walk right past the angle -- the legs were leaning at forty-five and he sized them for the share alone. [PAUSE / ASK] Two multipliers, both applied -- can you name them? ", "5": "Everything downstream depends on measuring this one angle from the right reference. The sling-to-horizontal angle is the leg down to the level -- the flat of the load, the horizon, the ground. Straight up is ninety degrees and that is where a leg carries the least. As the leg leans out to reach a wider pick point, the angle to horizontal drops, and the tension climbs. The mistake that costs people is measuring from vertical instead of horizontal, because those two always add to ninety, so you will read the exact complement of what you want -- thirty when it should be sixty. Load charts, standards, and this whole module use sling-to-horizontal. Get in the habit of always picturing the angle down to the level. I have watched two experienced hands measure the same leg and call it two different numbers because one was going off vertical and one off horizontal. [PAUSE / ASK] Which way is your habit -- off horizontal or off vertical?", "6": "This is the one measurement everything else in this module hangs on, so let us be exact. The sling angle we care about is the angle between the sling leg and the horizontal -- the flat plane of the load, the ground, the level. We call it the sling-to-horizontal angle. When a leg stands straight up it is at ninety degrees to horizontal, and as it leans out to reach a wider pick point that angle drops toward the horizontal. Some folks will measure from the vertical centerline instead, and that is the complement of the angle we want -- it will have you reading thirty when the real answer is sixty. Someone might measure to the other leg, and that is a different animal called the included angle that we cover later, and mixing them up is the classic way riggers get burned. Some people will measure to the load face, which moves around with the shape of the load and tells you nothing consistent. I have watched a crew argue over a chart because two of them were measuring from different references. [PAUSE / ASK] Picture a leg leaning out and find the angle down to the level. Make your call.", "7": "Here is the shop-floor formula, and it is the same one on the card you test from: Load Angle Factor equals leg length over vertical height. The leg length is the actual slant of the sling, measured pick point to hook. The height is the straight-up headroom from the load to the hook. Slant over straight-up. Run the example: a twenty foot leg with fifteen feet of headroom is twenty over fifteen, which is one point three three. Every leg feels a third more than its share. Notice the factor is always one or bigger, because the slant is always at least as long as the straight-up -- if you ever compute less than one, you flipped it or measured the wrong length. This is the number you can get with a tape measure and no calculator, which is exactly why the trade uses it. On a job with an odd geometry and no table handy, I have measured the leg and the headroom right off the rigging and had my factor in ten seconds. [PAUSE / ASK] What is L over H for a twenty-five foot leg and twenty feet of headroom?", "8": "Here is the house formula, and it is the same one printed in the rigger reference booklet you will be tested from. The Load Angle Factor is the leg length divided by the vertical height. Leg length is the actual slant length of the sling from the pick point up to the hook. Vertical height is the straight-up distance from the load to the hook, the headroom. Divide the slant by the straight-up and you get a number that is always one or bigger, and that number is how many times the share of load each leg actually feels. Some folks will flip it and put height over length, which always gives less than one and would tell you the sling feels less than the load -- backwards and dangerous. Someone might reach for weight over legs, but that is the share of load, a different step that comes before this one. Some people will grab the span, which is the horizontal spread, not the slant length. I have seen a rigger measure the spread instead of the leg and come up short on tension. [PAUSE / ASK] Slant over straight-up -- say it back. Make your call.", "9": "Let us connect the tape measure to the calculator once, so the formula stops feeling like a trick. In the rigging triangle, the height is opposite the sling angle and the leg length is the hypotenuse. Sine is opposite over hypotenuse, so the sine of the sling angle is height over leg length. Our Load Angle Factor is the flip of that, leg over height, so the factor is one divided by the sine of the angle. Same number, two roads to it. And this is the why behind the danger: as the angle gets shallow, its sine gets small, and one divided by a small number gets big in a hurry. That is the runaway we keep warning about, written in math. You do not have to compute sines in the field -- L over H handles it -- but seeing they are the same builds trust in the shortcut. I watched a young engineer check my tape-measure factor against one-over-sine on his phone and grin when they matched to the decimal. [PAUSE / ASK] Small angle, small sine, big factor -- does the why land? ", "10": "This is the bridge between the shop-floor shortcut and the trigonometry, and it is worth seeing once so the formula stops being magic. In the rigging triangle, the sine of the sling-to-horizontal angle is the vertical height divided by the leg length -- that is just the definition of sine, opposite over hypotenuse. The Load Angle Factor is the flip of that, leg length over height, so the factor is one divided by the sine of the angle. That is why a shallower angle blows the tension up: as the angle drops, its sine drops, and one divided by a small number gets big fast. Some folks will grab cosine, which tracks the horizontal run, not the tension. Someone might reach for tangent of the included angle, mixing two different angles and the wrong function. Some people will name sine itself, forgetting the factor is the flip of sine, not sine. On a job I watched a young engineer check my L-over-H against his calculator and light up when one over sine matched to the decimal. [PAUSE / ASK] Small angle, small sine, big factor -- does that click? Make your call.", "11": "These four numbers are worth carrying in your head the way you carry a phone number. Ninety degrees, straight up, factor of one -- the leg feels exactly its share. Sixty degrees, factor of one point one five five, barely more, the mild lean. Forty-five degrees, factor of one point four one four, now you notice it. And thirty degrees, factor of two, the tension doubles. Each one is just one over the sine of that angle, and you can rebuild the table any time from that. The jump from sixty to thirty is the story: sixty barely costs you, thirty doubles you, and the ground between them is where most picks live. Anchor these to the sling standard and rig to them. I have watched a rigger keep these four taped to the inside of his hard hat brim until they were second nature. [PAUSE / ASK] Which angle doubles the tension?", "12": "Thirty degrees is the number every rigger should have burned into memory, because it is both the common minimum and the point where things get expensive. At thirty degrees to horizontal the Load Angle Factor is two -- one divided by the sine of thirty, and the sine of thirty is one half, so one over one half is two. That means each leg is carrying twice its share of the load. Rig a ten thousand pound load on two legs at thirty degrees and each leg is not feeling five thousand, it is feeling ten thousand. Some folks will say it just equals the share, which is only true straight up at ninety degrees. Someone might say one and a fifteenth, but that is the sixty degree factor, the gentle one. Some people will guess half, which has the danger running exactly backwards -- a shallow angle multiplies tension, it never divides it. I have watched a rigger set a wide, shallow pick to clear an obstruction and never account for the legs seeing double. [PAUSE / ASK] Thirty degrees, factor of two -- picture it. Make your call.", "13": "Let us do the whole thing end to end with the worksheet numbers, because seeing both multipliers land is the point. Twelve thousand pound load, three legs, sharing evenly. Step one, the share: twelve thousand over three is four thousand a leg. Step two, the angle factor: each leg is twenty feet long with fifteen feet of headroom, so twenty over fifteen is one point three three. Step three, multiply: one point three three times four thousand is five thousand three hundred twenty pounds in each leg. Look at what the angle added -- over thirteen hundred pounds a leg, on top of the share. If you had stopped at the four thousand share, you would have undersized every sling by a third. Then you still add your dynamic factor on top of the five three twenty. Share, then angle, then dynamics. I have watched a crew size straight off the share on a transformer set and only catch the miss when the legs looked too small for the lean. [PAUSE / ASK] What did the angle add per leg here?", "14": "Let us run it the way the worksheet runs it, in two clean steps. First the share of load: twelve thousand pounds over three legs is four thousand pounds a leg. That is what each leg would feel if it hung straight down. But these legs are leaning, at a Load Angle Factor of one point three three, so the real tension is the share times the factor: four thousand times one point three three is five thousand three hundred twenty pounds. Notice the tension jumped past the share because of the angle. Some folks will stop at four thousand, the share, and forget to apply the angle -- that is leaving a third of the tension unaccounted for. Someone might grab the whole twelve thousand, loading one leg with the entire weight. Some people will guess three thousand by dividing weight by four out of habit, but there are three legs here, not four. On a transformer pick I watched a crew size slings off the share and skip the angle step entirely. [PAUSE / ASK] Share first, then angle -- both steps. Make your call.", "15": "The number to feel here is not any single factor, it is the shape of the climb. From ninety down to sixty you barely feel it. Sixty to forty-five steepens. And below thirty it goes nearly vertical -- twenty degrees is almost three times, ten degrees is almost six times the share. The tension does not rise on a straight line, it curves up and then bolts near the bottom. That is why a pick that looks only a little shallower than the last one can carry a lot more tension than you would guess. Riggers get ambushed here because the eye reads angle as linear and the tension is anything but. The low, flat pull is the one that quietly overloads the hardware. I have seen a nearly horizontal choke line snap a shackle that was rated well over the load weight, because nobody accounted for the multiplier down there. [PAUSE / ASK] Between thirty and ten degrees, roughly how much does the factor grow?", "16": "The shape of this relationship is the thing to feel in your gut, not just memorize. As a sling leans farther out and its angle to horizontal drops, the tension climbs, and it does not climb evenly -- it climbs slowly at first and then it runs away near the bottom. From ninety down to sixty you barely notice, one point one five is mild. From sixty to forty-five it steepens. Below thirty it goes vertical -- at twenty degrees the factor is nearly three, at ten degrees it is almost six. Some folks will say tension falls, which is exactly backwards and the most dangerous wrong answer here. Someone might think it holds steady until thirty and then changes, but it climbs the whole way, thirty is just where we draw the line. Some people picture a steady even rise, but the curve is the point -- the danger is not linear, it ambushes you at the low end. I have seen a nearly horizontal choke pull a shackle apart because nobody felt that curve. [PAUSE / ASK] Slow at the top, runaway at the bottom. Make your call.", "17": "Thirty degrees is a line the trade draws on purpose, and knowing why makes you use it right. It is not that a sling cannot go shallower -- it bends fine. It is that below thirty the tension curve turns sharply upward, so you pay a big penalty in leg tension for a tiny gain in reach or headroom. You end up loading the slings and the shackles and the pick points far harder than the load actually weighs, all to save a little vertical room. That is why the charts stop at thirty and a lot of employers make it a hard floor. And here is the important part: when your geometry wants to push you below thirty, the answer is to change the geometry, not to accept the tension. Move the pick points inboard, get more headroom, or drop in a spreader bar to stand the legs up. I worked a lift where the first plan came out at twenty-five degrees and the engineer added a spreader to buy the angle back rather than pay the penalty. [PAUSE / ASK] Name one way to buy back a shallow angle.", "18": "Thirty degrees is not a law of physics, it is a line drawn where the cost stops being worth it. Below thirty degrees the tension curve turns sharply upward, so you pay a large penalty in leg tension for a small gain in reach or headroom. You are loading the slings, the hardware, and the pick points far harder than the load itself weighs, and you are doing it to save a little vertical room. Most standards and load charts stop at thirty for that reason, and many employers set it as a hard minimum. Some folks will think the sling cannot bend past thirty, but it bends fine -- the problem is what it costs, not what it can do. Someone might say charts only exist at thirty, but charts run all the way up to ninety. Some people will blame the hook opening, which is a real hazard but not the reason for the thirty degree floor. I worked a job where the plan called for twenty-five degrees and the engineer moved the pick points to buy back the angle rather than pay the tension. [PAUSE / ASK] Big tension cost, small reach gain -- that is the trade. Make your call.", "19": "Second section, and this is the one that quietly sinks lifts. There are two different angles people call by the same numbers, and confusing them is how a sling gets undersized on paper that passes review. I have watched a whole crew talk past each other on a lift plan because two of them meant two different angles. [PAUSE / ASK] Ask yourself which angle a load chart is actually quoting.", "20": "Now we name the other angle, and this is the one that causes half the trouble in this trade. The included angle is the angle between the two legs themselves, measured up at the hook where they come together. Spread the legs into a wide flat V and the included angle is big. Stand them nearly straight down and parallel and the included angle is small. That is a completely different measurement from the sling-to-horizontal angle, which is one leg down to the level. Two angles, two references, and they describe the same physical pick with different-sounding numbers. This is not trivia -- it is the exact confusion that undersizes slings on paper that passes review. Keep them straight: included is between the legs, sling-to-horizontal is leg to the level. I have watched two riggers describe the identical lift as sixty degrees and mean two different geometries, and neither knew they disagreed. [PAUSE / ASK] Where do you measure the included angle -- between what and what?", "21": "Now we name the other angle, the one that causes half the confusion in this trade. The included angle is the angle between the two sling legs themselves, measured up at the hook where they come together. If the legs form a wide, flat V the included angle is large; if they hang nearly parallel and straight down the included angle is small. It is a completely different measurement from the sling-to-horizontal angle, which is one leg down to the level. Some folks will describe the leg-to-horizontal, which is the angle we used for tension, not the included angle. Someone might measure to the vertical centerline, which is yet a third reference. Some people will measure to the load edge, which is not a standard angle at all. The reason this matters is coming: the same physical pick can be labeled two very different-sounding numbers depending on which angle you quote. I have watched two riggers describe the exact same lift as sixty degrees and as sixty degrees and mean completely different geometries. [PAUSE / ASK] Between the legs, up at the hook. Make your call.", "22": "Here is the arithmetic that links the two angles, and the coincidence hiding in it. For a symmetric two-leg pick, the included angle is one hundred eighty minus twice the sling-to-horizontal angle. Run a thirty degree leg: twice thirty is sixty, one eighty minus sixty is one twenty included. Run forty-five: twice forty-five is ninety, one eighty minus ninety is ninety -- forty-five gives a ninety degree included. Now run sixty: twice sixty is one twenty, one eighty minus one twenty is sixty. At sixty degrees, both angles are sixty. The same number for two totally different measurements, and only at sixty does that happen, because that is the equilateral triangle. That single coincidence is what lets a lift get labeled sixty degrees and mean two different things. On a plan review I watched sixty and sixty sit in two boxes and every reader assume they matched. [PAUSE / ASK] What included angle does a thirty degree leg make?", "23": "This is the coincidence that traps people, so watch it closely. For a symmetric two-leg pick, the included angle is one hundred eighty minus twice the sling-to-horizontal angle. Put sixty degrees to horizontal in: twice sixty is one twenty, and one eighty minus one twenty is sixty. So at sixty sling-to-horizontal the included angle is also sixty -- the same number for two different angles. That is exactly why a lift can be called sixty degrees and mean two different things. It happens only at sixty, where the triangle is equilateral. Some folks will say thirty, forgetting to double the angle before subtracting. Someone might say ninety, which is what you would get from a forty-five degree leg, not sixty. Some people will say one twenty, which is the included angle for a thirty degree leg, not a sixty. On a lift plan review I watched sixty and sixty get written in two boxes and everyone assume they matched, when one was the leg angle and one was the included. [PAUSE / ASK] One eighty minus twice the leg angle -- run it. Make your call.", "24": "This is the trap fully sprung, and it is a real way slings fail with the paperwork clean. Load charts and standards always quote the sling-to-horizontal angle -- leg to the level. Suppose the chart says sixty degrees and the rigger, thinking it means the angle between the legs, builds sixty degrees between them. That included sixty puts each leg at only thirty degrees to horizontal. So he planned for the sixty degree factor of one point one five and actually got the thirty degree factor of two -- nearly double the tension, on rigging that looks like it honored the chart. The load did not change, the sling did not change, but the number in each leg nearly doubled because the reference got swapped. This is why we drilled the two angles so hard. Always read a charted angle as leg-to-horizontal. I have seen this exact swap cut a sling's real margin in half on a plan that passed review clean. [PAUSE / ASK] A charted angle always means which reference?", "25": "Here is the trap fully sprung, and it is a real way slings fail with the paperwork looking correct. Load charts and standards quote the sling-to-horizontal angle -- leg to the level. If a rigger instead builds sixty degrees between the legs, the included angle, then each leg is actually sitting at only thirty degrees to horizontal. And we just learned thirty degrees means a factor of two. So the rigger planned for the mild sixty degree factor of one point one five and actually got the factor of two -- nearly double the tension he sized for, with the chart looking honored. Some folks will say it matches the chart, missing that the reference was swapped. Someone might think the legs came out steeper and safer, but building the included angle wider makes each leg shallower, not steeper. Some people will say the angles are always equal, but they are equal only at sixty degrees, which is the coincidence that set the trap. I have seen this exact swap undersize a sling by nearly half on paper that passed review. [PAUSE / ASK] Chart means leg-to-horizontal, always. Make your call.", "26": "Third section. Now we go to where the sling actually touches the load, because how sharply it bends there decides how much of its rating you actually get. I have watched a strong sling give up half its capacity on one tight wrap around a pin too small for it. [PAUSE / ASK] Ask yourself how tight is too tight a bend for a rope.", "27": "The D-over-d ratio is about how hard the rope has to bend, and both letters are diameters. Big D is the diameter of whatever the rope wraps -- the pin, the shackle bow, the corner of the load, the saddle of the hook. Little d is the diameter of the rope itself. Divide the thing it wraps by the rope and you get the ratio. A big ratio means the rope curves gently around something fat, and it barely notices. A small ratio means the rope is bent tight around something thin, and that costs you, because the fibers on the outside of the bend get stretched hard while the ones on the inside go slack, and the load is not shared evenly across the rope anymore. Picture a rope wrapped around a pencil versus draped over a log -- same rope, very different stress. I have watched a sling get chewed up bending around a shackle pin far too small for it. [PAUSE / ASK] In D over d, which one is the rope?", "28": "The D/d ratio is about how sharply the sling has to bend, and both letters are diameters. Big D is the diameter of whatever the sling bends around -- the pin, the shackle bow, the load corner, the crane hook saddle. Little d is the diameter of the sling's own body, the rope itself. The ratio of the two tells you how tight the bend is relative to the rope, and a tighter bend costs you capacity. Some folks will think D is the hoist drum, which does have a D-over-d concern of its own but is not what a rigger checks at the sling. Someone might think it is the distance between pick points, which is span, not a diameter. Some people will guess the load depth, which has nothing to do with how the rope bends. The mental picture is simple: a rope wrapped tight around a thin pin is stressed hard on the outside fibers; the same rope over a fat round bar barely notices. I have watched a sling get cooked bending around a sharp shackle pin far too small for it. [PAUSE / ASK] Big D is what it wraps, little d is the rope. Make your call.", "29": "Here is the table straight from the reference booklet you test from, and it is worth knowing the shape of it. At twenty-five to one -- a nice fat diameter, twenty-five times the rope -- you keep the full rated capacity. As the ratio tightens, the capacity bleeds off: twenty to one is ninety-two percent, ten to one is eighty-six, four to one is seventy-five, and at one to one, where the pin is as thin as the rope itself, you are down to fifty percent. Half your sling, gone, on one tight wrap. The number people find hardest to believe is that four-to-one, a bend that looks perfectly reasonable, already costs you a quarter. That is the value of the table: it turns an eyeball judgment into a number you can defend. I have watched a rigger basket a rope around a bar its own thickness and treat it as full strength, and the table says he had half. [PAUSE / ASK] What does a four-to-one bend leave you?", "30": "This is the number that shows how much a hard bend really costs, and it is worth carrying. When the object the rope bends around is the same diameter as the rope itself, a one-to-one ratio, the sling holds only about half of its rated capacity. Half. That single tight wrap throws away fifty percent before the load is even off the ground. As the ratio opens up the efficiency climbs back: two-to-one is about sixty-five percent, four-to-one about seventy-five, and by twenty-five-to-one you are back to full rated capacity. Some folks will say a one-to-one gives full capacity, which is exactly the mistake this table exists to prevent. Someone might say ninety-two percent, but that is the gentle twenty-to-one bend, not the tight one. Some people will say seventy-five percent, which is the four-to-one, a much easier bend than one-to-one. I have seen a rope basketed around a bar its own thickness and treated as full strength. [PAUSE / ASK] Same size means half the strength. Make your call.", "31": "Once you understand that a tight bend costs capacity, the fix writes itself: stop the bend from being tight. A corner protector, a softener, a saddle with a real radius, placed between the sling and the sharp edge, does two jobs at once. It keeps the edge from cutting the rope, and it widens the effective diameter the rope wraps, opening up the D-over-d and keeping more of the rating. So the same cheap piece of gear that saves the rope from being sliced also saves you the capacity you would have lost to the sharp bend. This is a place where the ten dollar softener protects the several hundred dollar sling and, more importantly, the load and the people under the path. Keep them on the truck, because the job that needs one never has one lying around. I have watched a bare sling get sliced on a plate edge on a lift where there was not a softener within a mile. [PAUSE / ASK] Name the two things a softener does at once.", "32": "Once you know a tight bend costs capacity, the fix writes itself: stop the bend from being tight. Put a corner protector, a softener, or a saddle with a larger radius between the sling and the sharp edge, so the rope wraps a bigger effective diameter and the D-over-d opens up. That does two jobs at once -- it protects the rope from being cut on the edge, and it keeps more of the rated capacity. Some folks will choke it tighter, which makes the bend sharper and the problem worse. Someone might lift faster to shorten the exposure, which just adds dynamic load on top of a compromised sling. Some people will rate it at full vertical capacity and ignore the bend, which is how the edge wins. This is a place where the cheap piece of gear, the corner protector, saves the expensive one. I keep softeners in the truck for exactly this, and I have watched a bare sling get sliced on a plate edge on a lift that had no softener on site. [PAUSE / ASK] Open the radius, protect the rope. Make your call.", "33": "Last section. The same sling gives you three different capacities depending on how you hitch it, and the specialty types each own a job the others fail. I have watched the wrong sling picked for a hot load and watched it let go. [PAUSE / ASK] Ask yourself which hitch can actually double your capacity.", "34": "The same sling gives you three different capacities depending on how you hitch it, and mixing them up is a classic overload. A vertical hitch, a straight pull down to the load, is your baseline at one hundred percent. A choker, where the sling wraps under and back through its own eye, drops to about seventy-five percent, because the choke point is a built-in sharp bend that concentrates stress. And a basket, cradling the load with both ends up to the hook, gives up to two hundred percent -- but only while both legs hang vertical, because two parts of the sling are sharing the load. So the choker costs you a quarter and the basket can double you, off the very same sling. The trap is the basket: the doubling evaporates as the legs spread. We take each of these deeper next. I have watched a crew choke a bundle at full rating and forget the quarter comes off. [PAUSE / ASK] Which hitch loses capacity, and which can gain it?", "35": "Hitches are not all equal, and the choker pays a standing tax. A straight vertical hitch, sling straight down to the load, is your baseline at one hundred percent. A choker hitch, where the sling passes under the load and back through its own eye or fitting, is rated at only about seventy-five percent of that. The reason is the choke point: the sling bends sharply back on itself right there, a built-in tight bend that concentrates stress. Some folks will think a choker gains capacity, a hundred ten percent, but it loses, it never gains. Someone might call it a hundred percent, treating it like a vertical, which ignores the choke bend. Some people will say two hundred percent, but that is the basket hitch with vertical legs, a different configuration entirely. A choker grips and controls the load well, which is why we use it, but you pay for that grip in capacity. I have watched a crew choke a bundle and forget to knock the rating down a quarter. [PAUSE / ASK] Choker grips, and it costs you a quarter. Make your call.", "36": "The basket is the hitch that can double your capacity, and the one people overrate the instant the legs open up. When the sling passes under the load and both ends come straight up to the hook, you have two supporting parts, and with those parts truly vertical you get up to two hundred percent of the single vertical rating. But the moment the legs spread to wrap around a wide load, they are no longer vertical -- they have a sling angle -- and that same Load Angle Factor we spent all of Section 1 on cuts the basket capacity right back down. So a wide basket is not a two hundred percent basket. You apply the angle factor to the spread just like you would on a two-leg bridle. The doubling is a vertical-legs-only prize. I have watched a wide basket around a vessel get rated as if it were straight up, and the spread had quietly eaten a big chunk of the capacity. [PAUSE / ASK] What happens to basket capacity when the legs spread?", "37": "The basket hitch is the one that can double your capacity, but only under a condition people forget the moment the legs spread. A basket cradles the load with the sling passing under it and both ends up to the hook, giving you two supporting parts. When those two legs hang truly vertical, straight up and down, you get up to two hundred percent of the single vertical rating. But the instant the legs spread apart to reach around the load, they take on a sling angle, and that same Load Angle Factor from the front of this module cuts the basket capacity right back down. Some folks will tie it to the load weight, but the weight does not change the geometry rule. Someone might think only synthetic slings basket, but wire rope, chain, and synthetic all basket. Some people will bring up the choke angle, which belongs to the choker hitch, not the basket. So a basket is two hundred percent only straight up, and less at every angle below. I have seen a wide basket rated as if it were vertical and overloaded by the spread. [PAUSE / ASK] Two hundred percent, but only straight up. Make your call.", "38": "Let us put real numbers on the basket so the rule sticks. Take a wire rope sling rated ten thousand pounds in a straight vertical. Basket it with both legs hanging truly vertical and you get up to twice that, twenty thousand pounds, because two parts of the sling are carrying. That is the best case and it only exists straight up. Now let those legs spread out to forty-five degrees to wrap a wider load, and the sling angle goes to work against you -- the effective capacity drops well below the twenty thousand, back toward and past the single rating depending on how far they lean. The mistake is to grab the doubled number and forget the legs are not vertical. Rate the spread basket for its actual geometry, not its best case. I have watched a crew keep a basket's legs deliberately plumb on a smooth shaft precisely so they could count the full double. [PAUSE / ASK] When can you count the full doubled basket number?", "39": "Let us put the basket rule to work with real numbers so it sticks. The sling is rated ten thousand pounds in a straight vertical. Put it in a basket with both legs hanging truly vertical and you get up to two hundred percent of that vertical rating, which is twenty thousand pounds, because two parts of the sling are now supporting the load. Some folks will halve it to five thousand, which is the wrong direction -- a basket adds a supporting part, it does not remove one. Someone might leave it at ten thousand, forgetting the second part of the sling is carrying too. Some people will land on seventy-five hundred, which is the choker number, a different hitch that loses capacity instead of gaining it. And remember the fine print: this doubling holds only while the legs are vertical, and any spread pulls it back down. I have watched a crew basket a smooth shaft and correctly take the full double because they kept the legs plumb. [PAUSE / ASK] Basket vertical, up to double. Make your call.", "40": "The roundsling is one of the specialty types worth knowing by feel. Inside its woven cover runs a continuous loop of load-bearing yarns -- an endless bundle of fiber that does all the work, wrapped in an outer jacket that takes the abrasion but carries none of the load. That build lets it conform around a load, roll to move the wear point so it does not always chafe in the same spot, and grip gently on a finished surface without marking it. It works in all three hitches. The one discipline it demands is cover inspection, and this is the whole trick with roundslings: the yarns that carry the load are hidden, so a cut or a gouge in the cover means you cannot see whether the core underneath is sound. When you cannot verify the core, the sling is out of service. I have had to pull roundslings for a nicked cover even when they felt strong, because feeling is not seeing. [PAUSE / ASK] Why is a damaged cover an automatic removal on a roundsling?", "41": "The roundsling is one of the specialty types worth knowing by feel, because it behaves differently from the flat web sling most people picture. Inside its woven cover runs a continuous loop of load-bearing yarns -- an endless bundle of fiber that carries the load, protected by an outer jacket that takes the abrasion but carries nothing. That construction lets it conform around a load, rotate to spread wear, and grip gently on finished surfaces. Some folks will say it cannot choke, but it chokes fine and is often preferred for it. Someone might think it has no rating, but it is rated like any sling and tagged with its capacity. Some people will think it only works alongside wire rope, but it stands on its own. The one discipline it demands is inspection of the cover, because the yarns that do the work are hidden -- a cut cover means you cannot trust what is underneath. I have pulled roundslings out of service for a nicked cover even when the core felt fine, because you cannot see the core. [PAUSE / ASK] Hidden core, inspect the cover hard. Make your call.", "42": "Every specialty sling earns its keep on a job the others fail, and the metal mesh sling owns the rough end. It is a fabric of woven wire and cross rods, and it takes heat, resists cutting on sharp edges, and shrugs off abrasion that would shred a synthetic web in a single lift. Foundries, hot forgings, sharp plate, mill work -- that is its home. But match the tool to the enemy, because the same metal fabric that survives a forging will scratch a polished machined surface, so on a delicate finish you want a soft synthetic instead. And for rugged general work, wire rope is the workhorse. Heat and edges call for mesh, fine finishes call for synthetic, and everyday rugged work calls for wire rope. Learn to read the load and pick the sling that fits its hazard. I have watched a synthetic sling smoke and let go on a casting that came off the line hotter than anyone expected, on a lift that should have had mesh. [PAUSE / ASK] What sling would you reach for on a polished shaft?", "43": "No matter how exotic the sling gets, the pre-use habit never changes, and this is the discipline that outlives every technique in this module. Before the lift, confirm the sling has a legible identification tag. Read its rated capacity for the exact hitch and angle you are about to use -- vertical, choker, or basket, at the angle you are rigging. Inspect the body for the damage that matters for that type, whether that is broken wires, cuts, or a compromised cover. And the hard rule under all of it: no readable tag means the sling is out of service, because a sling you cannot positively identify is one whose rating and history you are only guessing at. It does not matter how good it looks. Out on a job I have red-tagged perfectly healthy-looking slings on nothing more than an unreadable tag, and I would do it again every single time. [PAUSE / ASK] What is the one condition that takes a sling out of service no matter how good it looks?", "44": "This is the gate. Six questions, and you need all six, because a sling sized on the wrong angle or the wrong hitch fails with the paperwork looking clean. I have watched that exact thing happen on a job that passed its review. Take your time and reason each one. [PAUSE / ASK] Ready to size some slings for real?", "45": "Every specialty sling earns its place by matching a job the others fail, and the metal mesh sling owns the rough end of that spectrum. It is a fabric of woven wire and cross rods, and it shrugs off heat, resists cutting on edges, and takes abrasion that would shred a synthetic web in one lift. Foundries, hot forgings, sharp plate, mill work -- that is its country. Some folks will reach for it on delicate polished surfaces, but the metal fabric can mark or scratch a fine finish, so that is backwards -- there you want a soft synthetic. Someone might limit it to tiny loads, but it comes in heavy capacities. Some people will think it skips the tag requirement, but every sling carries its identification and rating. Match the sling to the enemy: heat and edges call for metal mesh, delicate finishes call for synthetic, and general work often calls for wire rope. I have watched a synthetic sling smoke and let go on a hot casting that should have had mesh on it. [PAUSE / ASK] Heat and edges -- reach for mesh. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "No matter how exotic the sling gets, the pre-use discipline never changes, and this is the habit that outlives every fancy technique in this module. Before the lift you confirm the sling has a legible identification tag and you read its rated capacity for the exact hitch you are about to use -- vertical, choker, or basket, at the angle you are rigging. A sling with no readable tag is out of service, full stop, because a sling you cannot identify is a sling you cannot trust. Some folks will worry about price and vendor, which mean nothing to the load. Someone might chase a seasonal color code, but the color-of-the-quarter inspection scheme tells you it was inspected, not what it is rated for. Some people will note where it was made, which is not a lift-day check. Read the tag, match the rating to the hitch and angle, and inspect the body. I have red-tagged good-looking slings for nothing more than an unreadable tag, and I would do it again every time. [PAUSE / ASK] No readable tag, no lift. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "47": "Two clean steps, and the angle step is the one that bites. Share of load first: sixteen thousand pounds over two legs is eight thousand pounds a leg. Now the angle. Thirty degrees to horizontal is a Load Angle Factor of two, so each leg feels its eight thousand pound share times two, which is sixteen thousand pounds in every single leg. Read that again: at thirty degrees each leg carries the entire load weight. Some folks will stop at eight thousand, the share, and never apply the factor -- that is the whole point of the question and the whole point of the module. Someone might land near nine thousand two hundred, which is the sixty degree factor times the share, the mild angle, not this shallow one. Some people will divide down to four thousand as if there were four legs. Picture the geometry: a wide, shallow, thirty degree pick doubles what each leg already carries. [PAUSE / ASK] Eight thousand share, factor of two. Make your call.", "48": "This is the reference discipline that keeps the whole module honest. Load charts quote the sling-to-horizontal angle, so forty-five degrees on the chart means forty-five degrees between the leg and the level plane of the load. Set your leg so it rises at forty-five degrees off horizontal and you are matching the chart. Some folks will build forty-five between the two legs, the included angle, which would put each leg at a different, steeper angle to horizontal and misread the chart. Someone might measure off the load edge, which is not a standard reference and drifts with load shape. Some people will measure from vertical, which is the complement and would have them rigging fifteen degrees off horizontal while thinking they are at forty-five. The chart's number is always leg to horizontal -- burn that in. I have watched a lift plan fail review because the angle box did not say which reference, and two readers pictured two different lifts. [PAUSE / ASK] Chart angle is leg to horizontal. Make your call.", "49": "Straight off the efficiency table you now know. A pin four times the rope diameter is a D-over-d of four to one, and four to one gives about seventy-five percent of the sling's rated capacity. So a ten thousand pound sling over that pin should be treated as about seventy-five hundred. Some folks will call it full capacity, a hundred percent, but that is only at twenty-five to one, a much fatter pin than this. Someone might drop to fifty percent, but that is the brutal one-to-one bend, where the pin is as thin as the rope. Some people will grab ninety-two percent, which is the twenty-to-one, again a much gentler bend than four-to-one. The lesson under the number: a bend you might eyeball as fine is already costing you a quarter of the sling. On a bridge job I watched a rigger check the pin diameter against the rope and derate on the spot rather than guess. [PAUSE / ASK] Four to one is about three quarters. Make your call.", "50": "Apply the choker tax to a real number. The sling is six thousand pounds vertical, and a choker hitch is rated at about seventy-five percent of vertical, so six thousand times seventy-five hundredths is forty-five hundred pounds. That is the number you rig to in a choke, not the full six thousand. Some folks will leave it at six thousand, treating the choker like a vertical and ignoring the choke bend. Someone might push it up to nine thousand, but a choker loses capacity, it does not gain -- you are thinking of a basket. Some people will double it to twelve thousand, which is the vertical-legs basket, the opposite direction from a choker. The choke grips the load, and that grip costs you a quarter of the rating every time. I have watched a crew choke a pipe bundle at full vertical rating and never take the quarter off. [PAUSE / ASK] Choker is three quarters of vertical. Make your call.", "51": "Match the sling to the enemy, and here the enemy is heat and sharp edges together. A metal mesh sling is built from woven wire and cross rods, so it takes the heat of a forging and resists cutting on the scale edges where a synthetic would melt or slice through. Some folks will grab a polyester roundsling, which is made for finished surfaces but has no business near that heat. Someone might reach for a nylon web sling, which is even more vulnerable -- nylon and heat do not mix, and the edges would finish it. Some people will think of a cotton rope, which is not a rated lifting sling for this at all and would burn. Heat plus edges is the exact signature that calls for metal mesh, the same way a polished machined surface calls for a soft synthetic. I have seen a web sling let go on a casting that came off the line hotter than the crew expected. [PAUSE / ASK] Heat and edges, reach for mesh. Make your call.", "52": "This is where all the math in the world yields to one hard rule. A sling whose identification tag is missing or unreadable comes out of service -- you do not lift with it. Not because it is necessarily weak, but because a sling you cannot positively identify is a sling whose rating, history, and material you are guessing at, and guessing is not a rigging method. Some folks will estimate off the diameter, but two ropes the same thickness can have very different ratings by grade and construction. Someone might use it at half capacity to feel safe, but a made-up derate on an unknown sling is still a guess with a decimal on it. Some people will match it to a similar-looking tagged sling, which assumes the very thing you cannot confirm. The tag is not paperwork, it is the sling's identity, and no identity means no lift. I have red-tagged slings that were probably perfectly good, on nothing but an unreadable tag, and never once regretted it. [PAUSE / ASK] No readable tag, out of service. Make your call.", "53": "That is Sling Tension and Specialty Slings, and here is what you carry out. Every angled leg gets two multipliers, not one: the share of load, then the Load Angle Factor, and the factor is leg length over height, which is one over the sine of the sling-to-horizontal angle. Ninety degrees is one, sixty is one point one five, forty-five is one point four one, and thirty doubles you -- and below thirty the tension runs away, which is why thirty is the floor. The angle a chart quotes is always leg-to-horizontal, never between the legs, and confusing those two is the trap that undersizes slings on clean paper. Where the sling bends, a small D-over-d steals capacity -- half of it at one to one -- and a softener buys it back while saving the rope. And the hitch decides the rating: vertical is one hundred percent, choker about seventy-five, basket up to two hundred but only with vertical legs. Match the specialty sling to the hazard, and never lift on a sling you cannot identify. Next module is Slings and Terminations, where we go inside the slings themselves -- how they are built, how they are ended, and how they fail. I have watched these angle and hitch rules turn a load chart from a mystery into a tool. [PAUSE / ASK] Before you go, think of one pick on your job where you would now size a leg differently."};
+var GATE = ["S4_M17_q18", "S4_M17_q19", "S4_M17_q20", "S4_M17_q21", "S4_M17_q22", "S4_M17_q23", "S4_M17_q24", "S4_M17_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"6": "S4_M17_q01", "8": "S4_M17_q02", "10": "S4_M17_q03", "12": "S4_M17_q04", "14": "S4_M17_q05", "16": "S4_M17_q06", "18": "S4_M17_q07", "21": "S4_M17_q08", "23": "S4_M17_q09", "25": "S4_M17_q10", "28": "S4_M17_q11", "30": "S4_M17_q12", "32": "S4_M17_q13", "35": "S4_M17_q14", "37": "S4_M17_q15", "39": "S4_M17_q16", "41": "S4_M17_q17", "45": "S4_M17_q18", "46": "S4_M17_q19", "47": "S4_M17_q20", "48": "S4_M17_q21", "49": "S4_M17_q22", "50": "S4_M17_q23", "51": "S4_M17_q24", "52": "S4_M17_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M17';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

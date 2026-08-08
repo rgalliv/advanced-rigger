@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Specialty Rigging Hardware | CraneQualified S4_M19</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M19" data-cq-stage="4"
+      data-cq-total="52" data-cq-gate-code="R-201C / AR-105C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M19 &middot; Specialty Rigging Hardware</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Specialty Rigging Hardware</h1>
+<p class='sub'>CraneQualified Stage 4 -- Advanced Rigger -- Module 5</p><p class='meta'>Gate R-201C / AR-105C -- 6-question final at 100 percent</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ol class='obj'><li>Select the right shackle type and pin, and load it in-line and symmetrically</li><li>Apply the shackle side-load reduction factors and the 120-degree leg limit</li><li>Load a hook in the saddle, never on the tip, and apply hook removal criteria</li><li>Distinguish shoulder from non-shoulder eyebolts and set angular loads correctly</li><li>Choose swivel hoist rings for angular picks and know why they keep full rating</li><li>Use turnbuckles, links, and rings within their limits and rig to marked working load limits</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>Shackles</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>Two Shackle Body Shapes</h2>
+<p>Shackles come in two body shapes for two kinds of loading:</p><ul><li><b>Anchor (bow) shackle</b> -- wide, rounded bow; handles <b>angled and multi-leg</b> loads</li><li><b>Chain (D) shackle</b> -- narrow, straight body; for <b>in-line, single-leg</b> pulls</li></ul><p class='note'>When sling legs come into a shackle at a spread, use the bow. Governed by ASME B30.26.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">An anchor (bow) shackle differs from a chain (D) shackle mainly in that it:</p>
+<div class="quiz-group" data-qid="S4_M19_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q01',0,'fb_S4_M19_q01')">Must always be welded closed before it is used</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q01',1,'fb_S4_M19_q01')">Is only ever used with a bolt-type pin, never a screw pin</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q01',2,'fb_S4_M19_q01')">Carries no rated capacity and is for tag lines only</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q01',3,'fb_S4_M19_q01')">Has a wider bow that better handles angled, multi-leg loads</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q01"></div>
+</div></section>
+<section class="slide t-content" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>Two Pin Types</h2>
+<p>Two pin types, for two situations:</p><ul><li><b>Screw-pin shackle</b> -- pin threads in by hand; quick, for <b>non-permanent</b> connections you check each use</li><li><b>Bolt-type (safety) shackle</b> -- bolt, nut, and cotter pin; cannot back out; for <b>permanent</b> installs or when the load may rotate</li></ul><p class='warn'>A rotating load can unscrew a screw pin. If the load may turn, or you cannot re-check the pin, use the bolt type.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A screw-pin shackle, compared with a bolt-type (safety) shackle, is best suited for:</p>
+<div class="quiz-group" data-qid="S4_M19_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q02',0,'fb_S4_M19_q02')">Non-permanent connections that are checked each use</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q02',1,'fb_S4_M19_q02')">Overhead loads with no way to inspect the pin</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q02',2,'fb_S4_M19_q02')">Any lift where the load will spin the pin loose</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q02',3,'fb_S4_M19_q02')">Permanent installations left in place for years</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Loading a Shackle Correctly</h2>
+<p>A shackle earns its full rating only under the right loading:</p><ul><li><b>In-line</b> -- the pull runs down the shackle's centerline</li><li><b>Symmetric</b> -- balanced, not cocked to one side</li><li>Sling legs within an <b>included angle of about 120 degrees</b></li></ul><p class='warn'>Spread the legs past 120 degrees, or pull off to the side, and you must reduce the rating.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A shackle carries its full rated capacity only when it is:</p>
+<div class="quiz-group" data-qid="S4_M19_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q03',0,'fb_S4_M19_q03')">Painted the correct color for the current inspection season</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q03',1,'fb_S4_M19_q03')">Simply larger than the hook that it happens to connect to</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q03',2,'fb_S4_M19_q03')">Loaded in-line and symmetrically, legs within a 120-degree angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q03',3,'fb_S4_M19_q03')">Loaded from absolutely any direction at absolutely any angle</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q03"></div>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Side-Load Reduction Factors</h2>
+<p>Pulling a shackle off its in-line direction cuts its rating on a schedule:</p><table class='rate'><tr><th>Side angle from in-line</th><th>Rated load reduction</th></tr><tr><td>0 - 5 degrees</td><td>0 percent</td></tr><tr><td>5 - 45 degrees</td><td>30 percent</td></tr><tr><td>46 - 90 degrees</td><td>50 percent</td></tr><tr><td>Over 90 degrees</td><td>avoid</td></tr></table><p class='note'>Applies to both screw-pin and bolt-type shackles.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Using the shackle side-load reduction factors, a side load between 46 and 90 degrees from in-line reduces the rated capacity by about:</p>
+<div class="quiz-group" data-qid="S4_M19_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q04',0,'fb_S4_M19_q04')">About 50 percent of the rated load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q04',1,'fb_S4_M19_q04')">About 10 percent of the rated load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q04',2,'fb_S4_M19_q04')">About 30 percent of the rated load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q04',3,'fb_S4_M19_q04')">No reduction at all in that range</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q04"></div>
+</div></section>
+<section class="slide t-content" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h2>Shackle Removal Criteria</h2>
+<p>Remove a shackle from service for any of these:</p><ul><li><b>10 percent loss</b> of the catalog dimension at any point on bow or pin</li><li>A <b>pin that will not seat flush</b> -- shoulder not drawn down to the body</li><li>Bending, twisting, stretching, elongation, cracks, deep nicks or gouges</li><li>Excessive corrosion or pitting, or <b>any unauthorized welding</b></li><li>Missing or illegible rating</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A shackle should be removed from service when inspection shows:</p>
+<div class="quiz-group" data-qid="S4_M19_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q05',0,'fb_S4_M19_q05')">The pin's shoulder drawn down and seated fully flush with the body</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q05',1,'fb_S4_M19_q05')">A clearly legible manufacturer's working-load-limit stamp on it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q05',2,'fb_S4_M19_q05')">A light protective film of the manufacturer's lubricant on the pin</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q05',3,'fb_S4_M19_q05')">A 10 percent loss of catalog dimension, or a pin not seating flush</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q05"></div>
+</div></section>
+<section class="slide t-divider" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>Hooks</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>The Latch Is Not a Load Point</h2>
+<p>A <b>safety latch</b> -- or a <b>mousing</b> when there is no latch -- bridges the throat to keep the sling or load from jumping out.</p><p class='warn'>The latch (or mouse) is <b>not a load-bearing part</b>. Never rig so the latch takes weight. It retains the connection; the hook body carries the load.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The safety latch on a lifting hook is intended to:</p>
+<div class="quiz-group" data-qid="S4_M19_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q06',0,'fb_S4_M19_q06')">Keep the sling or load from jumping out of the hook</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q06',1,'fb_S4_M19_q06')">Raise the hook's rated capacity when it is closed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q06',2,'fb_S4_M19_q06')">Allow the hook to be tip-loaded safely</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q06',3,'fb_S4_M19_q06')">Carry a share of the load along with the hook</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Load in the Saddle, Never the Tip</h2>
+<p>The load belongs in the <b>saddle</b> -- the bowl at the bottom of the hook -- seated <b>in line with the shank</b>.</p><p class='warn'>Wrong connections that reduce capacity or bend the hook:</p><ul><li><b>Tip / point load</b> -- load on the tip; pries the hook open, cuts capacity sharply</li><li><b>Side load</b> -- pull across the hook</li><li><b>Back load</b> -- load across the back, away from the throat</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A hook must be loaded so the load sits:</p>
+<div class="quiz-group" data-qid="S4_M19_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q07',0,'fb_S4_M19_q07')">Up against the safety latch so as to hold the latch closed</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q07',1,'fb_S4_M19_q07')">Out on the very tip of the hook for an easy quick release</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q07',2,'fb_S4_M19_q07')">Across the back of the hook, well away from the throat</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q07',3,'fb_S4_M19_q07')">Down in the saddle (bowl) of the hook, in line with the shank</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q07"></div>
+</div></section>
+<section class="slide t-content" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h2>Hook Removal Criteria</h2>
+<p>Remove a hook from service for any of these:</p><ul><li><b>Throat opening increase</b> over about 5 percent (never more than 1/4 inch)</li><li><b>Wear</b> exceeding about 10 percent of the original dimension at any point</li><li><b>Any twist</b> from the plane of the unbent hook</li><li>Cracks, nicks, or gouges</li><li>Missing or illegible manufacturer identification; a damaged latch</li></ul><p class='note'>Measure the throat against reference marks to catch spread early.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A lifting hook should be removed from service when it shows:</p>
+<div class="quiz-group" data-qid="S4_M19_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q08',0,'fb_S4_M19_q08')">A throat opening over 5 percent, wear over 10 percent, or any twist</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q08',1,'fb_S4_M19_q08')">A working safety latch that springs fully shut on its own every time</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q08',2,'fb_S4_M19_q08')">A light protective coat of the manufacturer's original factory finish</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q08',3,'fb_S4_M19_q08')">A clearly legible manufacturer identification stamp pressed on the hook</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q08"></div>
+</div></section>
+<section class="slide t-divider" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Eyebolts and Hoist Rings</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>Shoulder vs Non-Shoulder Eyebolts</h2>
+<p>Two eyebolt types, and the difference is everything:</p><ul><li><b>Non-shoulder (plain)</b> -- no collar; <b>vertical, in-line loads only</b>. At an angle it bends or breaks.</li><li><b>Shoulder</b> -- has a collar that braces side force; can take angular loads (with derating)</li></ul><p class='warn'>A plain eyebolt loaded at any angle is a failure waiting to happen. Angular load requires a shoulder eyebolt -- or better, a hoist ring.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A non-shoulder (plain) eyebolt is designed to be loaded:</p>
+<div class="quiz-group" data-qid="S4_M19_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q09',0,'fb_S4_M19_q09')">Only in a choker configuration under the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q09',1,'fb_S4_M19_q09')">Vertically and in-line only, never at an angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q09',2,'fb_S4_M19_q09')">Only when two of them are reeved together</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q09',3,'fb_S4_M19_q09')">At any angle up to 90 degrees from vertical</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q09"></div>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Setting a Shoulder Eyebolt for an Angle</h2>
+<p>To use a shoulder eyebolt at an angle, all of these must be true:</p><ul><li>The <b>shoulder seats flush</b> against the load, in full contact</li><li>The <b>plane of the eye lines up with the direction of pull</b></li><li>The bolt is <b>tightened / torqued to spec</b>, not backed off</li></ul><p class='warn'>An eyebolt "turned to the side" loses capacity and can fail. Angular loading still derates it steeply -- consider a hoist ring.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When a shoulder eyebolt is used for an angular lift, the rigger must ensure the shoulder is:</p>
+<div class="quiz-group" data-qid="S4_M19_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q10',0,'fb_S4_M19_q10')">Turned a full 90 degrees away from the direction of the pull</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q10',1,'fb_S4_M19_q10')">Coated in grease so that it can slip freely under the angled load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q10',2,'fb_S4_M19_q10')">Seated flush against the load, the eye's plane in line with the pull</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q10',3,'fb_S4_M19_q10')">Backed off about a half turn so that the eye can rotate freely</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>The Swivel Hoist Ring</h2>
+<p>A <b>swivel hoist ring</b> bolts down like an eyebolt but its bail <b>swivels 360 degrees and pivots</b> to align with the load line.</p><p class='note'>Because it always pulls in-line with itself, its <b>rated capacity is not reduced at an angle</b> -- unlike an eyebolt, which sheds capacity as the pull comes off vertical.</p><p class='warn'>It must be <b>torqued to the manufacturer's spec</b> and inspected like any other hardware.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Compared with a shoulder eyebolt, a swivel hoist ring has the key advantage that:</p>
+<div class="quiz-group" data-qid="S4_M19_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q11',0,'fb_S4_M19_q11')">Its rated capacity is not reduced when loaded at an angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q11',1,'fb_S4_M19_q11')">It requires no inspection at all because it cannot wear</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q11',2,'fb_S4_M19_q11')">It is always cheaper and lighter than an eyebolt to install</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q11',3,'fb_S4_M19_q11')">It never needs to be torqued down to the load at all</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q11"></div>
+</div></section>
+<section class="slide t-content" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h2>Choosing for an Angular Pick</h2>
+<p>Put it together for a real decision:</p><table class='rate'><tr><th>Situation</th><th>Choice</th></tr><tr><td>Straight vertical pull</td><td>plain or shoulder eyebolt</td></tr><tr><td>Moderate angle, eyebolt acceptable</td><td>shoulder eyebolt, flush, in plane, derated</td></tr><tr><td>Steep angle, full rating needed</td><td>swivel hoist ring</td></tr></table><p class='note'>Hoist rings cost more but buy back the capacity an angle takes from an eyebolt.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">For a pick where the sling legs must pull at a steep angle from the tapped holes, the better hardware choice is generally:</p>
+<div class="quiz-group" data-qid="S4_M19_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q12',0,'fb_S4_M19_q12')">Turnbuckles set down into each one of the tapped holes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q12',1,'fb_S4_M19_q12')">Wire rope clips threaded directly into each of the tapped holes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q12',2,'fb_S4_M19_q12')">Swivel hoist rings, which align with the pull and keep full rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q12',3,'fb_S4_M19_q12')">Plain non-shoulder eyebolts, which are the simplest to install</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q12"></div>
+</div></section>
+<section class="slide t-divider" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Turnbuckles, Links, and Rings</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>What a Turnbuckle Does</h2>
+<p>A <b>turnbuckle</b> is a length and tension <b>adjuster</b>: a body with two threaded ends (one right-hand, one left-hand thread). Turning the body draws both ends in or lets them out.</p><p>End types: <b>jaw</b>, <b>eye</b>, and <b>hook</b>.</p><p class='warn'>Lock the turnbuckle against rotation (jam nuts or wire) so vibration cannot loosen it. It is an adjuster in the line, not a lifting pick point.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A turnbuckle's purpose in a rigging assembly is to:</p>
+<div class="quiz-group" data-qid="S4_M19_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q13',0,'fb_S4_M19_q13')">Provide a swivel so that the load below can spin freely</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q13',1,'fb_S4_M19_q13')">Adjust tension or length by turning the body between its ends</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q13',2,'fb_S4_M19_q13')">Serve as the main lifting pick point for the whole load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q13',3,'fb_S4_M19_q13')">Replace a shackle anywhere that a pin would be inconvenient</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q13"></div>
+</div></section>
+<section class="slide t-content" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Turnbuckle End Types</h2>
+<p>The three end types are not equal:</p><ul><li><b>Jaw and eye ends</b> -- closed; secure under load and slack</li><li><b>Hook end</b> -- can <b>open or unload</b> if the line goes slack; weakest and lowest-rated</li></ul><p class='warn'>For overhead or critical work, use jaw or eye ends. Avoid relying on a hook end where it could come unhooked.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Among turnbuckle end fittings, a hook end is the weakest choice because:</p>
+<div class="quiz-group" data-qid="S4_M19_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q14',0,'fb_S4_M19_q14')">It simply cannot be threaded like the other two ends</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q14',1,'fb_S4_M19_q14')">It is always made of a noticeably softer metal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q14',2,'fb_S4_M19_q14')">It has no rated working capacity at all, ever</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q14',3,'fb_S4_M19_q14')">It can open or unload if the assembly goes slack</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q14"></div>
+</div></section>
+<section class="slide t-content" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Limits on Turnbuckles, Links, and Rings</h2>
+<p>These load-path components share a few hard rules:</p><ul><li><b>Never side-load</b> -- the pull runs straight through, not across</li><li><b>Never exceed the rating</b></li><li><b>Never repair by welding</b> -- heat destroys strength and hides cracks</li><li>Inspect for bent rods, stretched or cracked fittings, thread damage, wear</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Turnbuckles and the links and rings in an assembly must never be:</p>
+<div class="quiz-group" data-qid="S4_M19_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q15',0,'fb_S4_M19_q15')">Inspected carefully before each and every single use</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q15',1,'fb_S4_M19_q15')">Side-loaded, loaded past their rating, or repaired by welding</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q15',2,'fb_S4_M19_q15')">Marked anywhere at all with their rated working capacity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q15',3,'fb_S4_M19_q15')">Matched in rating to the rest of the assembly load path</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h2>Master Links and Rings</h2>
+<p>A <b>master link</b> sits at the top of a multi-leg assembly, where all the leg loads gather.</p><p class='warn'>It must be <b>rated to carry the full assembly load</b> through all its legs -- not just one leg's share -- and it must be marked with its rating.</p><p>Connecting links and weldless rings likewise must be rated to match the assembly and used only as manufactured, rated components.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A master link or ring at the top of a multi-leg sling assembly must be:</p>
+<div class="quiz-group" data-qid="S4_M19_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q16',0,'fb_S4_M19_q16')">Made from a field-bent steel rod for a bit of flexibility</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q16',1,'fb_S4_M19_q16')">The lightest possible component so it does not add weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q16',2,'fb_S4_M19_q16')">Rated to carry the full assembly load through all its legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q16',3,'fb_S4_M19_q16')">Left unmarked so that it is not confused with the slings</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Rig to the Marked Working Load Limit</h2>
+<p>Across every component in this module, the rating you rig to is the <b>working load limit marked by the manufacturer</b> on that specific piece.</p><p class='warn'>The whole assembly is only as strong as its <b>lowest-rated component</b>. A heavy sling through a light shackle is limited by the shackle.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Across every piece of rigging hardware -- shackles, hooks, eyebolts, hoist rings, turnbuckles -- the rating you rig to is:</p>
+<div class="quiz-group" data-qid="S4_M19_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q17',0,'fb_S4_M19_q17')">The number stamped on the sling it connects to</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q17',1,'fb_S4_M19_q17')">The working load limit marked by the manufacturer</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q17',2,'fb_S4_M19_q17')">Whatever the crane's chart shows for the boom</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q17',3,'fb_S4_M19_q17')">An estimate based on how heavy the part feels</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>Unmarked Hardware Is Out of Service</h2>
+<p>The identity rule that governs slings governs hardware too:</p><p class='warn'>A shackle, hook, eyebolt, hoist ring, link, or ring with <b>no legible identification or rating</b> is out of service until it is properly identified.</p><p>No marking means no known rating, grade, or history -- and no lift.</p>
+</div></section>
+<section class="slide t-content" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>The 120-Degree Leg Limit</h2>
+<p>Tying the loading rules together: a shackle carries its full rating only when loaded <b>symmetrically</b> with the sling legs within an <b>included angle of about 120 degrees</b>.</p><p class='warn'>Spread the legs past 120 degrees and the force on the shackle climbs -- reduce the rating, just as you would for a sling at a wide angle.</p>
+</div></section>
+<section class="slide t-divider" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions -- 100 percent required to complete</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">A rigger finds a shackle, a hook, or a link with no legible identification or rated capacity marking. The correct action is:</p>
+<div class="quiz-group" data-qid="S4_M19_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q18',0,'fb_S4_M19_q18')">Remove it from service until it is properly identified and rated</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q18',1,'fb_S4_M19_q18')">Use it only for very light loads just to be on the safe side</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q18',2,'fb_S4_M19_q18')">Estimate the rating from its overall size and then use it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q18',3,'fb_S4_M19_q18')">Match it to a similar marked piece and use that same rating</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">A shackle's rated capacity assumes symmetric loading with the sling legs kept within an included angle of about:</p>
+<div class="quiz-group" data-qid="S4_M19_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q19',0,'fb_S4_M19_q19')">60 degrees, above which the shackle cannot be used</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q19',1,'fb_S4_M19_q19')">90 degrees, exactly matching a square-legged pick</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q19',2,'fb_S4_M19_q19')">120 degrees, beyond which the rating must be reduced</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q19',3,'fb_S4_M19_q19')">180 degrees, so that any leg spread is acceptable</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A shackle is loaded at a 70-degree side angle from its in-line direction. Its capacity must be reduced by about:</p>
+<div class="quiz-group" data-qid="S4_M19_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q20',0,'fb_S4_M19_q20')">About 10 percent of the rated load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q20',1,'fb_S4_M19_q20')">About 30 percent of the rated load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q20',2,'fb_S4_M19_q20')">No reduction is needed at that angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q20',3,'fb_S4_M19_q20')">About 50 percent of the rated load</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-47" data-idx="47">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A plain, non-shoulder eyebolt is available for a pick where one leg will pull at an angle. The rigger should:</p>
+<div class="quiz-group" data-qid="S4_M19_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q21',0,'fb_S4_M19_q21')">Not use the plain eyebolt for the angled leg; it is vertical-only</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q21',1,'fb_S4_M19_q21')">Use it right at the angle, since eyebolts handle any direction</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q21',2,'fb_S4_M19_q21')">Load it at the angle but only up to about half of its rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q21',3,'fb_S4_M19_q21')">Grease its threads so that it can swivel over to the angle</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-48" data-idx="48">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">A rigger needs full rated capacity at a steep pick-point angle and has both shoulder eyebolts and swivel hoist rings available. The better choice is:</p>
+<div class="quiz-group" data-qid="S4_M19_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q22',0,'fb_S4_M19_q22')">The eyebolt, because it is a good deal lighter and cheaper</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q22',1,'fb_S4_M19_q22')">The swivel hoist ring, since its rating is not reduced at an angle</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q22',2,'fb_S4_M19_q22')">Either one, since the load angle does not affect eyebolts</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q22',3,'fb_S4_M19_q22')">Neither one, since angled picks are always strictly prohibited</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-49" data-idx="49">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">During inspection a hook shows a throat opening that has spread about 8 percent beyond its original measurement. The rigger should:</p>
+<div class="quiz-group" data-qid="S4_M19_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q23',0,'fb_S4_M19_q23')">Keep on using it as long as the safety latch still closes</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q23',1,'fb_S4_M19_q23')">Rate it at only half its capacity from this point forward</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q23',2,'fb_S4_M19_q23')">File the throat back down to its original width and reuse</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q23',3,'fb_S4_M19_q23')">Remove it from service -- the throat has opened past the limit</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-50" data-idx="50">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">A shackle pin is threaded in but its shoulder will not draw down flush against the shackle body. The rigger should:</p>
+<div class="quiz-group" data-qid="S4_M19_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q24',0,'fb_S4_M19_q24')">Tap the pin in with a hammer until it at least looks close</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q24',1,'fb_S4_M19_q24')">Replace the pin with a grade-8 bolt of the very same diameter</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q24',2,'fb_S4_M19_q24')">Remove the shackle from service -- the pin is not fully engaged</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q24',3,'fb_S4_M19_q24')">Use it anyway as long as the pin is nearly most of the way in</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-51" data-idx="51">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">A load must hang from a hook. The single most important rule for how the load sits in the hook is:</p>
+<div class="quiz-group" data-qid="S4_M19_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q25',0,'fb_S4_M19_q25')">Load it across the back of the hook, well away from the throat</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q25',1,'fb_S4_M19_q25')">Seat it in the saddle, in line with the shank -- never on the tip</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q25',2,'fb_S4_M19_q25')">Hang it from the very tip of the hook for an easy release</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M19_q25',3,'fb_S4_M19_q25')">Rest it up against the latch so that the latch stays closed</button>
+</div>
+<div class="feedback" id="fb_S4_M19_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-52" data-idx="52">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M20'}}))">Next: Blocks, Sheaves, and Fairleads &gt;</button><p>That is Specialty Rigging Hardware.</p>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 52</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 52;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M19)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M19_RiggingHardware";
+var HASHES={"S4_M19_q01": "565dcfbc", "S4_M19_q02": "b7cdf8d0", "S4_M19_q03": "b1ac4de5", "S4_M19_q04": "b75cfef2", "S4_M19_q05": "9aea76c0", "S4_M19_q06": "1c81e1a4", "S4_M19_q07": "f538f356", "S4_M19_q08": "7ad44a66", "S4_M19_q09": "819f2c3a", "S4_M19_q10": "87fe8a35", "S4_M19_q11": "8f5d69a0", "S4_M19_q12": "2db00d9f", "S4_M19_q13": "4a2295d1", "S4_M19_q14": "cb8b2fa6", "S4_M19_q15": "73d4e907", "S4_M19_q16": "f23d7e23", "S4_M19_q17": "0eb00655", "S4_M19_q18": "af3fe067", "S4_M19_q19": "b961919e", "S4_M19_q20": "fb447545", "S4_M19_q21": "eebe7e8b", "S4_M19_q22": "b2e28d4d", "S4_M19_q23": "95700388", "S4_M19_q24": "358ff3be", "S4_M19_q25": "a931d5f4"};
+var GATE=["S4_M19_q18", "S4_M19_q19", "S4_M19_q20", "S4_M19_q21", "S4_M19_q22", "S4_M19_q23", "S4_M19_q24", "S4_M19_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=51;            /* completion slide (52) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (52) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M19)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Specialty Rigging Hardware, module five of the Advanced Rigger stage. The last module took you inside the slings. This one covers everything that connects those slings to the load and the hook -- the shackles, the hooks, the eyebolts and hoist rings, the turnbuckles, and the links and rings. Every one of these has a type to match to the job, a rating that comes with loading conditions, and its own removal criteria. And every one of them is a place a lift can fail, because the hardware is often the smallest, most-overlooked part of the whole assembly. This is the module that teaches you to look at the little steel pieces as carefully as the big ones. I have watched a whole rig-up come down to whether one shackle pin was seated right. [PAUSE / ASK] Before we start, ask yourself how much a hard side load takes off a shackle's rating. Hold your guess.", "2": "Six outcomes, and they follow the hardware from the load up to the hook. First the shackle, the most common connector and the one with the most loading rules. Then the hook, where where-you-put-the-load is everything. Then eyebolts and hoist rings, which is really the story of how to handle an angular pull. And finally the turnbuckles, links, and rings that finish an assembly. Under all of it runs one rule: every component has a marked working load limit, and the weakest piece governs the whole lift. The gate at the end is six questions at one hundred percent, because a single wrong-loaded shackle or a tip-loaded hook can undo a perfect sling calculation. I have worked with hands who inspect a shackle as carefully as they inspect a million-dollar crane. [PAUSE / ASK] Look at the six and pick the piece of hardware you know the least about.", "3": "First section, shackles, because they are the connector you will reach for more than any other. There is more to a shackle than clipping it on -- the shape, the pin, the way you load it, and the way it wears all matter. Out on a job the shackle is small and easy to take for granted, right up until one is loaded wrong. [PAUSE / ASK] Ask yourself what makes a bow shackle different from a D shackle.", "4": "Shackles come in two shapes, and matching the shape to the load is the first decision. An anchor shackle, the bow, has a wide rounded body, and that width is there so you can bring angled and multiple sling legs into it at a spread. A chain shackle, the D shape, is narrow and straight and meant for a single, in-line pull. So the rule is simple: legs at an angle or more than one leg, reach for the bow; a straight single pull, the D is fine. Both are governed by the rigging hardware standard and both carry a stamped rating. The width of that bow is not decoration -- it is what lets the shackle take a spread without binding. On a job I watched a rigger start to bring three legs into a narrow D shackle and stop to swap in a bow. [PAUSE / ASK] Which shape do you reach for when legs come in at an angle?", "5": "Shackles come in two body shapes, and picking the right one starts every connection off right. An anchor shackle, also called a bow shackle, has a wide, rounded bow, and that width lets it take angled and multi-leg loads -- you can bring two or three sling legs into it at a spread. A chain shackle, the D shape, has a narrow straight body and is meant for a single in-line pull. So when legs come in at an angle, you reach for the bow. Some folks will think a shackle only takes a bolt pin, but both shapes come with screw pins and bolt types. Someone might think shackles carry no rating, but every one is stamped with a working load limit. Some people will imagine welding it shut, but you never weld on a rated shackle -- welding is a removal condition. Wide bow for spread, narrow D for straight pull. On a job I watched a rigger grab a D shackle for a three-leg pick and have to swap it for a bow. [PAUSE / ASK] Which shape takes the angled legs? Make your call.", "6": "The pin decides how much you can trust the shackle to stay together. A screw pin threads in by hand, which is fast and perfect for connections you make and break the same shift -- as long as you confirm it is fully seated each time. A bolt type, also called a safety shackle, uses a bolt, a nut, and a cotter pin, so it physically cannot back out. That is your choice for anything permanent, and for any lift where the load might rotate, because a turning load can slowly unscrew a screw pin right out of the shackle. If you cannot get back to re-check the pin, go bolt type. Screw pin for temporary and watched, bolt type for permanent or turning. I have seen a screw pin walk itself loose under a load that kept slowly spinning on the hook. [PAUSE / ASK] What kind of load will unscrew a screw pin?", "7": "The pin type decides how much you can trust the shackle to stay together, so match it to the job. A screw-pin shackle threads its pin in by hand, which is quick and handy for connections you make, use, and break down the same shift -- as long as you check that the pin is fully seated each time. A bolt-type or safety shackle uses a bolt, nut, and cotter pin, so it cannot back out; that is the one for permanent installs or any time the load might rotate and unscrew a screw pin. Some folks will put a screw pin on a permanent install, but that is the bolt type's job. Someone might use a screw pin where the load will spin it, which can walk the pin right out. Some people will hang a screw pin overhead where no one can recheck it, another bolt-type situation. Screw pin for temporary and watched, bolt type for permanent or turning. I have seen a screw pin back itself out under a load that kept rotating. [PAUSE / ASK] Which pin cannot back out on its own? Make your call.", "8": "A shackle's stamped rating is a promise the manufacturer makes under certain conditions, and you have to hold up your end. Load it in-line, with the pull running straight down its centerline. Load it symmetrically, not cocked off to one side. And keep any sling legs coming into it within an included angle of about a hundred twenty degrees. Meet those and you get the full rating; miss them and you have to derate. The two ways people lose the rating are pulling the shackle sideways, which we will put numbers to next, and spreading the legs too wide. Neither one is obvious unless you are looking for it. On a job I watched a bow shackle loaded with the legs spread nearly flat, well past a hundred twenty, and the lift lead caught it. [PAUSE / ASK] What is the widest included angle a shackle takes at full rating?", "9": "A shackle's stamped rating comes with conditions, and rigging outside them quietly overloads it. The full rated capacity applies when the shackle is loaded in-line -- the pull running down its centerline -- and loaded symmetrically, with any sling legs kept within an included angle of about a hundred twenty degrees. Spread the legs wider than that, or pull the shackle off to the side, and you have to reduce the rating. Some folks think a shackle holds full capacity from any direction, but a side pull cuts it. Someone might chase a paint color, which says nothing about how it is loaded. Some people will just make sure it is bigger than the hook, but size is not the same as correct loading. In-line, symmetric, legs inside a hundred twenty degrees. On a job I watched a bow shackle loaded with legs spread far past that and pulled before it saw the full weight. [PAUSE / ASK] What two loading conditions earn the full rating? Make your call.", "10": "Side loading a shackle has a price, and here is the schedule for it. From zero to five degrees off in-line, there is essentially no reduction -- a hair of angle is free. From five to forty-five degrees, you take off about thirty percent. From forty-six to ninety degrees, you cut it in half, fifty percent. And past ninety degrees, you just do not do it -- avoid loading a shackle that far off in-line. These apply to both screw-pin and bolt-type shackles. The pattern to remember is nothing, thirty, fifty, avoid, as the angle steepens. A side load sneaks up on people because a shackle looks like it does not care which way you pull, but it very much does. On a job I watched a rigger measure a side angle and knock a shackle's rating down by half before hooking on. [PAUSE / ASK] What does a side load past forty-five degrees cost you?", "11": "Side loading a shackle has a real price, and the chart puts numbers on it. From zero to five degrees off in-line there is essentially no reduction. From five to forty-five degrees you knock off about thirty percent. From forty-six to ninety degrees you cut it in half, a fifty percent reduction. And past ninety degrees you simply avoid it -- do not load a shackle that way. So a hard side pull in that forty-six to ninety band leaves you only about half the stamped rating. Some folks think side loading is free, but only the first few degrees are. Someone might guess ten percent, far too little for that steep an angle. Someone might stop at thirty percent, which is the gentler five-to-forty-five band, not this one. Know the bands: nothing, thirty, fifty, avoid. On a job I watched a shackle pulled hard sideways and derated on the spot with that chart. [PAUSE / ASK] A steep side load costs you how much? Make your call.", "12": "Shackles wear and deform at predictable places, and the removal list targets them. Ten percent loss of the catalog dimension anywhere on the bow or the pin takes it out. A pin that will not seat flush -- its shoulder not drawing down against the body -- takes it out, because that pin is not fully engaged. So do bending, twisting, stretching, elongation, cracks, deep nicks or gouges, heavy corrosion or pitting, and any sign of unauthorized welding, which destroys the heat treatment. And a missing or unreadable rating retires it just like any other piece. The pin-not-seating one is worth burning in, because it is easy to shrug off and force -- and forcing it is exactly wrong. On a job I watched a rigger reject a shackle whose pin would not draw flush rather than tap it in and hope. [PAUSE / ASK] What does a pin that will not seat flush tell you?", "13": "Shackles fail at predictable places, and the removal criteria zero in on them. You retire a shackle for a ten percent loss of its catalog dimension at any point on the bow or the pin, for a pin that will not seat fully -- its shoulder not flush against the body -- and for any bending, twisting, stretching, elongation, cracks, deep nicks or gouges, heavy corrosion, or any sign of unauthorized welding. Any of those and it is done. Some folks would pull it for a legible load-limit stamp, but that stamp is exactly what you want to see. Someone might remove it for a film of lubricant, which is protection, not damage. Some people would worry about a pin that seats flush, but flush is correct -- it is the pin that will not seat that is the problem. Measure the wear, check the pin seats, look for distortion and welding. I have caught a shackle whose pin would not draw flush and pulled it before it ever lifted. [PAUSE / ASK] What does a pin that will not seat flush tell you? Make your call.", "14": "Second section, hooks. A hook looks like the simplest thing in the world, and it is where some of the most common rigging mistakes happen -- almost always about where the load sits and whether the throat is opening up. Out on a job I have watched good crews tip-load a hook without a second thought. [PAUSE / ASK] Ask yourself where in a hook the load is supposed to sit.", "15": "The latch on a hook does one job, and it is not the job people sometimes give it. A safety latch, or a mousing of wire when there is no latch, bridges the throat opening so the sling or the load cannot jump out if the rigging goes slack or shifts. That is retention, and it matters. But the latch is not a load-bearing part -- it is not built to carry weight, and it will fail if you make it. So you never rig a load so that it bears on the latch. The hook body carries the load; the latch just keeps things from falling out of the throat. Keep the two jobs separate in your head. On a job I watched a load shift on a slack sling and the latch was the only thing that kept it in the hook -- doing its real job, not carrying weight. [PAUSE / ASK] What is the latch for, and what is it not for?", "16": "The latch on a hook does an important job, but it is not the job people sometimes assume. A safety latch, or a mousing when there is no latch, bridges the throat opening to keep the sling or the load from jumping out of the hook if things go slack or shift. That is its whole purpose -- retention. What it does not do is carry load. The latch is not a load-bearing part, and you never rig so that the latch takes weight. Some folks think the latch shares the load, but it is not built for that and will fail if you load it. Someone might think closing the latch raises the hook's capacity, but the rating comes from the hook body, not the latch. Some people will use a latch to justify tip loading, but nothing makes tip loading safe. Latch keeps things in; the hook body carries the load. I have watched a load shift and the latch be the only reason a sling stayed in the hook. [PAUSE / ASK] What is the latch actually for? Make your call.", "17": "Where the load sits in a hook decides how much of the hook's strength you actually get. It belongs down in the saddle, the bowl at the bottom, seated in line with the shank so the pull runs straight through the strongest part of the hook. Put it there and you get the rating. The three ways to get it wrong all have names. Tip loading, or point loading, hangs the load out on the tip and pries the hook open, cutting its capacity sharply -- it is the most common hook error. Side loading pulls across the hook. Back loading puts the load across the back, away from the throat. Every one of those bends the hook the wrong way or robs its strength. Saddle, in line with the shank, every single time. On a job I watched a tip-loaded hook begin to open under a load it would have carried easily in the bowl. [PAUSE / ASK] Name the wrong way to load a hook that pries it open.", "18": "Where the load sits in a hook decides whether you get its full strength or a fraction of it. The load belongs down in the saddle, the bowl at the bottom of the hook, seated in line with the shank so the pull runs straight through the strongest part. Load it there and the hook gives you its rating. Some folks will hang the load out on the tip -- point loading or tip loading -- which pries the hook open and can cut its capacity dramatically; it is one of the most common and dangerous hook mistakes. Someone might rest the load against the latch, which is not a load-bearing part. Some people will back-load it across the back of the hook away from the throat, another wrong connection that bends the hook. Saddle, in line with the shank -- that is the only correct spot. On a job I watched a tip-loaded hook start to open under a load it should have handled easily in the bowl. [PAUSE / ASK] Where in the hook does the load belong? Make your call.", "19": "Hooks warn you before they fail, if you measure them. A throat opening that has increased more than about five percent -- and never more than a quarter inch -- means the hook is bending open, and it comes out. Wear over about ten percent of the original dimension at any point takes it out. Any twist out of the plane of the unbent hook takes it out. So do cracks, nicks, or gouges, a missing or unreadable identification, or a damaged latch. The throat measurement is the key one, and the trick is to have reference marks or a known original dimension so you can actually catch a five percent spread, which is small. On a job I watched an inspector condemn a hook for a throat spread you had to put calipers on to see. [PAUSE / ASK] What does a growing throat opening mean?", "20": "Hooks give plenty of warning before they fail, if you measure them. You remove a hook for a throat opening that has increased more than about five percent -- and in no case more than a quarter inch -- because a spreading throat means the hook is bending open. You remove it for wear that exceeds about ten percent of the original dimension at any point, for any twist out of the plane of the unbent hook, and for cracks, nicks, or gouges, or a missing or illegible identification. Some folks would pull a hook for a legible ID stamp, but that is what keeps it in service. Someone might remove it for a latch that works properly, which is exactly what you want. Some people would worry about the factory finish, which is protection, not damage. Measure the throat against reference marks, check for twist, look for cracks. I have watched an inspector catch a hook opening past five percent that looked fine to a passing glance. [PAUSE / ASK] A spreading throat means what is happening to the hook? Make your call.", "21": "Third section, eyebolts and hoist rings, which is really one story: how to handle a pull that comes off at an angle. Eyebolts are fussy about angle and hoist rings solve the problem, and knowing the difference saves hardware and loads. Out on a job I have watched a plain eyebolt fold over the instant a leg pulled sideways. [PAUSE / ASK] Ask yourself what happens to an eyebolt's strength when you pull it at an angle.", "22": "Eyebolts come in two kinds, and mixing them up bends and snaps hardware. A non-shoulder or plain eyebolt has no collar at its base, so it is built for vertical, in-line pull only -- straight up its axis. Pull it at an angle and it bends or breaks, because there is nothing to brace the side force. A shoulder eyebolt has a collar at the base that bears against the load surface and braces that side force, so it can take an angular load -- though with a steep derating we will get to. The one-line rule: plain means vertical only, shoulder for angles. And even a shoulder eyebolt at an angle loses a lot of capacity, which is why hoist rings exist. On a job I watched a plain eyebolt fold flat the instant the load pulled off to the side. [PAUSE / ASK] Which eyebolt is vertical-only?", "23": "Eyebolts come in two kinds, and confusing them bends and breaks hardware. A non-shoulder or plain eyebolt has no collar at its base, so it is designed for vertical, in-line pull only -- straight up the axis of the bolt. Load a plain eyebolt at an angle and it will bend or break, because there is no shoulder to brace against the side force. Some folks think a plain eyebolt handles angles up to ninety degrees, but that is exactly what breaks it. Someone might imagine it in a choker under the load, which is not how eyebolts work. Some people will think you only use it reeved to a second eyebolt, but that just adds angle and tension. Plain eyebolt means straight-up loads, period; anything at an angle needs a shoulder. On a job I watched a plain eyebolt bend over sideways the instant the load pulled off to an angle. [PAUSE / ASK] What is the only safe direction to load a plain eyebolt? Make your call.", "24": "A shoulder eyebolt can take an angle, but only if you set it up exactly right, and every detail matters. The shoulder has to seat fully flush against the load, in solid contact, so it can brace the side force -- a shoulder sitting on a gap does nothing. The plane of the eye has to line up with the direction of pull, so the load pulls through the eye and not across it; an eyebolt turned to the side loses capacity and can crack. And the bolt has to be tightened down, torqued to spec if required, never backed off to let the eye swivel -- a loose eyebolt is a broken one waiting to happen. Even done perfectly, the angle derates it hard, which is your cue to think about a hoist ring instead. On a job I watched an eyebolt that was turned to the side crack under an angled pull. [PAUSE / ASK] Which way does the plane of the eye have to face?", "25": "A shoulder eyebolt can take an angular load, but only if you set it up exactly right, and the details are what people miss. The shoulder -- the collar at the base -- must seat fully flush against the load surface, making solid contact, so it can brace against the side force. And the plane of the eye must line up with the direction of pull, so the load pulls through the eye, not across it. An eyebolt turned to the side loses capacity and can fail. Some folks will back the bolt off to let the eye swivel, but a loose eyebolt is a broken eyebolt waiting to happen -- it must be tight and flush. Someone might grease the shoulder to let it slip, which is the opposite of the flush, solid contact you need. Some people will turn the eye ninety degrees from the pull, loading it across the weak direction. Flush shoulder, eye in the plane of the pull, tightened to spec. On a job I watched an eyebolt turned to the side crack under an angled load. [PAUSE / ASK] Which way must the plane of the eye face? Make your call.", "26": "This is the piece of hardware that solves the angle problem, and it is worth knowing exactly why. A swivel hoist ring bolts into a tapped hole like an eyebolt, but its bail swivels a full turn around and pivots up and down, so it rotates to line itself up with the load no matter which way you pull. Because it always ends up pulling in-line with itself, its rated capacity is not reduced at an angle -- that is the whole point, and it is the opposite of an eyebolt, which loses capacity fast as the pull comes off vertical. The trade is that you must torque it to the manufacturer's spec every time, and you inspect it like anything else. Full rating at any angle is what you are paying for. On a job I watched hoist rings hold their full number on a nasty angle where eyebolts would have been cut in half. [PAUSE / ASK] Why does the hoist ring keep its rating at an angle?", "27": "Here is the piece of hardware that solves the angular-loading headache, and it is worth knowing why. A swivel hoist ring bolts down like an eyebolt, but its bail swivels a full turn and pivots up and down, so it rotates to align itself with the load line no matter which way you pull. Because it always ends up pulling in-line with itself, its rated capacity is not reduced at an angle -- unlike an eyebolt, which sheds capacity fast as the pull comes off vertical. That is the whole reason hoist rings exist. Some folks will pick it for being cheap and light, but it is neither; you choose it for the angle performance. Someone might think it skips torque, but a hoist ring must be torqued to the manufacturer's spec every time. Some people will assume it never wears, but it gets the same inspection as anything else. Full rating at any angle -- that is the hoist ring's gift. On a job I watched a set of hoist rings hold full rating on a bad angle where eyebolts would have been derated hard. [PAUSE / ASK] Why does a hoist ring keep its rating at an angle? Make your call.", "28": "Let us turn all of this into a decision you will actually make on a load. For a straight vertical pull, a plain or shoulder eyebolt is fine. For a moderate angle where an eyebolt will do, use a shoulder eyebolt, seated flush, in the plane of the pull, and derated for the angle. For a steep angle where you need the full rating, reach for a swivel hoist ring, because it aligns with the pull and holds its rating where an eyebolt would lose half or more. The hoist ring costs more, but it buys back exactly the capacity the angle would have stolen. Matching the hardware to the angle is the whole skill here. On a job I watched a crew swap angled eyebolts for hoist rings and recover all the margin the angle had been eating. [PAUSE / ASK] For a steep angle at full rating, what do you reach for?", "29": "Put the last few ideas together into a real decision, because this is the choice you will actually make in the field. When the sling legs have to pull at a steep angle out of tapped holes in a load, swivel hoist rings are generally the right answer, because they pivot and swivel to line up with each leg and hold their full rating at that angle. An eyebolt in the same spot would be derated hard, or would bend if it were a plain one. Some folks reach for plain non-shoulder eyebolts because they are simplest, but plain eyebolts are vertical-only and would bend or break at that angle. Someone might try wire rope clips in the holes, which is not what clips are for at all. Some people might set turnbuckles into the holes, but a turnbuckle is a length adjuster, not a pick point. For steep angular picks, hoist rings earn their cost. On a job I watched a crew swap angled eyebolts for hoist rings and buy back all the capacity the angle had eaten. [PAUSE / ASK] What hardware holds full rating on a steep angled pick? Make your call.", "30": "Last section: the turnbuckles that adjust an assembly and the links and rings that tie it together. These are quiet parts of the load path that still have to be rated, loaded right, and inspected. Out on a job I have watched a welded master link get cut up on the spot. [PAUSE / ASK] Ask yourself what a turnbuckle is actually for.", "31": "A turnbuckle is an adjuster, and knowing that keeps you from misusing it. It is a body with two threaded ends, one cut right-handed and one left-handed, so turning the body pulls both ends in together or lets them both out -- that is how you take up slack, tension a guy line, or level a load. The ends come as jaws, eyes, or hooks. Whatever you tension it to, you lock it against rotation with jam nuts or wire, so vibration cannot back it off. And it is an adjuster in the line, not a lifting attachment or a pick point. On a job I watched a crew use turnbuckles to fine-level a long load until it hung dead flat, then lock every one of them. [PAUSE / ASK] What does turning the body of a turnbuckle do?", "32": "A turnbuckle is an adjuster, and knowing that keeps you from asking it to do jobs it was not built for. It is a body with two threaded end fittings, one right-hand and one left-hand thread, so that turning the body draws both ends in or lets them out, adjusting the tension or the length of the assembly. That is what it is for -- tuning a guy line, leveling a load, taking up slack. Some folks will treat a turnbuckle as the main pick point, but it is a length adjuster in the line, not a lifting attachment. Someone might swap it in for a shackle, but it does a different job. Some people will expect it to swivel the load, which is a hoist ring's or swivel's role, not a turnbuckle's. Body turns, ends draw in or out, tension adjusts. On a job I watched a crew use turnbuckles to fine-level a long load until it hung dead flat. [PAUSE / ASK] What does turning the body actually do? Make your call.", "33": "The three turnbuckle ends are not equal, and the hook end is the one to watch. Jaw and eye ends are closed, so they stay put under load and under slack. A hook end can open up or slip off its connection if the assembly goes slack, which makes it the weakest and lowest-rated of the three. For anything overhead or critical, you want the closed jaw or eye ends, or at least a hook with a positive latch, so nothing can come unhooked when the tension drops. The material is fine; it is the open shape that is the risk. On a job I watched a hook-end turnbuckle jump its connection the moment its line went slack during a shift. [PAUSE / ASK] What can happen to a hook end when the line goes slack?", "34": "Turnbuckles come with different ends -- jaw, eye, and hook -- and the hook is the one to be careful with. A hook end can open up or slip off its connection if the assembly goes slack, so it is the weakest and least secure of the three and is rated lower. For anything overhead or critical, you want the jaw or eye ends, which cannot come unhooked, or a hook with a positive latch. Some folks think the hook end just cannot be threaded, but the issue is security under slack, not threading. Someone might assume it is a softer metal, but the material is not the point -- the open shape is. Some people will think it has no rating, but it is rated, just lower than the closed ends. Hook ends can unload; closed ends cannot. And whatever the ends, you lock the turnbuckle against rotation so vibration cannot loosen it. On a job I watched a hook-end turnbuckle jump loose the moment its line went slack. [PAUSE / ASK] What happens to a hook end when the line goes slack? Make your call.", "35": "Turnbuckles, links, and rings all live by the same short list of don'ts. Never side-load them -- the pull runs straight through the body of a turnbuckle or through the opening of a ring, never pinched across it. Never load them past their rating. And never repair them by welding, because the heat destroys the heat-treated strength and can hide cracks under a bead. When you inspect, you look for bent rods on a turnbuckle, stretched or cracked end fittings, damaged threads, and wear on links and rings. These are quiet parts, but they are in the load path and they get the same respect as everything else. On a job I watched a master link somebody had field-welded get condemned and cut up on the spot. [PAUSE / ASK] Why is welding a repair you never make on this hardware?", "36": "The rules that protect turnbuckles, links, and rings are mostly about respecting their limits. You never side-load them -- the pull runs straight through, not across -- you never load them past their rating, and you never repair them by welding, because heat destroys the heat-treated strength and hides cracks. A turnbuckle takes its load in a straight line through the body; a master link or ring takes it through the ring, not pinched across it. Some folks might think marking the rated capacity is forbidden, but that marking is required. Someone might think inspecting before use is a no-no, but that is exactly the discipline. Some people will think matching the rating to the assembly is wrong, but every component has to match the load path. No side loads, no overloads, no welding. On a job I watched a master link that someone had welded on get cut up and thrown out on the spot. [PAUSE / ASK] Name one thing you must never do to these components. Make your call.", "37": "The master link is the gather point at the top of a multi-leg assembly, where every leg's load comes together into one ring, so it has to be rated to carry the whole thing. Not one leg's share -- the full assembly load, through all the legs at once. Size or rate it for just one leg and you have built the weak point of the entire bridle. It carries its rating marked, like every rated component, and the connecting links and weldless rings that tie an assembly together follow the same rule: rated to match, used only as manufactured, never field-made. On a job I watched an undersized master link become the number that governed a whole four-leg bridle, weaker than any of the legs. [PAUSE / ASK] What load does the master link have to be rated for?", "38": "The master link sits at the top of a multi-leg assembly, where every leg's load comes together, so it has to be rated to carry the whole thing. All the leg tensions gather at that one ring, and it must be sized and rated for the full assembly load coming through all its legs, not just one leg's share. Some folks will want the lightest possible link to save weight, but the master link is not where you cut capacity -- it carries everything. Someone might field-bend a rod into a ring, which is a prohibited makeshift with no rating. Some people will leave it unmarked to avoid confusion, but it needs its rating marked like any rated component. It is the gather point for the whole assembly and it is rated for the whole assembly. On a job I watched an undersized master link become the weak point that governed a whole four-leg bridle. [PAUSE / ASK] What load does the master link have to carry? Make your call.", "39": "For all the different hardware in this module, one rule ties it together. You rig to the working load limit marked on that exact piece of hardware by its manufacturer -- the shackle's stamp, the hook's rating, the eyebolt's, the hoist ring's, the turnbuckle's. Each component has its own limit, and the whole assembly is only as strong as its lowest-rated piece. That is the trap to watch: a strong, heavy sling rigged through a light shackle is limited by the shackle, not the sling, and if you only read the sling you will overload the connection. Read every component's marked limit and let the weakest one set the number for the pick. On a job I watched a heavy sling run through a light shackle that quietly became the real limit of the whole lift. [PAUSE / ASK] Which component sets the limit for the assembly?", "40": "For all the different hardware in this module, one rule ties it together and keeps you honest. You rig to the working load limit marked on that specific piece of hardware by its manufacturer -- the shackle's stamp, the hook's rating, the eyebolt's, the hoist ring's, the turnbuckle's. Each component carries its own limit, and the whole assembly is only as strong as its lowest-rated piece. Some folks will read the sling's number and apply it to the hardware, but the hardware has its own, often different, rating. Someone might grab the crane's load chart, which rates the machine, not the shackle in your hand. Some people will eyeball it by feel, which is not a method. Read each component's marked working load limit and let the weakest one govern. On a job I watched a heavy sling rigged through a light shackle that quietly set the real limit for the whole pick. [PAUSE / ASK] Whose marked rating do you rig each component to? Make your call.", "41": "The same identity rule that retired an untagged sling retires unmarked hardware, and it is just as firm. A shackle, hook, eyebolt, hoist ring, link, or ring with no legible identification or rated capacity comes out of service until it is properly identified, because without the marking you do not know its working load limit, its grade, or its history, and you do not rig on a guess. It does not matter how solid it looks. No marking, no known rating; no known rating, no lift. This is the habit that protects you when a piece of hardware looks perfectly fine but cannot tell you what it is. On a job I have set aside good-looking shackles for nothing more than a stamp I could not read, and never regretted it. [PAUSE / ASK] What do you do with a piece of hardware you cannot identify?", "42": "Let us tie the shackle loading rules together with the leg angle, because it works exactly like the sling angles you already know. A shackle holds its full rating only when it is loaded symmetrically and the sling legs coming into it stay within an included angle of about a hundred twenty degrees. Spread those legs wider than a hundred twenty and the force on the shackle climbs, the same way spreading sling legs drives up leg tension, so you have to reduce the rating. It is the load angle factor idea showing up again, this time at the shackle. A hundred twenty degrees is the line to remember. On a job I watched a bow shackle loaded with the legs spread nearly flat and caught before it took the full weight. [PAUSE / ASK] Past what included angle do you start derating the shackle?", "43": "This is the gate. Six questions, all six required, because one wrong-loaded shackle or one tip-loaded hook can undo a perfect lift. These pull from every section -- side loading, eyebolts, hoist rings, hook loading, throat wear, and pin engagement. Reason each one out. I have watched this be the point a rigger starts inspecting the little steel pieces as hard as the big ones. [PAUSE / ASK] Ready to judge some hardware?", "44": "The same identity rule that governed slings governs the hardware, and it is just as firm. A shackle, hook, link, or ring with no legible identification or rated capacity marking comes out of service until it is properly identified and rated, because without the marking you do not know its working load limit, its grade, or its history. Some folks will estimate the rating off the size, but two pieces that look alike can be rated very differently by grade and maker. Someone might use it only for light loads to feel safe, but a made-up limit on unmarked hardware is still a guess. Some people will match it to a similar marked piece, which assumes the exact thing you cannot confirm. No marking means no known rating, and no known rating means it does not go in the lift. I have set aside good-looking shackles for nothing more than a rating I could not read. [PAUSE / ASK] Unmarked hardware -- in the lift or out? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "45": "Shackles have an angle limit on the legs coming into them, and it pairs with the side-load rule from earlier. The stamped rating assumes the shackle is loaded symmetrically and that any sling legs coming into it stay within an included angle of about a hundred twenty degrees. Spread the legs wider than a hundred twenty and you have to reduce the rating, because the geometry drives up the force on the shackle just like it does on a sling. Some folks will cap it at sixty degrees, which is tighter than the actual limit. Someone might say ninety, picturing a square pick, but the limit is wider than that. Some people will say a hundred eighty, as if any spread were fine, but a straight-across pull is exactly what you cannot do at full rating. A hundred twenty is the line; past it, derate. On a job I watched a bow shackle loaded with legs spread near flat and pulled before it took the weight. [PAUSE / ASK] What included angle is the shackle's limit? Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "46": "Back to the side-load chart, because this is exactly the kind of angle that gets missed. Seventy degrees off in-line falls in the forty-six to ninety degree band, and that band cuts the rated capacity in half -- about a fifty percent reduction. So a shackle rated for, say, ten thousand pounds is good for only about five thousand pulled that far sideways. Some folks will say no reduction, but only the first five degrees are free. Someone might take off ten percent, far too little for that steep an angle. Someone might take thirty percent, but that is the gentler five-to-forty-five band, not seventy degrees. Know the bands: nothing near in-line, thirty in the middle, fifty when it gets steep, and avoid past ninety. I have watched a rigger pull a chart and cut a shackle's rating in half for a side load about this steep. [PAUSE / ASK] A seventy-degree side load costs about how much? Make your call.", "47": "This is the eyebolt trap, and it is a common one. A plain, non-shoulder eyebolt is designed for vertical, in-line pull only -- it has no shoulder to brace a side force -- so you do not use it for the angled leg at all. Loaded at an angle it will bend or break. The right move is a shoulder eyebolt seated flush with the eye in the plane of the pull, or better yet a swivel hoist ring that holds full rating at the angle. Some folks think an eyebolt handles any direction, but that is the plain one's downfall. Someone might grease the threads to let it swivel, but an eyebolt does not swivel and must be tight. Some people will load it at the angle at half rating, but a plain eyebolt at an angle is not a half-rating situation, it is a wrong-tool situation. Plain eyebolt equals vertical only. On a job I watched a plain eyebolt fold over the moment a leg pulled off to the side. [PAUSE / ASK] Can a plain eyebolt take the angled leg? Make your call.", "48": "When you need full capacity at a steep angle and you have both on the truck, the hoist ring wins, and you should know why cold. A swivel hoist ring pivots and swivels to align with the load line, so it pulls in-line with itself and keeps its full rated capacity at any angle. A shoulder eyebolt can take an angle, but its capacity drops off steeply as the pull comes off vertical, so at a steep angle it is derated hard. For full rating at a steep angle, the hoist ring is the answer. Some folks pick the eyebolt for being lighter, but weight is not the deciding factor here, capacity at angle is. Someone might say either is fine because angle does not matter to eyebolts, but angle very much derates an eyebolt. Some people will think angled picks are just banned, but they are routine with the right hardware. Hoist ring for full rating at an angle. On a job I watched hoist rings hold the number where eyebolts would have lost half. [PAUSE / ASK] Which one keeps full rating at a steep angle? Make your call.", "49": "A spreading throat is a hook telling you it is bending open, and the number here is over the line. The removal point for a hook throat is an increase of more than about five percent, and in no case more than a quarter inch. Eight percent is past that, so the hook comes out of service -- a throat that has spread that far means the hook has been overloaded and is deforming. Some folks will keep using it because the latch still closes, but the latch has nothing to do with a bent hook body. Someone might try to file the throat back, but you never machine a hook back into service -- the metal is already compromised. Some people will invent a half-rating derate, but a bent hook is a removal, not a downgrade. Measure the throat against the reference marks and retire it if it has opened past the limit. I have watched an inspector condemn a hook for a throat spread you had to measure to catch. [PAUSE / ASK] An eight percent throat spread means what? Make your call.", "50": "A pin that will not seat flush is a shackle telling you something is wrong, and it is a removal, not a workaround. If the pin threads in but its shoulder will not draw down flush against the body, the pin is not fully engaged -- the threads may be damaged, the pin may be the wrong one, or the body may be distorted -- and the shackle comes out of service until it is sorted out. Some folks will use it if the pin is most of the way in, but most of the way is not engaged. Someone might swap in a grade-eight bolt, but a bolt is not a shackle pin -- it is not shouldered or rated for that bearing, and substituting one is a serious mistake. Some people will hammer the pin to force it, which damages it further. A shackle pin seats flush and turns by hand to snug; anything else is out. On a job I watched a rigger reject a shackle whose pin would not draw flush rather than force it. [PAUSE / ASK] A pin that will not seat flush -- in or out? Make your call.", "51": "Of everything about hooks, this is the rule to carry out the door, because it is where hooks most often get misused. The load seats down in the saddle, the bowl at the bottom of the hook, in line with the shank, so the pull runs through the strongest part and the hook gives you its full rating. Never on the tip. Some folks will hang the load on the tip for an easy release -- point loading -- which pries the hook open and can cut its capacity by more than half. Someone might rest the load on the latch, which is not a load-bearing part. Some people will back-load it across the back of the hook, away from the throat, which bends the hook the wrong way. Saddle, in line with the shank, every time. On a job I watched a tip-loaded hook start to straighten under a load it would have carried easily seated in the bowl. [PAUSE / ASK] Where does the load belong in the hook? Make your call.", "52": "That is Specialty Rigging Hardware, and here is what you carry out. Shackles come as bow and D, screw pin and bolt type; you load them in-line and symmetric with legs inside a hundred twenty degrees, you derate for side load -- thirty percent past five degrees, fifty percent past forty-five -- and you retire them for a ten percent dimension loss or a pin that will not seat flush. Hooks carry the load in the saddle, never the tip, the latch is not a load point, and you pull them for a throat spread over five percent, wear over ten, or any twist. Plain eyebolts are vertical only; shoulder eyebolts take an angle seated flush and in the plane of the pull but derate steeply; and a swivel hoist ring holds full rating at any angle, which is why you reach for it on steep picks. Turnbuckles adjust and get locked; hook ends can unload; master links carry the whole assembly. And above all of it: rig to the marked working load limit, let the weakest piece govern, and no readable marking means no lift. Next module is Blocks, Sheaves, and Fairleads, where we get into how lines are reeved and redirected. I have watched these hardware habits catch problems a whole crew walked past. [PAUSE / ASK] Before you go, think of one piece of hardware on your job you will now load or inspect differently."};
+var GATE = ["S4_M19_q18", "S4_M19_q19", "S4_M19_q20", "S4_M19_q21", "S4_M19_q22", "S4_M19_q23", "S4_M19_q24", "S4_M19_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M19_q01", "7": "S4_M19_q02", "9": "S4_M19_q03", "11": "S4_M19_q04", "13": "S4_M19_q05", "16": "S4_M19_q06", "18": "S4_M19_q07", "20": "S4_M19_q08", "23": "S4_M19_q09", "25": "S4_M19_q10", "27": "S4_M19_q11", "29": "S4_M19_q12", "32": "S4_M19_q13", "34": "S4_M19_q14", "36": "S4_M19_q15", "38": "S4_M19_q16", "40": "S4_M19_q17", "44": "S4_M19_q18", "45": "S4_M19_q19", "46": "S4_M19_q20", "47": "S4_M19_q21", "48": "S4_M19_q22", "49": "S4_M19_q23", "50": "S4_M19_q24", "51": "S4_M19_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M19';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>
