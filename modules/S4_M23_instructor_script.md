@@ -209,7 +209,7 @@ Here is the rule that protects both you and the device's engineering. When a bel
 
 ## Slide 51
 
-Close on the markings rule, because an unverifiable device is a real hazard. When a spreader beam turns up with its rated-load and category markings worn away and unreadable, you remove it from service until a qualified person verifies it. Without legible markings you cannot confirm its rating, its Design Category, or its Service Class, and a device you cannot verify is a device you cannot trust. You do not estimate, you do not guess a half-rating, and you do not repaint numbers from memory. Out of service, verified by someone qualified, back only when confirmed. Some folks will eyeball the rating from how sturdy it looks, but looks are not a rating. Someone might use half a guess, but a guess is not verified. Some people will repaint from memory, inventing a rating. Remove it and have it verified. On a job I have watched an unreadable beam tagged out on the spot. [PAUSE / ASK] What do you do with a beam whose markings are gone? Make your call.
+A below-the-hook device is not weightless, and a big beam can weigh a serious fraction of what you are picking. The crane feels load plus device plus rigging, so leaving the beam out is the error that quietly puts a lift over capacity while every number on the paperwork looks right. Some folks mis-read the radius, which is a real mistake but a different one. Someone might double-count the rigging, and that is conservative rather than dangerous. And confusing rated with actual load is its own problem. [PAUSE / ASK] Find the self-weight stamped on the next beam you use. This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 52
 

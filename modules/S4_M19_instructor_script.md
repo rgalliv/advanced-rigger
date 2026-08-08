@@ -209,7 +209,7 @@ A pin that will not seat flush is a shackle telling you something is wrong, and 
 
 ## Slide 51
 
-Of everything about hooks, this is the rule to carry out the door, because it is where hooks most often get misused. The load seats down in the saddle, the bowl at the bottom of the hook, in line with the shank, so the pull runs through the strongest part and the hook gives you its full rating. Never on the tip. Some folks will hang the load on the tip for an easy release -- point loading -- which pries the hook open and can cut its capacity by more than half. Someone might rest the load on the latch, which is not a load-bearing part. Some people will back-load it across the back of the hook, away from the throat, which bends the hook the wrong way. Saddle, in line with the shank, every time. On a job I watched a tip-loaded hook start to straighten under a load it would have carried easily seated in the bowl. [PAUSE / ASK] Where does the load belong in the hook? Make your call.
+A beam clamp is not a general-purpose grab. It is rated for a flange within a stated thickness range and for a pull along a stated axis, and step outside either one and the number on the clamp no longer describes anything. Some folks reason that a light load buys margin, but the clamp is not gripping the way it was tested to. Someone might think coating matters; it is the thickness and the direction that matter. And a clamp that tightens onto the wrong flange is still a clamp on the wrong flange. [PAUSE / ASK] Picture a clamp cocked over at an angle because that is where the sling led. This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 52
 

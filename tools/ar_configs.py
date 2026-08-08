@@ -375,3 +375,82 @@ MODULES["S4_M20"]["new_items"] = {
              "a loaded line. [PAUSE / ASK] This one is part of the final set, so it counts toward "
              "your one hundred percent. Make your call."),
 }
+
+
+# R5 gap closures, 8 Aug 2026. One item per module, each taking a duplicated
+# gate slot. Gate slides carry no topical section heading, so a question on any
+# module topic reads naturally there.
+
+MODULES["S4_M17"]["new_items"] = {
+    # gate, was S4+R1 - the third of three identical S4+R1 gate items
+    21: dict(acs=["R5"],
+        stem="A synthetic sling is pulled tight across a bare plate edge. The hazard is:",
+        correct="The edge can cut through the sling while it is loaded",
+        distractors=["The sling stretches and slowly loses rated capacity",
+                     "The plate edge wears round and loses its square shape",
+                     "The sling tag chafes and gets hard to read later on"],
+        narr="Synthetic webbing is strong in tension and poor against a cutting edge, and tension "
+             "is exactly what presses it into that edge. It does not need a knife edge either -- "
+             "a flame-cut plate or a square structural corner will do it, and it happens while the "
+             "load is in the air. Some folks worry about stretch, which is a real property but not "
+             "what fails here. Someone might think the steel gives way first; it does not. And a "
+             "chafed tag is a paperwork problem, not the thing that drops the load. [PAUSE / ASK] "
+             "Think about the last square corner you put a soft sling around. This one is part of "
+             "the final set, so it counts toward your one hundred percent. Make your call."),
+}
+
+MODULES["S4_M19"]["new_items"] = {
+    # gate, was S1 - duplicated by q24, which also carries S1
+    25: dict(acs=["R5"],
+        stem="A beam clamp is rated for a flange thickness range. Working outside it:",
+        correct="Voids the rating, and so does pulling it off its axis",
+        distractors=["Is fine if the load is well under the clamp rating",
+                     "Only matters when the beam is painted or coated",
+                     "Changes nothing so long as the clamp still tightens"],
+        narr="A beam clamp is not a general-purpose grab. It is rated for a flange within a stated "
+             "thickness range and for a pull along a stated axis, and step outside either one and "
+             "the number on the clamp no longer describes anything. Some folks reason that a light "
+             "load buys margin, but the clamp is not gripping the way it was tested to. Someone "
+             "might think coating matters; it is the thickness and the direction that matter. And "
+             "a clamp that tightens onto the wrong flange is still a clamp on the wrong flange. "
+             "[PAUSE / ASK] Picture a clamp cocked over at an angle because that is where the "
+             "sling led. This one is part of the final set, so it counts toward your one hundred "
+             "percent. Make your call."),
+}
+
+MODULES["S4_M22"]["new_items"] = {
+    # gate, was S1+K3 - identical pairing to q19
+    20: dict(acs=["R5"],
+        stem="A deadman anchoring a snatch block has to be sized against:",
+        correct="The resultant on the block, which can exceed the pull",
+        distractors=["The pull in the line, since that is what it resists",
+                     "The weight of the load being moved across the floor",
+                     "The rated capacity marked on the snatch block body"],
+        narr="An anchor does not feel the line pull. It feels the resultant -- the two rope "
+             "tensions added as vectors on the bisector of the angle -- and on a tight turn that "
+             "comes out bigger than either line. Size a deadman to the pull and you have sized it "
+             "to the wrong number, and a deadman that pulls out lets the whole system go at once. "
+             "Some folks anchor to the pull because that is the figure on the winch. Someone might "
+             "use the load weight, which is a third number again. And the block's own rating "
+             "describes the block, not the ground it is tied to. [PAUSE / ASK] This one is part of "
+             "the final set, so it counts toward your one hundred percent. Make your call."),
+}
+
+MODULES["S4_M23"]["new_items"] = {
+    # gate, was R4+S5 - identical pairing to q18
+    25: dict(acs=["R5"],
+        stem="The most common capacity mistake made with a heavy lifting beam is:",
+        correct="Leaving the beam's own weight out of the chart check",
+        distractors=["Reading the chart at a radius shorter than the real one",
+                     "Counting the rigging twice in the suspended weight",
+                     "Using the rated load in place of the actual load"],
+        narr="A below-the-hook device is not weightless, and a big beam can weigh a serious "
+             "fraction of what you are picking. The crane feels load plus device plus rigging, so "
+             "leaving the beam out is the error that quietly puts a lift over capacity while every "
+             "number on the paperwork looks right. Some folks mis-read the radius, which is a real "
+             "mistake but a different one. Someone might double-count the rigging, and that is "
+             "conservative rather than dangerous. And confusing rated with actual load is its own "
+             "problem. [PAUSE / ASK] Find the self-weight stamped on the next beam you use. This "
+             "one is part of the final set, so it counts toward your one hundred percent. Make "
+             "your call."),
+}

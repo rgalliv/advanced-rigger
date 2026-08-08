@@ -189,7 +189,7 @@ Let us run the level-surface friction number so it is concrete. The force to sli
 
 ## Slide 46
 
-Straight application of the level-surface rule. The sliding force is the coefficient of friction times the weight: about zero point six times ten thousand pounds, which is roughly six thousand pounds of pull, plus a bit more to break it loose from rest. That six thousand is the number your winch, rigging, and anchor have to handle. Some folks will land near six hundred pounds, off by a factor of ten on the decimal. Someone might add up to sixteen thousand, but you multiply by a number less than one, so the force is less than the weight. Some people will get a thousand, dividing instead of multiplying. Point six times ten thousand is six thousand. On a job I have watched a rigger size the pull straight off coefficient times weight and get it right on the first try. [PAUSE / ASK] Point six times ten thousand pounds -- what is the pull? Make your call.
+An anchor does not feel the line pull. It feels the resultant -- the two rope tensions added as vectors on the bisector of the angle -- and on a tight turn that comes out bigger than either line. Size a deadman to the pull and you have sized it to the wrong number, and a deadman that pulls out lets the whole system go at once. Some folks anchor to the pull because that is the figure on the winch. Someone might use the load weight, which is a third number again. And the block's own rating describes the block, not the ground it is tied to. [PAUSE / ASK] This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 47
 

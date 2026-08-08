@@ -67,13 +67,13 @@ Every question carries `item_codes`; every module carries a `gate` / `bank` /
 |---|---:|---:|---:|---:|---:|
 | S4_M15 | 18 | 11 | 7 | 0 | 4 |
 | S4_M16 | 17 | 12 | 5 | 0 | 3 |
-| S4_M17 | 18 | 9 | 5 | 4 | 4 |
+| S4_M17 | 18 | 10 | 5 | 3 | 4 |
 | S4_M18 | 19 | 9 | 10 | **0** | 2 |
-| S4_M19 | 19 | 12 | 4 | 3 | 5 |
+| S4_M19 | 19 | 13 | 4 | 2 | 5 |
 | S4_M20 | 19 | 12 | 7 | **0** | 5 |
 | S4_M21 | 18 | 9 | 9 | **0** | 3 |
-| S4_M22 | 22 | 15 | 4 | 3 | 5 |
-| S4_M23 | 19 | 11 | 6 | 2 | 3 |
+| S4_M22 | 22 | 16 | 4 | 2 | 5 |
+| S4_M23 | 19 | 12 | 6 | 1 | 3 |
 
 Every module meets the skill floor of two `S#` codes in the gate.
 
@@ -126,15 +126,31 @@ items on fleet angle (`K7`) and block ratings (`K5`) were replaced:
 
 `K7` still has two items and `K5` three. Skill codes in the gate rose from 4 to 5.
 
+**The `R5` sweep.** `R5` was untested in all four remaining modules - a different code in
+each, but consistently the last risk element in its list, which suggests the original
+authoring worked down the risk column and ran out of question slots. One item added per
+module, each taking a duplicated gate slot:
+
+| Module | Slot | Was | `R5` now tested |
+|---|---|---|---|
+| S4_M17 | q21 (gate) | third of three identical `S4`+`R1` items | Unprotected edges cutting synthetic slings under tension |
+| S4_M19 | q25 (gate) | `S1`, duplicated by q24 | Beam clamps outside their rated flange range or off-axis |
+| S4_M22 | q20 (gate) | `S1`+`K3`, identical pairing to q19 | Anchor or deadman pullout under the resultant |
+| S4_M23 | q25 (gate) | `R4`+`S5`, identical pairing to q18 | Forgetting the device's own weight in the capacity check |
+
+Gate slots were chosen deliberately: gate slides carry no topical section heading, so a
+question on any module topic reads naturally there. Every module still meets the skill
+floor.
+
 **Sourcing note.** No numeric criterion was introduced that the ACS does not already
 state. Clip counts, spacing, turnback lengths and torque values are taught as *by rope
 diameter, per the manufacturer or an accepted table* rather than as invented figures -
 the ACS is explicit that fabricated numeric criteria are the one failure mode this
 program cannot absorb.
 
-Remaining taught-only, listed for the record and not yet closed: M17 (R2, R3, R4, R5),
-M19 (K6, K8, R5), M22 (R5, R7, S3), M23 (R5, R6). None carries the life-safety weight the
-M20 gap did; all are second-order risk and skill codes.
+Remaining taught-only, listed for the record: M17 (R2, R3, R4), M19 (K6, K8),
+M22 (R7, S3), M23 (R6) - eight codes across four modules, down from twelve. `R5` is now
+tested everywhere. Nothing remaining carries the life-safety weight the M20 gap did.
 
 ## Outstanding
 
@@ -144,9 +160,9 @@ M20 gap did; all are second-order risk and skill codes.
 2. **ElevenLabs narration** - all nine run the `speechSynthesis` fallback. When audio
    ships, reconcile each overlay GATE to its 8-item engine GATE and re-run the suite.
 3. **`S4_M14`'s next pointer** to `S4_M15` - the only edit any existing file needs.
-4. **Item authoring for the four modules still carrying taught-only codes** - M17, M19,
-   M22 and M23. Twelve codes in total, all second-order; the three consequential gaps
-   (M18 terminations, M21 multi-point, M20 two-blocking) are closed.
+4. **Item authoring for the four modules still carrying taught-only codes** - M17 (R2,
+   R3, R4), M19 (K6 beam clamps as a knowledge element, K8 proof versus rated versus
+   ultimate), M22 (R7, S3), M23 (R6). Eight codes, all second-order.
 
 ## Reproducibility
 
