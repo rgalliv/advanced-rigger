@@ -70,7 +70,7 @@ Every question carries `item_codes`; every module carries a `gate` / `bank` /
 | S4_M17 | 18 | 9 | 5 | 4 | 4 |
 | S4_M18 | 19 | 9 | 10 | **0** | 2 |
 | S4_M19 | 19 | 12 | 4 | 3 | 5 |
-| S4_M20 | 19 | 11 | 3 | 5 | 4 |
+| S4_M20 | 19 | 12 | 7 | **0** | 5 |
 | S4_M21 | 18 | 9 | 9 | **0** | 3 |
 | S4_M22 | 22 | 15 | 4 | 3 | 5 |
 | S4_M23 | 19 | 11 | 6 | 2 | 3 |
@@ -79,8 +79,9 @@ Every module meets the skill floor of two `S#` codes in the gate.
 
 ### What the coverage map exposed - and what was done about it
 
-Two banks under-covered the content their ACS says is the module's spine. Both are now
-closed, by **replacing redundant items rather than growing the bank**, which stays at 25.
+Three banks under-covered the content their ACS says is the module's spine. All three are
+now closed, by **replacing redundant items rather than growing the bank**, which stays at
+25 in every case. Five of nine modules are now at full ACS coverage.
 
 **`S4_M18` - Terminations.** Was 9 of 19 codes untested. The bank carried fourteen items
 on removal criteria (`K8`) and tested field-assembled terminations with one item out of
@@ -110,6 +111,21 @@ lifting-beam (`K3`). Five replaced:
 
 Four items still carry `K3`.
 
+**`S4_M20` - Blocks and Sheaves.** Was 5 of 19 untested, and what was missing was the
+life-safety cluster: two-blocking, the rope failure it causes, verifying the
+anti-two-block device, unevaluated anchors, and standing in the bight. Five of the nine
+items on fleet angle (`K7`) and block ratings (`K5`) were replaced:
+
+| Position | Was | Now tests |
+|---|---|---|
+| q10 | fleet angle (`K7`) | `K8` what two-blocking is |
+| q11 | fleet angle (`K7`) | `R5` the rope parts with no warning |
+| q13 | block ratings (`K5`) | `R2` anchor evaluated for the resultant, not the load |
+| q22 (gate) | fleet angle (`K7`+`R4`) | `S5` function-check the anti-two-block before the lift + `K8` |
+| q25 (gate) | inspect a block (`S4`) | `R6` stay out of the bight and off the line of pull |
+
+`K7` still has two items and `K5` three. Skill codes in the gate rose from 4 to 5.
+
 **Sourcing note.** No numeric criterion was introduced that the ACS does not already
 state. Clip counts, spacing, turnback lengths and torque values are taught as *by rope
 diameter, per the manufacturer or an accepted table* rather than as invented figures -
@@ -117,8 +133,8 @@ the ACS is explicit that fabricated numeric criteria are the one failure mode th
 program cannot absorb.
 
 Remaining taught-only, listed for the record and not yet closed: M17 (R2, R3, R4, R5),
-M19 (K6, K8, R5), M20 (K8 two-blocking, R2, R5, R6, S5 verify anti-two-block),
-M22 (R5, R7, S3), M23 (R5, R6).
+M19 (K6, K8, R5), M22 (R5, R7, S3), M23 (R5, R6). None carries the life-safety weight the
+M20 gap did; all are second-order risk and skill codes.
 
 ## Outstanding
 
@@ -128,9 +144,9 @@ M22 (R5, R7, S3), M23 (R5, R6).
 2. **ElevenLabs narration** - all nine run the `speechSynthesis` fallback. When audio
    ships, reconcile each overlay GATE to its 8-item engine GATE and re-run the suite.
 3. **`S4_M14`'s next pointer** to `S4_M15` - the only edit any existing file needs.
-4. **Item authoring for the five modules still carrying taught-only codes** - none is as
-   severe as the M18 and M21 gaps were. `S4_M20`'s untested `K8` two-blocking and `S5`
-   verify anti-two-block are the most consequential of what remains.
+4. **Item authoring for the four modules still carrying taught-only codes** - M17, M19,
+   M22 and M23. Twelve codes in total, all second-order; the three consequential gaps
+   (M18 terminations, M21 multi-point, M20 two-blocking) are closed.
 
 ## Reproducibility
 

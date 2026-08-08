@@ -297,3 +297,81 @@ MODULES["S4_M21"]["new_items"] = {
              "is part of the final set, so it counts toward your one hundred percent. Make your "
              "call."),
 }
+
+
+MODULES["S4_M20"]["new_items"] = {
+    # was q10 - one of five items on fleet angle (K7)
+    10: dict(acs=["K8"],
+        stem="Two-blocking is the condition where:",
+        correct="The load block and the boom tip are drawn hard together",
+        distractors=["Two separate blocks are reeved into the same line",
+                     "A block is loaded from two directions at one time",
+                     "The rope is doubled back through the block again"],
+        narr="Two-blocking is what happens when the load block and the boom tip run out of space "
+             "between them and get pulled into each other. The winch keeps pulling, nothing is "
+             "left to give, and the load line takes all of it. Some folks hear the name and "
+             "picture two blocks in the same reeving, which is just a normal multi-part system. "
+             "Someone might think it means a block pulled from two directions -- that is side "
+             "loading, a different problem. And doubling the rope through a block is reeving, not "
+             "a fault. [PAUSE / ASK] Picture the hook coming all the way up to the sheaves at the "
+             "boom tip and ask what gives first. Make your call."),
+    # was q11 - K7 again (fairlead)
+    11: dict(acs=["R5"],
+        stem="Two-blocking is treated as a severe hazard mainly because:",
+        correct="The rope can part with no warning and drop the load",
+        distractors=["The hoist motor overheats and stops the machine",
+                     "The block paint gets scarred and has to be redone",
+                     "The rope slowly stretches and needs shortening"],
+        narr="This is the part that gets people. There is no groan, no creak, no slow stretch that "
+             "tells you it is coming. The line simply parts, and whatever was hanging on it comes "
+             "down. Some folks expect a machine to protect them by stalling out, and the winch "
+             "has more than enough power to tear the rope apart first. Someone might treat it as "
+             "cosmetic damage to the block. And nothing about this is a slow stretch you catch at "
+             "the next inspection. [PAUSE / ASK] Think about who is standing under the hook in "
+             "the second before that happens. Make your call."),
+    # was q13 - one of four items on block and becket ratings (K5)
+    13: dict(acs=["R2"],
+        stem="Before a snatch block is anchored to a beam or padeye, someone must confirm:",
+        correct="The anchor was evaluated for the resultant, not the load",
+        distractors=["The anchor is painted the same color as the rigging",
+                     "The anchor sits higher than the load being moved",
+                     "The anchor was used for a similar pull once before"],
+        narr="The block does not feel the load. It feels the resultant, which is the two rope "
+             "tensions added as vectors, and on a tight turn that can come out larger than the "
+             "load itself. So the question for the anchor is never what does this load weigh -- "
+             "it is what does this anchor see, and has anybody actually checked. Some folks go "
+             "by color coding, which tells you nothing structural. Someone might reason that "
+             "higher is safer; height is not capacity. And it held once before is the most common "
+             "way an unevaluated anchor stays in service. [PAUSE / ASK] Ask who evaluated the "
+             "last padeye you hung a block from. Make your call."),
+    # gate, was q22 - R4 + K7, both already carried by q12
+    22: dict(acs=["S5", "K8"],
+        stem="The anti-two-block device fitted to a machine has to be:",
+        correct="Function-checked before the lift, not assumed to work",
+        distractors=["Reset by the operator after every completed lift",
+                     "Removed while rigging so it cannot nuisance trip",
+                     "Checked once a year by the inspection contractor"],
+        narr="The device exists to stop the hoist before the blocks meet. That only helps if it "
+             "actually works today, on this machine, which is why it gets a function check as "
+             "part of getting ready to lift rather than a note in a file. Some folks think it is "
+             "something you reset afterward, which is backwards. Someone might disable it because "
+             "it tripped when they did not want it to, and that is deliberately removing the last "
+             "protection in the system. And an annual inspection does not tell you about this "
+             "morning. [PAUSE / ASK] This one is part of the final set, so it counts toward your "
+             "one hundred percent. Make your call."),
+    # gate, was q25 - S4, already carried by q17 and q18
+    25: dict(acs=["R6"],
+        stem="While a snatch block is under load, the crew has to stay:",
+        correct="Out of the bight and off the line of pull entirely",
+        distractors=["Close enough to reach the block if it starts to slip",
+                     "Directly behind the block where the view is clearest",
+                     "Beside the rope so hand signals can still be passed"],
+        narr="A bight is the loop of rope formed around a block, and standing inside one puts you "
+             "where the rope goes if anything lets go. Same for standing in line with the pull. "
+             "You want to be out of both, and far enough that a parted line cannot reach you. "
+             "Some folks stand close so they can grab something, and there is nothing a person "
+             "can grab under that kind of tension. Someone might take the position with the best "
+             "view, which is often the worst place to be. And no signal is worth standing beside "
+             "a loaded line. [PAUSE / ASK] This one is part of the final set, so it counts toward "
+             "your one hundred percent. Make your call."),
+}

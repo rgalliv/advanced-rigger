@@ -105,7 +105,7 @@ There is a right size for a fleet angle, and it is small -- a degree or two at m
 
 ## Slide 25
 
-There is a right size for a fleet angle, and it is small. You keep the fleet angle down to roughly a degree or two at most -- about a degree and a half to a sheave or a smooth drum, and around two degrees to a grooved drum. Keep it in that band and the rope leads on cleanly. Let it get too large and the rope climbs the flange of the sheave, rubs, and wears itself and the sheave; on a drum, too large a fleet angle piles the wraps badly. Some folks think a big fleet angle gives a smooth wrap, but big is exactly the problem. Someone might say forty-five degrees, which is enormous for a fleet angle and would tear things up. Some people will say ninety degrees straight in, but the fleet angle is measured off square, so square is zero, not ninety. Small -- a degree or two. On a job I watched a rope climb a sheave flange and start to wear because the fleet angle had opened up too far. [PAUSE / ASK] Big fleet angle or small? Make your call.
+Two-blocking is what happens when the load block and the boom tip run out of space between them and get pulled into each other. The winch keeps pulling, nothing is left to give, and the load line takes all of it. Some folks hear the name and picture two blocks in the same reeving, which is just a normal multi-part system. Someone might think it means a block pulled from two directions -- that is side loading, a different problem. And doubling the rope through a block is reeving, not a fault. [PAUSE / ASK] Picture the hook coming all the way up to the sheaves at the boom tip and ask what gives first. Make your call.
 
 ## Slide 26
 
@@ -113,7 +113,7 @@ A fairlead is the practical fix for a bad lead, so it pairs right with fleet ang
 
 ## Slide 27
 
-A fairlead solves the fleet-angle problem in the real world, so it pairs naturally with what we just covered. A fairlead is a device -- rollers or sheaves -- that guides a rope onto a drum or around a corner at an acceptable angle, keeping the fleet angle in check and stopping the rope from chafing on an edge or piling up badly on the drum. When the geometry would otherwise give you a bad lead, you put a fairlead in to straighten it out. Some folks think a fairlead adds mechanical advantage, but it only guides the rope, it does not multiply force. Someone might think it locks the rope, but that is a brake or a clamp. Some people will think it measures tension, but that is a load cell or dynamometer. A fairlead just leads the rope fair -- straight and clean. On a job I watched a fairlead tame a nasty rope lead onto a winch drum. [PAUSE / ASK] What job does a fairlead do for the rope? Make your call.
+This is the part that gets people. There is no groan, no creak, no slow stretch that tells you it is coming. The line simply parts, and whatever was hanging on it comes down. Some folks expect a machine to protect them by stalling out, and the winch has more than enough power to tear the rope apart first. Someone might treat it as cosmetic damage to the block. And nothing about this is a slow stretch you catch at the next inspection. [PAUSE / ASK] Think about who is standing under the hook in the second before that happens. Make your call.
 
 ## Slide 28
 
@@ -133,7 +133,7 @@ The snatch block earns its name from how it opens, and that feature is what make
 
 ## Slide 32
 
-The snatch block earns its own name because of how it opens, and that feature is what makes it so handy. A snatch block has a side plate, a cheek, that swings open, so you can drop a bight -- a loop -- of the line into it without having to thread the rope end all the way through. That lets you add it anywhere along a line to redirect the pull, change the direction the rope runs, without re-reeving the whole rig. Some folks will picture a block with no sheave sliding the rope over a bar, but a snatch block has a real sheave. Someone might think it is only ever the fixed upper block, but its whole point is going in anywhere to redirect. Some people will assume it always doubles the pull, but the load it sees depends on the angle, which is next. Opens on one side, takes the bight, redirects the line. On a job I watched a rigger drop a snatch block onto a line mid-run to pull a load around a corner. [PAUSE / ASK] What makes a snatch block easy to add to a line? Make your call.
+The block does not feel the load. It feels the resultant, which is the two rope tensions added as vectors, and on a tight turn that can come out larger than the load itself. So the question for the anchor is never what does this load weigh -- it is what does this anchor see, and has anybody actually checked. Some folks go by color coding, which tells you nothing structural. Someone might reason that higher is safer; height is not capacity. And it held once before is the most common way an unevaluated anchor stays in service. [PAUSE / ASK] Ask who evaluated the last padeye you hung a block from. Make your call.
 
 ## Slide 33
 
@@ -197,7 +197,7 @@ This is the sheave D/d rule as a removal-level concern. A wire rope run over a s
 
 ## Slide 48
 
-Fleet angle again, this time at the failure end. When the fleet angle grows well past the degree or two you want, the rope no longer leads on square -- it comes in at a side angle, climbs the flange of the sheave or piles up unevenly on the drum, and rubs and wears the rope and the metal. On a drum, a bad fleet angle can even cross wraps and crush the rope. So a fleet angle that has opened up too far is a wear-and-damage problem. Some folks think a bigger fleet angle wraps cleaner, but it does the opposite. Someone might think fleet angle does not matter on a drum, but it drives how the rope spools. Some people will imagine the tension drops on its own, which is not a thing. Too-wide fleet, climbing and wear. On a job I watched a wide fleet angle pile a rope badly on one end of a winch drum. [PAUSE / ASK] A fleet angle grown too wide causes what? Make your call.
+The device exists to stop the hoist before the blocks meet. That only helps if it actually works today, on this machine, which is why it gets a function check as part of getting ready to lift rather than a note in a file. Some folks think it is something you reset afterward, which is backwards. Someone might disable it because it tripped when they did not want it to, and that is deliberately removing the last protection in the system. And an annual inspection does not tell you about this morning. [PAUSE / ASK] This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 49
 
@@ -209,7 +209,7 @@ This is the snatch block's signature job, so recognize when it is the answer. To
 
 ## Slide 51
 
-A sheave that will not spin is telling you something has failed inside, and it is a removal. When a sheave drags on its pin instead of turning freely, the bearing or the pin is failing, and a dragging sheave grinds the rope instead of letting it roll -- so the block comes out of service until it is repaired or replaced. Some folks will keep using it, thinking a stiff sheave grips the rope, but a sheave is meant to roll, not grip, and a dragging one chews rope. Someone might add load to force it to spin, which just damages rope and sheave. Some people will squirt oil on it and skip the real inspection, but a bad bearing needs more than a shot of oil and a look. A sheave that will not turn freely is a removal. On a job I watched an inspector condemn a whole block because one sheave dragged on its pin. [PAUSE / ASK] A sheave that will not turn freely -- in or out? Make your call.
+A bight is the loop of rope formed around a block, and standing inside one puts you where the rope goes if anything lets go. Same for standing in line with the pull. You want to be out of both, and far enough that a parted line cannot reach you. Some folks stand close so they can grab something, and there is nothing a person can grab under that kind of tension. Someone might take the position with the best view, which is often the worst place to be. And no signal is worth standing beside a loaded line. [PAUSE / ASK] This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 52
 
