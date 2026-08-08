@@ -68,48 +68,57 @@ Every question carries `item_codes`; every module carries a `gate` / `bank` /
 | S4_M15 | 18 | 11 | 7 | 0 | 4 |
 | S4_M16 | 17 | 12 | 5 | 0 | 3 |
 | S4_M17 | 18 | 9 | 5 | 4 | 4 |
-| S4_M18 | 19 | 7 | 3 | **9** | 2 |
+| S4_M18 | 19 | 9 | 10 | **0** | 2 |
 | S4_M19 | 19 | 12 | 4 | 3 | 5 |
 | S4_M20 | 19 | 11 | 3 | 5 | 4 |
-| S4_M21 | 18 | 7 | 2 | **9** | 2 |
+| S4_M21 | 18 | 9 | 9 | **0** | 3 |
 | S4_M22 | 22 | 15 | 4 | 3 | 5 |
 | S4_M23 | 19 | 11 | 6 | 2 | 3 |
 
 Every module meets the skill floor of two `S#` codes in the gate.
 
-### What the coverage map immediately exposed
+### What the coverage map exposed - and what was done about it
 
-This is the payoff for building the layer. Two banks under-cover the content their ACS
-says is the module's spine:
+Two banks under-covered the content their ACS says is the module's spine. Both are now
+closed, by **replacing redundant items rather than growing the bank**, which stays at 25.
 
-**`S4_M18` - Terminations. 9 of 19 codes untested.**
-Untested: `K2` clip count, spacing, turnback and torque by rope diameter; `K4` retorque
-after initial loading; `K5` wedge socket assembly; `K6` poured and swaged sockets;
-`R2` too few clips or torque by feel; `R3` wedge socket backward; `R4` reusing crushed
-clips; `R5` treating a field termination as factory efficiency; `S2` inspect and correct
-a wedge socket.
+**`S4_M18` - Terminations.** Was 9 of 19 codes untested. The bank carried fourteen items
+on removal criteria (`K8`) and tested field-assembled terminations with one item out of
+25, in the module named for them. Five items replaced:
 
-The bank tests sling **inspection and removal criteria** thoroughly and barely tests
-**field-assembled terminations** - one item (q04, clip orientation) out of 25. The module
-is titled *Slings and Field-Assembled Terminations*, and `K2` and `K5` are the
-highest-consequence elements in it. This is the module that donates to the Rigging
-Equipment Inspection course.
+| Position | Was | Now tests |
+|---|---|---|
+| q06 | removal criteria (`K8`) | `K2` clip count, spacing, turnback and torque by rope diameter + `R2` torque set by feel |
+| q07 | removal criteria (`K8`) | `K4` retorque after the first load seats the rope |
+| q08 | removal criteria (`K8`) | `K5` wedge socket orientation + `S2` inspect and correct one |
+| q09 | removal criteria (`K8`) | `R3` socket installed backward + `R4` reusing a crushed wedge |
+| q19 (gate) | removal criteria (`K8`+`S4`) | `K6` poured and swaged sockets as engineered work + `R5` field termination is not factory efficiency |
 
-**`S4_M21` - Multi-Point Lifts. 9 of 18 codes untested.**
-Untested: `K4` trolley beams; `K6` pick-point capacity as its own limit; `K7` device
-weight against the crane chart; `R3` spreader beam outside rated span; `R4` unengineered
-pick points; `R5` losing track of total suspended weight; `R6` load shift during travel;
-`S4` total combined weight against the chart; `S5` trial lift and read the trim.
+Eight items still carry `K8`, so removal-criteria coverage remains strong for the
+Rigging Equipment Inspection harvest.
 
-The bank is weighted to beam types and share arithmetic. `K7`/`S4` - combined weight
-against the chart - is a rule the ACS states twice (M21 and M23) and M21 never tests it.
+**`S4_M21` - Multi-Point Lifts.** Was 9 of 18 untested. Nine items tested spreader-versus-
+lifting-beam (`K3`). Five replaced:
 
-Neither is a defect in what was built. Both are **item-authoring gaps that were
-invisible until the codes were mapped**, which is the argument for the mapping.
+| Position | Was | Now tests |
+|---|---|---|
+| q10 | beam types (`K3`) | `K4` trolley beams; share changes as the trolley moves |
+| q11 | beam types (`K3`) | `K6` pick-point capacity as its own limit + `R4` unengineered field pick points |
+| q12 | beam types (`K3`) | `K7` device weight against the chart + `S4` total combined weight + `R5` losing track when devices stack |
+| q13 | beam types (`K3`) | `R3` spreader beam used outside its rated span |
+| q23 (gate) | beam types (`K3`) | `S5` trial lift and read the trim + `R6` share shifting during travel |
 
-Smaller gaps, listed for the record: M17 (R2, R3, R4, R5), M19 (K6, K8, R5),
-M20 (K8 two-blocking, R2, R5, R6, S5 verify anti-two-block), M22 (R5, R7, S3),
-M23 (R5, R6).
+Four items still carry `K3`.
+
+**Sourcing note.** No numeric criterion was introduced that the ACS does not already
+state. Clip counts, spacing, turnback lengths and torque values are taught as *by rope
+diameter, per the manufacturer or an accepted table* rather than as invented figures -
+the ACS is explicit that fabricated numeric criteria are the one failure mode this
+program cannot absorb.
+
+Remaining taught-only, listed for the record and not yet closed: M17 (R2, R3, R4, R5),
+M19 (K6, K8, R5), M20 (K8 two-blocking, R2, R5, R6, S5 verify anti-two-block),
+M22 (R5, R7, S3), M23 (R5, R6).
 
 ## Outstanding
 
@@ -119,8 +128,9 @@ M23 (R5, R6).
 2. **ElevenLabs narration** - all nine run the `speechSynthesis` fallback. When audio
    ships, reconcile each overlay GATE to its 8-item engine GATE and re-run the suite.
 3. **`S4_M14`'s next pointer** to `S4_M15` - the only edit any existing file needs.
-4. **Item authoring for M18 and M21** - close the two coverage gaps above before those
-   modules are harvested.
+4. **Item authoring for the five modules still carrying taught-only codes** - none is as
+   severe as the M18 and M21 gaps were. `S4_M20`'s untested `K8` two-blocking and `S5`
+   verify anti-two-block are the most consequential of what remains.
 
 ## Reproducibility
 

@@ -133,3 +133,167 @@ MODULES["S4_M23"] = dict(
         13: ["S2", "R2"], 14: ["K7", "S1"], 15: ["K7"], 16: ["K8", "S3"], 17: ["S4"],
         18: ["R4", "S5"], 19: ["R2", "S1"], 20: ["K1"], 21: ["K3", "K4"], 22: ["K5"],
         23: ["K8", "S3"], 24: ["R1", "S5"], 25: ["R4", "S5"]}))
+
+
+# ---------------------------------------------------------------------------
+# Replacement items, authored 8 Aug 2026 to close the coverage gaps the ACS
+# mapping exposed. Keyed by question POSITION in final slide order.
+#
+# Each replaces a redundant item rather than growing the bank, which stays at 25.
+# Content is drawn from the module's own ACS block in
+# CQ_S4_ADVANCED_RIGGER_ACS_BUILD_MAP.md section 8. No numeric criterion is
+# introduced that the ACS does not already state - clip counts, spacing,
+# turnback lengths and torque values are taught as "by rope diameter, per the
+# manufacturer or an accepted table" rather than as invented figures.
+# ---------------------------------------------------------------------------
+
+MODULES["S4_M18"]["new_items"] = {
+    # was q06 - one of fourteen items on removal criteria (K8)
+    6: dict(acs=["K2", "R2"],
+        stem="The number of wire rope clips, their spacing, and the turnback length are set by:",
+        correct="The rope diameter, per the maker or an accepted table",
+        distractors=["The weight of the load being carried by that assembly",
+                     "The judgment of whoever is building the termination",
+                     "The length of rope left over once the eye is formed"],
+        narr="Clips are not a feel job. Every dimension that matters -- how many clips, how far "
+             "apart they sit, how much rope turns back, how tight the nuts go -- is set by the "
+             "diameter of the rope, and you read it off the manufacturer's table. Some folks will "
+             "reach for the load weight, but the table does not ask what you are lifting. Someone "
+             "might think experience substitutes for the table; that is exactly how terminations "
+             "come apart. And leftover rope is scrap, not a specification. [PAUSE / ASK] I have "
+             "watched a crew put three clips on a rope that called for more because three is what "
+             "was in the gang box. Make your call."),
+    # was q07 - duplicated the removal-criteria idea already covered
+    7: dict(acs=["K4"],
+        stem="After a new clip termination has carried its first load, the required action is to:",
+        correct="Retorque every nut, because that first load seats the rope",
+        distractors=["Replace all the clips, because the first load hardens them",
+                     "Back the nuts off slightly to relieve stress in the rope",
+                     "Log the load and leave the clips exactly as they were set"],
+        narr="A wire rope is not solid bar. Under its first real load the strands settle and the "
+             "rope gets slightly smaller where the clips grip it, so nuts that were correct when "
+             "you set them are now loose. You go back and retorque, every one. Some folks will "
+             "assume the first load ruins the clips; it does not. Someone might think loosening "
+             "relieves something useful; it only reduces grip. And writing it down changes "
+             "nothing about the hardware. [PAUSE / ASK] Ask yourself who on your last job went "
+             "back with a wrench after the first pick. Make your call."),
+    # was q08 - K8 again
+    8: dict(acs=["K5", "S2"],
+        stem="On a wedge socket, the live line running to the load must:",
+        correct="Line up straight with the load, with the tail as dead end",
+        distractors=["Enter on the tail side so the wedge grips it harder",
+                     "Be turned back and secured to the standing part",
+                     "Sit on whichever side the rigger finds easier to reach"],
+        narr="A wedge socket only works one way round. The live line -- the part going to the load "
+             "-- runs straight in line with the pull, and the short tail coming out the back is "
+             "the dead end. Get that backwards and the wedge cannot set. Some folks will reason "
+             "that feeding the live line against the wedge makes it bite harder; it does the "
+             "opposite. Someone might carry a habit over from clip terminations and turn the live "
+             "line back. And convenience never picks the orientation. [PAUSE / ASK] Picture the "
+             "socket hanging in front of you and trace which leg goes to the load. Make your call."),
+    # was q09 - K8 again
+    9: dict(acs=["R3", "R4"],
+        stem="A wedge socket is found installed backward, and the wedge is deeply crushed. You:",
+        correct="Take both out of service; a crushed wedge is not reused",
+        distractors=["Turn the socket around and reuse the same wedge",
+                     "Keep the wedge and add clips to the live line",
+                     "Retorque the securing clip and put it back to work"],
+        narr="Two separate defects in one assembly, and either one is disqualifying. The socket is "
+             "backward, and the wedge carries crush marks from a rope it already gripped. A "
+             "deformed wedge does not seat the same way twice. Some folks will fix the "
+             "orientation and call it done, which leaves the damaged wedge in the load path. "
+             "Someone might add clips as insurance, but you cannot bolt your way out of a bad "
+             "termination. And torque does nothing for a crushed wedge. [PAUSE / ASK] Think about "
+             "who has authority to pull that assembly off the job. Make your call."),
+    # gate, was q19 - was K8 + S4, duplicating three other gate items
+    19: dict(acs=["K6", "R5"],
+        stem="Next to a field-assembled clip termination, a poured or swaged socket is:",
+        correct="An engineered termination, and it holds a higher efficiency",
+        distractors=["A field repair any qualified rigger may build on site",
+                     "Equal in strength, so the two may be swapped freely",
+                     "Weaker, which is why it is kept to light-duty work"],
+        narr="Not every termination is worth the same percentage of the rope's strength. A poured "
+             "or swaged socket is made under controlled conditions and rates high. A clip "
+             "termination you build in the field rates lower, and you have to apply that lower "
+             "figure before you rate the assembly. Some folks will treat a socket as field work; "
+             "it is not. Someone might assume all terminations are interchangeable, which is the "
+             "error that gets a field eye rated like a factory one. And sockets are not the weak "
+             "option. [PAUSE / ASK] This one is part of the final set, so it counts toward your "
+             "one hundred percent. Make your call."),
+}
+
+MODULES["S4_M21"]["new_items"] = {
+    # was q10 - one of nine items on spreader-versus-lifting-beam (K3)
+    10: dict(acs=["K4"],
+        stem="On a trolley beam, moving the trolley along the beam changes:",
+        correct="The share of the load carried at each support point",
+        distractors=["The total weight the crane hook has to support",
+                     "The rated capacity stamped on the beam itself",
+                     "The design category the beam was engineered to"],
+        narr="A trolley beam has a moving attachment point, and the moment it moves the arithmetic "
+             "changes. Slide the trolley toward one end and that end starts carrying more. The "
+             "total hanging under the hook does not change -- gravity does not care where the "
+             "trolley sits -- but the split does. Some folks will think the total moves; it does "
+             "not. Someone might think the beam's rating changes with position; the stamp is "
+             "fixed, though where you may use it is not. And the design category was set at the "
+             "factory. [PAUSE / ASK] Picture the trolley two feet from one end and ask which "
+             "support is working hardest. Make your call."),
+    # was q11 - K3 again
+    11: dict(acs=["K6", "R4"],
+        stem="A pick point welded onto a load by the field crew has to be treated as:",
+        correct="Unrated, until a qualified person evaluates the attachment",
+        distractors=["Rated to match the sling that is attached through it",
+                     "Acceptable whenever the weld looks sound and complete",
+                     "Rated off the crane chart figure for the total lift"],
+        narr="A pick point is its own limit. It does not inherit a rating from the sling through "
+             "it, from the crane, or from anything else in the system, and a weld put in by the "
+             "field is an unknown until somebody qualified says otherwise. Some folks will assume "
+             "the sling rating carries through the attachment; the load path is only as strong as "
+             "that weld. Someone might judge it by eye, and you cannot see penetration. And the "
+             "crane chart describes the crane, not the lug. [PAUSE / ASK] Ask who signs off on a "
+             "field-welded lug on your jobs. Make your call."),
+    # was q12 - K3 again
+    12: dict(acs=["K7", "S4", "R5"],
+        stem="Checking a lift against the crane chart, the weight you must use is:",
+        correct="The load, plus the lifting device, plus all of the rigging",
+        distractors=["The load by itself, since the chart already has margin",
+                     "The load plus rigging, but not the below-hook device",
+                     "The heaviest single item in the suspended assembly"],
+        narr="The crane does not know what is load and what is hardware. It feels everything "
+             "hanging below the hook, and that is the number the chart has to be read against. "
+             "Load, plus the beam or device, plus every sling and shackle. Some folks will lift "
+             "the load figure straight off the shipping papers and stop there. Someone might "
+             "count the rigging but forget the beam, and a heavy beam is not a rounding error. "
+             "And picking the biggest single piece ignores everything else on the hook. Stack two "
+             "devices and it gets easier to lose track, not harder. [PAUSE / ASK] Add up what "
+             "hung under the hook on your last pick. Make your call."),
+    # was q13 - K3 again
+    13: dict(acs=["R3"],
+        stem="Using a spreader beam at a span wider than the one it is rated for:",
+        correct="Overloads the beam even when the load is under its rating",
+        distractors=["Is fine as long as the slings are sized for that span",
+                     "Only matters when the load is near the rated capacity",
+                     "Turns the beam into a lifting beam for that one pick"],
+        narr="A beam is rated for a load and a span together, not a load alone. Widen the span and "
+             "you lengthen the lever working on that beam, so the bending it feels climbs even "
+             "though the load on the hook never changed. Some folks will size the slings and "
+             "consider the job done; the slings are not what is bending. Someone might think the "
+             "span only matters near the rated load, but the beam is already past its design case. "
+             "And nothing about a span changes what kind of beam it is. [PAUSE / ASK] Look at the "
+             "next spreader you use and find both numbers on the plate. Make your call."),
+    # gate, was q23 - was K3, the ninth item on that code
+    23: dict(acs=["S5", "R6"],
+        stem="On a multi-point pick of a load whose contents can shift, the crew should:",
+        correct="Trial lift, read the trim, then watch the share in travel",
+        distractors=["Travel briskly so the contents have less time to move",
+                     "Size each leg to one quarter and get on with the lift",
+                     "Rely on the spreader beam to hold the share constant"],
+        narr="Two things are in play. You do not know the share until the load is off the ground, "
+             "so you break it inches clear, stop, and read how it hangs. And with contents that can "
+             "move, the share you read at the start is not guaranteed to be the share you have "
+             "halfway across the yard. Some folks will hurry, which adds momentum to a load that "
+             "is already unpredictable. Someone might divide by four, which was wrong before the "
+             "contents moved. And a beam sets geometry, not the contents. [PAUSE / ASK] This one "
+             "is part of the final set, so it counts toward your one hundred percent. Make your "
+             "call."),
+}

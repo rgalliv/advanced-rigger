@@ -105,7 +105,7 @@ So why reach for a spreader beam? Its main job is to hold the pick points apart 
 
 ## Slide 25
 
-So why reach for a spreader beam in the first place? Its main job is to hold the pick points apart so the sling legs coming down to the load stay vertical, or close to it. That does two good things: it keeps the legs from pulling in at a wide angle -- which would drive up leg tension and squeeze the load -- and on a long load it stops the load from tipping, sliding, or bending in the middle. Spreaders are the tool for long loads, generally anything over about twelve feet. Some folks will think it adds stabilizing weight, but it is not ballast. Someone might think it lets the load spin, but that is a swivel's job. Some people will think it excuses knowing the weight, but you always need the weight. Hold the points apart, keep the legs vertical. On a job I have watched a spreader keep the legs vertical on a long vessel that would have crushed inward otherwise. [PAUSE / ASK] What does a spreader beam do for the sling legs? Make your call.
+A trolley beam has a moving attachment point, and the moment it moves the arithmetic changes. Slide the trolley toward one end and that end starts carrying more. The total hanging under the hook does not change -- gravity does not care where the trolley sits -- but the split does. Some folks will think the total moves; it does not. Someone might think the beam's rating changes with position; the stamp is fixed, though where you may use it is not. And the design category was set at the factory. [PAUSE / ASK] Picture the trolley two feet from one end and ask which support is working hardest. Make your call.
 
 ## Slide 26
 
@@ -113,7 +113,7 @@ A lifting beam is the other family, loaded in a completely different way -- and 
 
 ## Slide 27
 
-A lifting beam is the other family of beam, and it is loaded in a completely different way, which is the key to telling them apart. A lifting beam, sometimes called an equalizer beam, has a single pick point on top connected to the hook and the load hung from points along the bottom -- so it carries its load in bending, like a beam supported at one point with weight hanging off it. That is the opposite of the spreader's compression. Some folks will say compression, but that is the spreader; the lifting beam bends. Someone might say pure tension, but a single sling in tension is not a beam at all. Some people will think it carries no load and just guides slings, but it very much carries the load in bending. Spreader compresses, lifting beam bends -- that is the pair to remember. On a job I have watched a lifting beam take the whole load in bending from one top pick. [PAUSE / ASK] How is a lifting beam loaded? Make your call.
+A pick point is its own limit. It does not inherit a rating from the sling through it, from the crane, or from anything else in the system, and a weld put in by the field is an unknown until somebody qualified says otherwise. Some folks will assume the sling rating carries through the attachment; the load path is only as strong as that weld. Someone might judge it by eye, and you cannot see penetration. And the crane chart describes the crane, not the lug. [PAUSE / ASK] Ask who signs off on a field-welded lug on your jobs. Make your call.
 
 ## Slide 28
 
@@ -121,7 +121,7 @@ The two beams solve different problems, so let us make the choice concrete. You 
 
 ## Slide 29
 
-The two beams solve different problems, so let us make the choice concrete. You pick a lifting beam when headroom is tight, because it uses a single pick point right on top and hangs the load below, with no tall triangle of angled slings above it the way a spreader needs. It also lets you place and equalize the bottom pick points precisely. A spreader needs vertical height for its sling legs; a lifting beam does not. Some folks will pick a beam to get a wide sling angle, but wide angles are what you are trying to avoid. Someone might want to add crushing force, which is a hazard, not a goal. Some people will pick it to skip inspection, but every below-the-hook device gets inspected. Tight headroom, single top pick -- that is the lifting beam's moment. On a job I have watched a lifting beam make a pick possible under a low ceiling where a spreader would not fit. [PAUSE / ASK] What condition favors a lifting beam? Make your call.
+The crane does not know what is load and what is hardware. It feels everything hanging below the hook, and that is the number the chart has to be read against. Load, plus the beam or device, plus every sling and shackle. Some folks will lift the load figure straight off the shipping papers and stop there. Someone might count the rigging but forget the beam, and a heavy beam is not a rounding error. And picking the biggest single piece ignores everything else on the hook. Stack two devices and it gets easier to lose track, not harder. [PAUSE / ASK] Add up what hung under the hook on your last pick. Make your call.
 
 ## Slide 30
 
@@ -129,7 +129,7 @@ Both beams fall into one important category, and it tells you which rules apply.
 
 ## Slide 31
 
-Both beams fall into one important category, and it tells you which rules apply. Spreader beams and lifting beams are below-the-hook lifting devices, governed by the below-the-hook volume of the crane and rigging standards -- B30.20 -- and they are designed to the below-the-hook design standard, BTH-1. That means they are engineered, rated, and marked with a capacity, and inspected each shift for deformation, cracks, and wear. Some folks will file them under the sling standard, but a beam is not a sling. Someone might call them just rigging hardware under the hardware volume, but below-the-hook devices have their own volume. Some people will think they are uncontrolled accessories, but they are very much governed and designed to a standard. Below-the-hook -- B30.20 and BTH-1. On a job I have watched an inspector check a spreader's rating stamp and shift inspection like any engineered device. [PAUSE / ASK] What category do these beams fall under? Make your call.
+A beam is rated for a load and a span together, not a load alone. Widen the span and you lengthen the lever working on that beam, so the bending it feels climbs even though the load on the hook never changed. Some folks will size the slings and consider the job done; the slings are not what is bending. Someone might think the span only matters near the rated load, but the beam is already past its design case. And nothing about a span changes what kind of beam it is. [PAUSE / ASK] Look at the next spreader you use and find both numbers on the plate. Make your call.
 
 ## Slide 32
 
@@ -201,7 +201,7 @@ Picture the classic long-load pick and name what the spreader is doing. A spread
 
 ## Slide 49
 
-Put the beam choice into a real constraint: not much room above the load. With tight headroom and a need for a single top pick point, the right device is generally a lifting beam, an equalizer beam, because it picks from one point on top and carries the load in bending, with no tall triangle of angled slings above it. It fits under a low ceiling where a spreader's sling geometry would not. Some folks will reach for a spreader, but its tall sling triangle is exactly what will not fit. Someone might try a plain sling with no beam, but that gives up the controlled single-point pick you need. Some people will spread a wider four-leg bridle, which needs even more height. Tight headroom, single top pick -- lifting beam. On a job I have watched a lifting beam make a low-headroom pick that nothing else would. [PAUSE / ASK] Which beam fits a single top pick with low headroom? Make your call.
+Two things are in play. You do not know the share until the load is off the ground, so you break it inches clear, stop, and read how it hangs. And with contents that can move, the share you read at the start is not guaranteed to be the share you have halfway across the yard. Some folks will hurry, which adds momentum to a load that is already unpredictable. Someone might divide by four, which was wrong before the contents moved. And a beam sets geometry, not the contents. [PAUSE / ASK] This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 50
 

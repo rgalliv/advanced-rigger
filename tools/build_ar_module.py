@@ -117,6 +117,12 @@ def build(key, src_dir, out_dir, used=None):
 
     new_idx = design_key(cfg, used)
 
+    # authored replacement items override the inherited stem/options at their position
+    news = cfg.get("new_items", {})
+    for pos, it in news.items():
+        correct[pos - 1] = it["correct"]
+        opts[pos - 1] = [it["correct"]] + list(it["distractors"])
+
     rnd = random.Random(cfg["seed"] + 7)
     new_opts = []
     for p in range(25):
@@ -155,14 +161,28 @@ def build(key, src_dir, out_dir, used=None):
                 doc, count=1, flags=re.S,
             )
 
+    for pos, it in news.items():
+        nq = newq[pos - 1]
+        i = doc.index('data-qid="%s"' % nq)
+        st = doc.rindex('<p class="quiz-stem">', 0, i)
+        en = doc.index("</p>", st)
+        doc = doc[:st] + '<p class="quiz-stem">' + it["stem"] + doc[en:]
+
     # --- data blocks ---
     new_narr = {str(n): narr[str(o)] for n, o in enumerate(order, start=1)}
+    slide_of_q = {v: int(k) for k, v in
+                  {str(order.index(s2) + 1): newq[i] for i, s2 in enumerate(q_slides)}.items()}
+    # inherited narration on a promoted slide gains the gate framing first; an
+    # authored replacement then overrides outright and carries its own framing,
+    # so the sentence is never appended twice
     for old_i in cfg["promoted"]:
         n = str(order.index(old_i) + 1)
         new_narr[n] = new_narr[n].rstrip() + (
             " This one is part of the final set, so it counts toward your one hundred percent."
             " Make your call."
         )
+    for pos, it in news.items():
+        new_narr[str(slide_of_q[newq[pos - 1]])] = it["narr"]
     new_qslide = {str(order.index(s) + 1): newq[i] for i, s in enumerate(q_slides)}
     hashes = {newq[p]: fnv1a(f"{cfg['salt']}:{newq[p]}:{new_idx[p]}") for p in range(25)}
 
@@ -186,7 +206,8 @@ def build(key, src_dir, out_dir, used=None):
                  for b, n in cfg["acs_counts"].items() for i in range(1, n + 1)]
     gate_c, bank_c, item_codes = set(), set(), {}
     for p in range(25):
-        c = cfg["item_acs"][p + 1]
+        c = ([f"{cfg['acs_prefix']}.{x}" for x in news[p + 1]["acs"]]
+             if p + 1 in news else cfg["item_acs"][p + 1])
         item_codes[newq[p]] = c
         (gate_c if p + 1 >= 18 else bank_c).update(c)
     manifest = {

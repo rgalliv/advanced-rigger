@@ -69,7 +69,7 @@ This is the number to carry for the rest of your career. First, a rope lay is th
 
 ## Slide 16
 
-This is the number to carry for the rest of your career, because it is the line between a working sling and a reject. In one rope lay -- the length it takes for a strand to make one full wrap around the rope -- a wire rope sling comes out of service at ten randomly distributed broken wires, or at five broken wires in a single strand. Either threshold, and it is done. The strand-specific number is lower because damage clustered in one strand is more serious than the same count spread around. Some folks will pull a sling for dust, which is housekeeping, not a removal criterion. Someone might yank it at one broken wire, which is worth noting and watching but is not by itself the removal point. Some people will worry about a little uneven strand tension, which is not the broken-wire rule. Count within one lay, and know both numbers. I have watched a supervisor teach new hands to mark one lay length with tape and count inside it. [PAUSE / ASK] Ten in a lay, or five in one strand -- both are removal. Make your call.
+Clips are not a feel job. Every dimension that matters -- how many clips, how far apart they sit, how much rope turns back, how tight the nuts go -- is set by the diameter of the rope, and you read it off the manufacturer's table. Some folks will reach for the load weight, but the table does not ask what you are lifting. Someone might think experience substitutes for the table; that is exactly how terminations come apart. And leftover rope is scrap, not a specification. [PAUSE / ASK] I have watched a crew put three clips on a rope that called for more because three is what was in the gang box. Make your call.
 
 ## Slide 17
 
@@ -77,7 +77,7 @@ Broken wires are not the only thing that ends a rope -- damage to its shape does
 
 ## Slide 18
 
-Broken wires are not the only thing that ends a rope -- damage to its shape does too, because once the geometry is wrong the strands stop sharing load. A kink is a permanent bend that has distorted the rope; a birdcage is where the strands have sprung outward like an open cage, usually from shock or sudden release of tension; and a crushed or flattened section has lost its round cross section. Any of those takes the sling out of service, because the damage is permanent and the rope can no longer carry evenly. Some folks will pull a rope for its lubricant film, but lube is protection, not damage. Someone might remove it for a faded tag color, which is an identification issue, not a body defect, though an unreadable tag is its own removal reason. Some people will worry about extra tucks in a splice, but more than the minimum is fine. Learn the shapes of these three failures by sight. I have pulled a birdcaged sling off a reel that somebody had shock-loaded and let go slack. [PAUSE / ASK] Kink, birdcage, crush -- shape damage is removal. Make your call.
+A wire rope is not solid bar. Under its first real load the strands settle and the rope gets slightly smaller where the clips grip it, so nuts that were correct when you set them are now loose. You go back and retorque, every one. Some folks will assume the first load ruins the clips; it does not. Someone might think loosening relieves something useful; it only reduces grip. And writing it down changes nothing about the hardware. [PAUSE / ASK] Ask yourself who on your last job went back with a wrench after the first pick. Make your call.
 
 ## Slide 19
 
@@ -85,7 +85,7 @@ Some of the worst damage on a wire rope is on the inside, where you cannot see i
 
 ## Slide 20
 
-Diameter is one of the honest tells on a wire rope, so a rope that has thinned down is telling you something is wrong inside. A noticeable reduction in diameter usually means the core has broken down, the inner wires are wearing, or corrosion is eating the rope from within -- and any of those is a removal condition. The outside can look almost fine while the inside is failing, which is exactly why measuring diameter matters. Some folks will wave it off if the rope still looks shiny, but shine on the surface says nothing about the core. Someone might call it harmless stretch, but a rope that lost diameter did not just get longer, it lost material or support. Some people will blame the factory rating, but a rope leaves the factory at its proper diameter. Measure it and compare to the original. On a turnaround I watched a rope that measured under size get pulled and then found rotten in the core when it was cut open. [PAUSE / ASK] Lost diameter means trouble inside. Make your call.
+A wedge socket only works one way round. The live line -- the part going to the load -- runs straight in line with the pull, and the short tail coming out the back is the dead end. Get that backwards and the wedge cannot set. Some folks will reason that feeding the live line against the wedge makes it bite harder; it does the opposite. Someone might carry a habit over from clip terminations and turn the live line back. And convenience never picks the orientation. [PAUSE / ASK] Picture the socket hanging in front of you and trace which leg goes to the load. Make your call.
 
 ## Slide 21
 
@@ -93,7 +93,7 @@ Two more removals to lock in. First, heat. Enough heat changes the rope steel an
 
 ## Slide 22
 
-Heat is a quiet killer on a steel sling, because it can wreck the strength without leaving an obvious mark. Enough heat changes the metal itself and damages the lubricant deep in the rope, and it can also cook off the core support, all without an outward sign you would notice in a glance. So a wire rope sling exposed to high heat comes out of service for evaluation -- you do not just keep running it because it still looks like a rope. Some folks will assume steel shrugs off any heat, but rope steel is heat-treated and heat undoes that. Someone might quench it with water, which can make the damage worse, not better. Some people will try to keep using it in a limited way, like baskets only, but a heat-damaged sling has no safe role. When heat has touched a sling, treat the strength as unknown, which means out. I have seen a sling that took flame from a nearby cut get pulled even though it looked untouched. [PAUSE / ASK] Heat can ruin strength with no visible sign. Make your call.
+Two separate defects in one assembly, and either one is disqualifying. The socket is backward, and the wedge carries crush marks from a rope it already gripped. A deformed wedge does not seat the same way twice. Some folks will fix the orientation and call it done, which leaves the damaged wedge in the load path. Someone might add clips as insurance, but you cannot bolt your way out of a bad termination. And torque does nothing for a crushed wedge. [PAUSE / ASK] Think about who has authority to pull that assembly off the job. Make your call.
 
 ## Slide 23
 
@@ -185,7 +185,7 @@ Across every sling family in this module, one rule sits above the rest, and it i
 
 ## Slide 45
 
-Edges are an equal-opportunity enemy, and the fix is the same one you learned for capacity in the last module. Put a corner protector or a softener over the sharp plate edge, and it protects both slings at once -- it keeps the edge from cutting the synthetic web and from nicking and kinking the wire rope, and it opens up the bend radius so you are not crushing either sling on a corner. One cheap piece of gear, both slings protected. Some folks will lift fast to shorten the exposure, which just adds shock on top of an edge that is still cutting. Someone might grab a smaller sling to seat in the edge, which makes the bend tighter and the cutting worse. Some people will claim chain is immune to edges, but a sharp edge nicks and gouges chain links too, and nicks are a removal condition. Protect the edge, protect every sling on it. I keep softeners on the truck for exactly this and have watched a bare web sling get sliced on a plate that had none. [PAUSE / ASK] One softener protects every sling on the edge. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.
+Not every termination is worth the same percentage of the rope's strength. A poured or swaged socket is made under controlled conditions and rates high. A clip termination you build in the field rates lower, and you have to apply that lower figure before you rate the assembly. Some folks will treat a socket as field work; it is not. Someone might assume all terminations are interchangeable, which is the error that gets a field eye rated like a factory one. And sockets are not the weak option. [PAUSE / ASK] This one is part of the final set, so it counts toward your one hundred percent. Make your call.
 
 ## Slide 46
 
