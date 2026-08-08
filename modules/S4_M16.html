@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Unequal Leg Loading and Off-Level Pick Points | CraneQualified S4_M16</title>
+<style>
+:root{
+  --bg:#0d1621; --bg2:#132133; --panel:#182a40; --line:#25415f;
+  --ink:#e8eef5; --ink2:#9db2c9; --accent:#f0a531; --accent2:#ffc061;
+  --ok:#2f9e63; --no:#c0392b; --shadow:0 8px 28px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%);
+  color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.slide{
+  position:absolute;inset:0;padding:26px 22px 108px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;opacity:0;visibility:hidden;
+  transform:translateX(28px);transition:opacity .32s ease,transform .32s ease;
+}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.slide-inner{max-width:820px;margin:0 auto}
+
+h1{font-size:1.9rem;line-height:1.2;margin:.2em 0 .5em;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.25;margin:.1em 0 .7em;color:var(--accent2)}
+p{margin:.6em 0}
+ul,ol{margin:.6em 0 .6em 1.1em;padding:0}
+li{margin:.42em 0}
+b{color:#fff}
+.sub{color:var(--ink2);font-size:1.02rem;margin:.25em 0}
+.note{
+  background:rgba(240,165,49,.09);border-left:3px solid var(--accent);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.warn{
+  background:rgba(192,57,43,.13);border-left:3px solid var(--no);
+  padding:11px 14px;border-radius:0 7px 7px 0;margin:1em 0;font-size:.95rem;
+}
+.gate-note{
+  background:rgba(47,158,99,.12);border:1px solid rgba(47,158,99,.4);
+  padding:12px 15px;border-radius:9px;margin:1.1em 0;font-size:.95rem;
+}
+.formula{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:1.02rem;color:var(--accent2);line-height:1.7;
+}
+.work{
+  background:#0a1220;border:1px solid var(--line);border-radius:9px;
+  padding:16px 18px;margin:1.1em 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:.95rem;line-height:1.75;
+}
+table.cmp{width:100%;border-collapse:collapse;margin:1em 0;font-size:.93rem}
+table.cmp th,table.cmp td{
+  border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;
+}
+table.cmp th{background:rgba(240,165,49,.13);color:var(--accent2);font-weight:600}
+ol.rank{counter-reset:r;list-style:none;margin-left:0}
+ol.rank li{
+  counter-increment:r;position:relative;padding-left:38px;margin:.7em 0;
+}
+ol.rank li:before{
+  content:counter(r);position:absolute;left:0;top:1px;width:26px;height:26px;
+  background:var(--accent);color:#12202f;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;
+}
+
+/* --- title / divider --- */
+.slide.t-title .slide-inner,.slide.t-divider .slide-inner{
+  min-height:62vh;display:flex;flex-direction:column;justify-content:center;text-align:center;
+}
+.slide.t-title h1{font-size:2.3rem;color:var(--accent2)}
+.slide.t-divider h1{font-size:2.5rem;color:var(--accent)}
+.brandbar{
+  display:inline-block;height:3px;width:74px;background:var(--accent);
+  margin:16px auto 0;border-radius:2px;
+}
+
+/* --- quiz --- */
+.quiz-stem{font-size:1.12rem;font-weight:600;margin:.2em 0 1em;line-height:1.45}
+.quiz-group{display:flex;flex-direction:column;gap:10px;margin:1em 0}
+.quiz-option{
+  appearance:none;text-align:left;width:100%;
+  background:var(--panel);color:var(--ink);border:1px solid var(--line);
+  border-radius:11px;padding:14px 16px;font-size:1rem;line-height:1.4;
+  cursor:pointer;transition:background .16s,border-color .16s,transform .1s;
+  font-family:inherit;
+}
+.quiz-option:hover:not(:disabled){background:#1e3350;border-color:var(--accent)}
+.quiz-option:active:not(:disabled){transform:scale(.995)}
+.quiz-option.correct{background:rgba(47,158,99,.26);border-color:var(--ok)}
+.quiz-option.wrong{background:rgba(192,57,43,.26);border-color:var(--no)}
+.quiz-option:disabled{cursor:default;opacity:.92}
+.feedback{
+  display:none;margin-top:12px;padding:12px 14px;border-radius:9px;
+  background:rgba(255,255,255,.05);border-left:3px solid var(--accent);font-size:.95rem;
+}
+.feedback.show{display:block}
+
+/* --- chrome --- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(10,18,32,.9);backdrop-filter:blur(9px);
+  border-bottom:1px solid var(--line);font-size:.78rem;color:var(--ink2);
+}
+#modname{font-weight:600;color:var(--ink);letter-spacing:.02em}
+#score-chip{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:4px 12px;font-weight:600;color:var(--accent2);font-size:.76rem;
+}
+#stage{padding-top:44px}
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:rgba(10,18,32,.94);backdrop-filter:blur(9px);
+  border-top:1px solid var(--line);padding:11px 14px calc(11px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px;
+}
+.nav-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:9px;
+  padding:11px 20px;font-weight:700;font-size:.92rem;cursor:pointer;font-family:inherit;
+}
+.nav-btn:disabled{background:#2b3f57;color:#69819b;cursor:default}
+#progress-wrap{flex:1;height:6px;background:#22364e;border-radius:3px;overflow:hidden}
+#progress{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+#counter{font-size:.78rem;color:var(--ink2);min-width:58px;text-align:right}
+
+#cq-gatebar{
+  display:none;position:fixed;left:0;right:0;bottom:64px;z-index:45;
+  background:rgba(10,18,32,.97);border-top:1px solid var(--accent);
+  padding:11px 16px;font-size:.9rem;text-align:center;
+}
+#cq-gatemsg{color:var(--accent2)}
+#cq-gatebtn{
+  display:none;margin-left:10px;background:var(--accent);color:#12202f;border:0;
+  border-radius:7px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.calc-btn{
+  background:var(--accent);color:#12202f;border:0;border-radius:10px;
+  padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  display:block;width:100%;font-family:inherit;
+}
+.completion-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin:1.2em 0;
+}
+.review-item{
+  background:rgba(192,57,43,.14);border-left:3px solid var(--no);
+  padding:9px 13px;border-radius:0 7px 7px 0;margin:.5em 0;font-size:.93rem;
+}
+#audiobtn{
+  background:none;border:1px solid var(--line);color:var(--ink2);
+  border-radius:18px;padding:4px 12px;font-size:.74rem;cursor:pointer;font-family:inherit;
+}
+#audiobtn.on{border-color:var(--accent);color:var(--accent2)}
+@media (max-width:420px){
+  .slide{padding:20px 15px 108px}
+  h1{font-size:1.6rem}.slide.t-title h1{font-size:1.85rem}
+  .slide.t-divider h1{font-size:2rem}
+  table.cmp{font-size:.85rem}
+  table.cmp th,table.cmp td{padding:7px 8px}
+}
+</style>
+</head>
+<body data-cq-module="S4_M16" data-cq-stage="4"
+      data-cq-total="46" data-cq-gate-code="R-201C / AR-102C"
+      data-cq-version="2026.07">
+
+<div id="topbar">
+  <span id="modname">S4_M16 &middot; Unequal Leg Loading and Off-Level Pick Points</span>
+  <span style="display:flex;gap:9px;align-items:center">
+    <button id="audiobtn" type="button">Narration: Off</button>
+    <span id="score-chip">GATE 0 / 6</span>
+  </span>
+</div>
+
+<main id="stage">
+<section class="slide t-title" id="slide-1" data-idx="1">
+<div class="slide-inner">
+<h1>Unequal Leg Loading and Off-Level Pick Points</h1>
+<p class='sub'>CraneQualified Stage 4 &middot; Advanced Rigger</p><p class='sub'>Module S4_M16 &middot; Gate code R-201C / AR-102C</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-objectives" id="slide-2" data-idx="2">
+<div class="slide-inner">
+<h2>What You Will Be Able To Do</h2>
+<ul><li>Explain why a four-leg bridle on a rigid load is designed as a two-leg lift</li><li>Explain how sling angle multiplies leg tension</li><li>Calculate the Load Angle Factor from leg length and headroom</li><li>Calculate sling tension using Share of Load and the Load Angle Factor</li><li>Determine load share at each point of an off-level two-point pick</li><li>Identify the governing (worst-case) leg on an unequal-leg bridle</li><li>Apply minimum sling angle limits and correct an off-level pick</li></ul><div class='gate-note'>This module ends with a six question knowledge check. You must score 100% to complete the module. The correct answer is not shown on a missed gate question.</div>
+</div></section>
+<section class="slide t-divider" id="slide-3" data-idx="3">
+<div class="slide-inner">
+<h1>Section 1</h1>
+<p class='sub'>Why Legs Do Not Share Evenly</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-4" data-idx="4">
+<div class="slide-inner">
+<h2>The Rigid Load Problem</h2>
+<p>A <b>rigid load</b> cannot flex to settle onto all its legs. Like a stiff table on an uneven floor, it rocks onto two legs while the others only touch.</p><ul><li><b>Flexible load:</b> sags and conforms, sharing reasonably across legs</li><li><b>Rigid load:</b> two legs can carry nearly the whole weight; the other two only steady it against tipping</li><li>You cannot know from looking which two legs are the working pair</li><li>The load hangs perfectly stable while badly overloading two legs</li></ul><p class='note'>This is why rigging practice sizes a 4-leg bridle on a rigid load as though only <b>two legs</b> carry the load.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-5" data-idx="5">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On a rigid load lifted with a four-leg bridle, the safest assumption is that:</p>
+<div class="quiz-group" data-qid="S4_M16_q01">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q01',0,'fb_S4_M16_q01')">Each of the four legs carries exactly one quarter of the total load weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q01',1,'fb_S4_M16_q01')">The two longest legs on the bridle always carry the most of any given load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q01',2,'fb_S4_M16_q01')">Two legs may carry nearly the whole load while the other two only steady it</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q01',3,'fb_S4_M16_q01')">All four legs reliably share the full load equally at every point of the lift</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q01"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-6" data-idx="6">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">For sling capacity calculation, a four-leg bridle on a rigid load is treated as if it were:</p>
+<div class="quiz-group" data-qid="S4_M16_q02">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q02',0,'fb_S4_M16_q02')">A two-leg lift, with two legs carrying the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q02',1,'fb_S4_M16_q02')">A four-leg lift, dividing the weight by four</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q02',2,'fb_S4_M16_q02')">A three-leg lift, dividing the weight by three</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q02',3,'fb_S4_M16_q02')">A single vertical hitch</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q02"></div>
+</div></section>
+<section class="slide t-content" id="slide-7" data-idx="7">
+<div class="slide-inner">
+<h2>Angle Is the Other Half of the Story</h2>
+<p>Leg count is not the only thing that decides leg load. <b>Angle</b> does too -- and it matters more than most riggers expect.</p><ul><li>A vertical leg carries only its share of the weight</li><li>A leaning leg carries its share PLUS an angle penalty</li><li>The flatter the leg, the larger the penalty -- rising steeply as the sling approaches horizontal</li><li>The load never changed weight; the geometry multiplied the tension</li></ul><p class='note'>The rest of this module is about putting a number on that penalty and using it to size slings correctly.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-8" data-idx="8">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">As the angle between a sling leg and the horizontal gets SMALLER (the sling gets flatter), the tension in that leg:</p>
+<div class="quiz-group" data-qid="S4_M16_q03">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q03',0,'fb_S4_M16_q03')">Drops to zero</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q03',1,'fb_S4_M16_q03')">Decreases</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q03',2,'fb_S4_M16_q03')">Increases</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q03',3,'fb_S4_M16_q03')">Stays the same</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q03"></div>
+</div></section>
+<section class="slide t-divider" id="slide-9" data-idx="9">
+<div class="slide-inner">
+<h1>Section 2</h1>
+<p class='sub'>The Load Angle Factor Method</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-10" data-idx="10">
+<div class="slide-inner">
+<h2>Step 1: The Load Angle Factor</h2>
+<p>The <b>Load Angle Factor (LAF)</b> is the multiplier that captures the angle penalty.</p><div class='formula'>Load Angle Factor = Leg Length &divide; Headroom<br>LAF = L &divide; H</div><ul><li><b>Leg length (L):</b> the actual length of the sling leg, hook to load</li><li><b>Headroom (H):</b> the vertical height from the load attachment up to the hook</li><li>A vertical leg: L and H are equal, so LAF = 1.0 (no penalty)</li><li>Any leaning leg: L is longer than H, so LAF is greater than 1.0</li></ul><p class='note'>LAF is always 1.0 or greater. If you ever calculate a factor below 1.0, you divided upside down.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-11" data-idx="11">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The Load Angle Factor (LAF) for a sling leg is calculated as:</p>
+<div class="quiz-group" data-qid="S4_M16_q04">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q04',0,'fb_S4_M16_q04')">Headroom divided by leg length (H / L)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q04',1,'fb_S4_M16_q04')">Leg length divided by headroom (L / H)</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q04',2,'fb_S4_M16_q04')">The load weight divided by leg length</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q04',3,'fb_S4_M16_q04')">Leg length multiplied by headroom (L x H)</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q04"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-12" data-idx="12">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A vertical sling leg (straight up and down, 90 degrees) has a Load Angle Factor of:</p>
+<div class="quiz-group" data-qid="S4_M16_q05">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q05',0,'fb_S4_M16_q05')">1.0</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q05',1,'fb_S4_M16_q05')">1.5</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q05',2,'fb_S4_M16_q05')">0.5</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q05',3,'fb_S4_M16_q05')">2.0</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q05"></div>
+</div></section>
+<section class="slide t-content" id="slide-13" data-idx="13">
+<div class="slide-inner">
+<h2>Step 2: Share of Load</h2>
+<p>Before applying the angle penalty, find each leg's fair <b>share</b> of the weight.</p><div class='formula'>Share of Load = Total Weight &divide; Number of Legs<br>SOL = W &divide; (legs)</div><ul><li>On a symmetric load, each leg's share is simply the total divided by the leg count you are designing for</li><li>Remember: on a rigid 4-leg bridle, that count is <b>2</b>, not 4</li><li>This is the starting weight, before the angle penalty is applied</li></ul>
+</div></section>
+<section class="slide t-quiz" id="slide-14" data-idx="14">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The Share of Load (SOL) for each leg of a symmetric bridle is:</p>
+<div class="quiz-group" data-qid="S4_M16_q06">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q06',0,'fb_S4_M16_q06')">The total load weight multiplied by the number of legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q06',1,'fb_S4_M16_q06')">The total load weight</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q06',2,'fb_S4_M16_q06')">The Load Angle Factor divided by the number of legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q06',3,'fb_S4_M16_q06')">The total load weight divided by the number of legs</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q06"></div>
+</div></section>
+<section class="slide t-content" id="slide-15" data-idx="15">
+<div class="slide-inner">
+<h2>Step 3: Sling Tension</h2>
+<p>Multiply the share by the angle factor to get the tension the leg actually feels.</p><div class='formula'>Sling Tension = Share of Load &times; Load Angle Factor<br>T = SOL &times; LAF</div><ul><li>The tension -- not the share -- is what you size the sling against</li><li>The gap between tension and share is the cost of the angle</li><li>Then apply the sling's rated capacity and design factor to the tension</li></ul><p class='note'>Size the sling to the <b>tension</b>. Sizing to the share is the error that leaves a leg undersized the moment it leans.</p>
+</div></section>
+<section class="slide t-content" id="slide-16" data-idx="16">
+<div class="slide-inner">
+<h2>Worked Example: Symmetric Bridle</h2>
+<p><b>Given:</b> a 12,000 lb symmetric load on a 3-leg bridle.<br>Leg length L = 20 ft; headroom H = 15 ft.</p><div class='work'>Step 1 -- Load Angle Factor<br>LAF = L &divide; H = 20 &divide; 15 = <b>1.33</b><br><br>Step 2 -- Share of Load<br>SOL = 12,000 &divide; 3 = <b>4,000 lb</b><br><br>Step 3 -- Sling Tension<br>T = SOL &times; LAF = 4,000 &times; 1.33 = <b>5,320 lb</b> per leg</div><p class='note'>Each leg feels 5,320 lb, not the 4,000 lb share. Size the sling to 5,320 lb (then apply the design factor).</p>
+</div></section>
+<section class="slide t-quiz" id="slide-17" data-idx="17">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">Sling tension in a symmetric bridle leg is calculated as:</p>
+<div class="quiz-group" data-qid="S4_M16_q07">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q07',0,'fb_S4_M16_q07')">Load Angle Factor divided by the number of legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q07',1,'fb_S4_M16_q07')">Share of Load multiplied by Load Angle Factor</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q07',2,'fb_S4_M16_q07')">Share of Load divided by Load Angle Factor</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q07',3,'fb_S4_M16_q07')">Share of Load minus Load Angle Factor</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q07"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-18" data-idx="18">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A 12,000 lb load hangs on a 3-leg symmetric bridle. Each leg has a Load Angle Factor of 1.4. The tension in each leg is:</p>
+<div class="quiz-group" data-qid="S4_M16_q08">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q08',0,'fb_S4_M16_q08')">5,600 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q08',1,'fb_S4_M16_q08')">12,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q08',2,'fb_S4_M16_q08')">2,860 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q08',3,'fb_S4_M16_q08')">4,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q08"></div>
+</div></section>
+<section class="slide t-divider" id="slide-19" data-idx="19">
+<div class="slide-inner">
+<h1>Section 3</h1>
+<p class='sub'>Off-Level Pick Points</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-20" data-idx="20">
+<div class="slide-inner">
+<h2>When the Hook Is Off the CG</h2>
+<p>When the pick point is not over the center of gravity, the two lift points carry <b>unequal shares</b>.</p><ul><li>The point nearer the CG carries the greater share</li><li>The point farther from the CG carries the smaller share</li><li>The load hangs off level until corrected -- and loads the near leg hard while it does</li><li>You must split the load between the points before sizing either sling</li></ul><p class='note'>Think of two people carrying a plank with a heavy box near one end. The person nearer the box strains; the far person barely works.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-21" data-idx="21">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When the pick point is NOT over the center of gravity, the sling legs will:</p>
+<div class="quiz-group" data-qid="S4_M16_q09">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q09',0,'fb_S4_M16_q09')">Carry no load at all until the load has been brought fully level</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q09',1,'fb_S4_M16_q09')">Continue to share the whole load equally between each of the legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q09',2,'fb_S4_M16_q09')">Each of the legs carries exactly one half of the load regardless</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q09',3,'fb_S4_M16_q09')">Carry different tensions, with the leg nearer the CG carrying more</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q09"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-22" data-idx="22">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On an off-level two-point pick, which attachment point carries the greater share of the load?</p>
+<div class="quiz-group" data-qid="S4_M16_q10">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q10',0,'fb_S4_M16_q10')">The higher attachment point</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q10',1,'fb_S4_M16_q10')">The point nearer the center of gravity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q10',2,'fb_S4_M16_q10')">The point farther from the center of gravity</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q10',3,'fb_S4_M16_q10')">Both carry equal shares</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q10"></div>
+</div></section>
+<section class="slide t-content" id="slide-23" data-idx="23">
+<div class="slide-inner">
+<h2>Splitting the Load: The Moment Method Again</h2>
+<p>Use the <b>moment method</b> to split an off-level load between two points -- the same tool that located the CG.</p><div class='formula'>Share at A = Weight &times; (distance CG-to-B) &divide; Span<br>Share at B = Weight &times; (distance CG-to-A) &divide; Span</div><ul><li>Each point's share uses the distance to the <b>opposite</b> point</li><li>The two shares always add up to the total weight -- a built-in check</li><li>The nearer point gets the bigger share, exactly as the plank predicts</li></ul>
+</div></section>
+<section class="slide t-content" id="slide-24" data-idx="24">
+<div class="slide-inner">
+<h2>Worked Example: Off-Level Two-Point Pick</h2>
+<p><b>Given:</b> 8,200 lb load between two points.<br>CG is 4 ft from point 1 and 9 ft from point 2. Span = 13 ft.</p><div class='work'>Share at point 1 (nearer) = 8,200 &times; 9 &divide; 13 = <b>5,677 lb</b><br>Share at point 2 (farther) = 8,200 &times; 4 &divide; 13 = <b>2,523 lb</b><br><br>Check: 5,677 + 2,523 = 8,200 lb &nbsp;&check;<br><br>Then apply each leg's angle factor to its own share to get leg tension.</div><p class='note'>Point 1 is nearer the CG and carries more than twice what point 2 carries. Size its sling accordingly -- and add its angle penalty.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-25" data-idx="25">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The share of load at each of two pick points is found using:</p>
+<div class="quiz-group" data-qid="S4_M16_q11">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q11',0,'fb_S4_M16_q11')">The sling leg length divided by the headroom measured at each separate pick point</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q11',1,'fb_S4_M16_q11')">The total load weight divided straight down the middle by two in all cases, always</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q11',2,'fb_S4_M16_q11')">The Load Angle Factor for each of the two separate legs and nothing whatsoever else</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q11',3,'fb_S4_M16_q11')">The moment method -- weight times distance to the opposite point, over the span</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q11"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-26" data-idx="26">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A 10,000 lb load hangs between two points 10 ft apart. The CG is 3 ft from point 1 and 7 ft from point 2. The share at point 1 is:</p>
+<div class="quiz-group" data-qid="S4_M16_q12">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q12',0,'fb_S4_M16_q12')">7,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q12',1,'fb_S4_M16_q12')">3,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q12',2,'fb_S4_M16_q12')">5,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q12',3,'fb_S4_M16_q12')">10,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q12"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-27" data-idx="27">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">On an off-level pick, before you size the sling at the heavily loaded point, you must also account for:</p>
+<div class="quiz-group" data-qid="S4_M16_q13">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q13',0,'fb_S4_M16_q13')">The weight of the crane hook block all by itself, and only that</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q13',1,'fb_S4_M16_q13')">Nothing else at all here -- the share you found is the final tension</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q13',2,'fb_S4_M16_q13')">Only the color and the manufacture age of the particular sling used</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q13',3,'fb_S4_M16_q13')">The angle of that leg, applied on top of the calculated share</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q13"></div>
+</div></section>
+<section class="slide t-divider" id="slide-28" data-idx="28">
+<div class="slide-inner">
+<h1>Section 4</h1>
+<p class='sub'>Angle Limits and Corrections</p>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-content" id="slide-29" data-idx="29">
+<div class="slide-inner">
+<h2>Minimum Sling Angle</h2>
+<p>Because tension climbs steeply as slings flatten, rigging practice sets a practical floor on sling angle.</p><table class='cmp'><tr><th>Angle from horizontal</th><th>Roughly what the leg carries</th></tr><tr><td>90 degrees (vertical)</td><td>Its share -- no penalty</td></tr><tr><td>60 degrees</td><td>About 1.15 times its share</td></tr><tr><td>45 degrees</td><td>About 1.4 times its share</td></tr><tr><td>30 degrees (practical floor)</td><td>About 2 times its share</td></tr><tr><td>Below 30 degrees</td><td>Tension climbs sharply -- do not go here without engineering</td></tr></table><p class='note'><b>30 degrees from horizontal</b> is the widely taught minimum. Below it, get an engineer or change the rigging.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-30" data-idx="30">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The reason low sling angles are dangerous is that they:</p>
+<div class="quiz-group" data-qid="S4_M16_q14">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q14',0,'fb_S4_M16_q14')">Multiply leg tension far above the load's share, often past the sling's rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q14',1,'fb_S4_M16_q14')">Have no real effect at all on a sling that is properly rated for the job</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q14',2,'fb_S4_M16_q14')">Reduce the total load that is carried on the crane hook during the pick</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q14',3,'fb_S4_M16_q14')">Make the sling considerably easier to inspect closely just before the lift</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q14"></div>
+</div></section>
+<section class="slide t-quiz" id="slide-31" data-idx="31">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">A common minimum sling angle taught in rigging practice, below which capacity drops sharply, is:</p>
+<div class="quiz-group" data-qid="S4_M16_q15">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q15',0,'fb_S4_M16_q15')">90 degrees from horizontal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q15',1,'fb_S4_M16_q15')">75 degrees from horizontal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q15',2,'fb_S4_M16_q15')">30 degrees from horizontal</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q15',3,'fb_S4_M16_q15')">5 degrees from horizontal</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q15"></div>
+</div></section>
+<section class="slide t-content" id="slide-32" data-idx="32">
+<div class="slide-inner">
+<h2>The Governing Leg on Unequal Bridles</h2>
+<p>When bridle legs differ in length, they hang at different angles and carry different tensions.</p><ul><li>The <b>flattest leg</b> (smallest angle to horizontal) carries the highest tension</li><li>Base the pick's capacity on that worst-case leg</li><li>Do not average the legs -- the easy legs do not cover for the flat one</li><li>When legs are unequal, the smallest H/R (steepest-to-flattest) ratio governs</li></ul><p class='note'>If the flattest leg is safe, the whole pick is safe. Find it first.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-33" data-idx="33">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">When bridle legs are of unequal length, rigging practice is to base capacity on:</p>
+<div class="quiz-group" data-qid="S4_M16_q16">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q16',0,'fb_S4_M16_q16')">The single longest leg on the whole bridle arrangement as it is rigged</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q16',1,'fb_S4_M16_q16')">The leg with the smallest angle to horizontal, which is the worst case</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q16',2,'fb_S4_M16_q16')">The single shortest leg on the bridle as rigged, and only that one leg</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q16',3,'fb_S4_M16_q16')">The plain numerical average of all of the bridle legs taken together</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q16"></div>
+</div></section>
+<section class="slide t-content" id="slide-34" data-idx="34">
+<div class="slide-inner">
+<h2>Correcting an Off-Level Pick</h2>
+<p>To restore even leg sharing, level the load. Two legitimate methods (from the CG module):</p><ol class='rank'><li><b>Adjust effective leg length</b> with turnbuckles or chain lever hoists to level the load from fixed attachment points</li><li><b>Move the pick points</b> so the hook ends up over the CG</li></ol><p class='warn'><b>Not acceptable:</b> increasing hoist speed; adding a leg to an unbalanced arrangement; holding it level with tag lines; accepting the tilt and lifting anyway.</p><p class='note'>After adjusting leg lengths, recheck: new lengths mean new angles, which mean new tensions. Re-verify sling capacity.</p>
+</div></section>
+<section class="slide t-quiz" id="slide-35" data-idx="35">
+<div class="slide-inner">
+<h2>Knowledge Check</h2>
+<p class="quiz-stem">The correct way to equalize the legs of a bridle when the load hangs off level is to:</p>
+<div class="quiz-group" data-qid="S4_M16_q17">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q17',0,'fb_S4_M16_q17')">Increase the hoist lifting speed steadily until the tilt is no longer clearly visible</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q17',1,'fb_S4_M16_q17')">Add an extra fifth sling leg to the existing four-leg bridle arrangement on the load</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q17',2,'fb_S4_M16_q17')">Adjust leg lengths with turnbuckles or chain lever hoists, or move the pick points</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q17',3,'fb_S4_M16_q17')">Accept the tilt as perfectly normal for this pick and simply lift the load anyway</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q17"></div>
+</div></section>
+<section class="slide t-content" id="slide-36" data-idx="36">
+<div class="slide-inner">
+<h2>Putting It Together: The Rigger's Sequence</h2>
+<p>For any bridle pick, the full sequence is:</p><ol class='rank'><li>Get the load weight and locate the CG (Module 1)</li><li>Decide the design leg count -- 2 for a rigid 4-leg bridle</li><li>If the hook is off the CG, split the load between points (moment method)</li><li>Find each leg's angle factor (L / H)</li><li>Multiply each leg's share by its angle factor to get tension</li><li>Identify the governing (flattest) leg</li><li>Size each sling to its tension, apply the design factor, verify the angle is above the 30-degree floor</li></ol>
+</div></section>
+<section class="slide t-divider" id="slide-37" data-idx="37">
+<div class="slide-inner">
+<h1>Final Knowledge Check</h1>
+<p class='sub'>Six questions &middot; 100% required to complete this module</p><div class='gate-note'>The correct answer is not shown on a missed question. If you do not pass, review the module and retest.</div>
+<span class="brandbar"></span>
+</div></section>
+<section class="slide t-gate" id="slide-38" data-idx="38">
+<div class="slide-inner">
+<h2>Final Question 1</h2>
+<p class="quiz-stem">Under ASME B30.9, ensuring the rated capacity of a sling is adequate for the load AND the effects of angles is the responsibility of:</p>
+<div class="quiz-group" data-qid="S4_M16_q18">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q18',0,'fb_S4_M16_q18')">The equipment owner</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q18',1,'fb_S4_M16_q18')">The crane manufacturer</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q18',2,'fb_S4_M16_q18')">The delivery driver</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q18',3,'fb_S4_M16_q18')">The rigger</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q18"></div>
+</div></section>
+<section class="slide t-gate" id="slide-39" data-idx="39">
+<div class="slide-inner">
+<h2>Final Question 2</h2>
+<p class="quiz-stem">The main hazard of a 4-leg bridle on a rigid load, compared to a flexible load, is that:</p>
+<div class="quiz-group" data-qid="S4_M16_q19">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q19',0,'fb_S4_M16_q19')">The rigid load spreads the weight out evenly across all four of its own legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q19',1,'fb_S4_M16_q19')">The rigid load will always tip completely over as it leaves the ground below</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q19',2,'fb_S4_M16_q19')">The weight can concentrate on two legs while the other two only stabilize</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q19',3,'fb_S4_M16_q19')">All four of the legs go completely slack at exactly the very same moment here</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q19"></div>
+</div></section>
+<section class="slide t-gate" id="slide-40" data-idx="40">
+<div class="slide-inner">
+<h2>Final Question 3</h2>
+<p class="quiz-stem">A 9,000 lb load hangs on a 3-leg symmetric bridle. Each leg has a Load Angle Factor of 1.5. The tension in each leg is:</p>
+<div class="quiz-group" data-qid="S4_M16_q20">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q20',0,'fb_S4_M16_q20')">3,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q20',1,'fb_S4_M16_q20')">9,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q20',2,'fb_S4_M16_q20')">2,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q20',3,'fb_S4_M16_q20')">4,500 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q20"></div>
+</div></section>
+<section class="slide t-gate" id="slide-41" data-idx="41">
+<div class="slide-inner">
+<h2>Final Question 4</h2>
+<p class="quiz-stem">A rigid machine base is picked on a 4-leg bridle. For sizing the slings, the total load weight should be divided among:</p>
+<div class="quiz-group" data-qid="S4_M16_q21">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q21',0,'fb_S4_M16_q21')">Three legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q21',1,'fb_S4_M16_q21')">Two legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q21',2,'fb_S4_M16_q21')">Four legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q21',3,'fb_S4_M16_q21')">One leg</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q21"></div>
+</div></section>
+<section class="slide t-gate" id="slide-42" data-idx="42">
+<div class="slide-inner">
+<h2>Final Question 5</h2>
+<p class="quiz-stem">As a sling leg moves from vertical toward horizontal, its Load Angle Factor:</p>
+<div class="quiz-group" data-qid="S4_M16_q22">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q22',0,'fb_S4_M16_q22')">Increases above 1.0</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q22',1,'fb_S4_M16_q22')">Becomes zero</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q22',2,'fb_S4_M16_q22')">Decreases below 1.0</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q22',3,'fb_S4_M16_q22')">Stays at 1.0</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q22"></div>
+</div></section>
+<section class="slide t-gate" id="slide-43" data-idx="43">
+<div class="slide-inner">
+<h2>Final Question 6</h2>
+<p class="quiz-stem">A 20,000 lb load hangs between two lift points 16 ft apart. The CG is 4 ft from point 1 and 12 ft from point 2. The share of load at point 1 is:</p>
+<div class="quiz-group" data-qid="S4_M16_q23">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q23',0,'fb_S4_M16_q23')">5,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q23',1,'fb_S4_M16_q23')">15,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q23',2,'fb_S4_M16_q23')">20,000 lb</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q23',3,'fb_S4_M16_q23')">10,000 lb</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q23"></div>
+</div></section>
+<section class="slide t-gate" id="slide-44" data-idx="44">
+<div class="slide-inner">
+<h2>Final Question 7</h2>
+<p class="quiz-stem">During a lift, a rigger notices the bridle has gone nearly flat to reach a wide sling spread. The correct concern is that:</p>
+<div class="quiz-group" data-qid="S4_M16_q24">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q24',0,'fb_S4_M16_q24')">The crane hook is now somehow carrying much less of the total load weight overall</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q24',1,'fb_S4_M16_q24')">The load angle factor for the legs has quietly dropped below a value of one here</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q24',2,'fb_S4_M16_q24')">Leg tension has climbed well above each leg's share and may exceed the rating</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q24',3,'fb_S4_M16_q24')">The slings will now be far too steep for this pick and will be badly under-loaded</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q24"></div>
+</div></section>
+<section class="slide t-gate" id="slide-45" data-idx="45">
+<div class="slide-inner">
+<h2>Final Question 8</h2>
+<p class="quiz-stem">Two bridle legs are unequal in length, so one is flatter than the other. Rigging practice is to base the pick's capacity on:</p>
+<div class="quiz-group" data-qid="S4_M16_q25">
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q25',0,'fb_S4_M16_q25')">The flatter leg, which carries the higher tension of the two</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q25',1,'fb_S4_M16_q25')">Whichever one of the two legs happens to be the newer one here</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q25',2,'fb_S4_M16_q25')">The plain numerical average of the two unequal bridle legs</button>
+<button class="quiz-option" type="button" onclick="cqAnswer(this,'S4_M16_q25',3,'fb_S4_M16_q25')">The steeper leg, which is simply the easier one of them to reach</button>
+</div>
+<div class="feedback" id="fb_S4_M16_q25"></div>
+</div></section>
+<section class="slide t-completion" id="slide-46" data-idx="46">
+<div class="slide-inner">
+<h2>Module Complete</h2>
+<div class='completion-panel'><p id='score-summary'>Complete the knowledge check to finish this module.</p><div id='review-list'></div><button class="calc-btn" style="max-width:340px;margin-top:14px" onclick="window.dispatchEvent(new CustomEvent('cq-module-complete',{detail:{next:'S4_M17'}}))">Next: Sling Tension and Specialty Slings &gt;</button></div>
+</div></section>
+</main>
+
+<div id="cq-gatebar">
+  <span id="cq-gatemsg"></span>
+  <button id="cq-gatebtn" type="button"></button>
+</div>
+
+<div id="navbar">
+  <button class="nav-btn" id="prevbtn" type="button" onclick="navigate(-1)">Back</button>
+  <div id="progress-wrap"><div id="progress"></div></div>
+  <span id="counter">1 / 46</span>
+  <button class="nav-btn" id="nextbtn" type="button" onclick="navigate(1)">Next</button>
+</div>
+
+<!-- cq-module-bridge.js -->
+<script>
+/* ============================================================
+   Core navigation. The gate engine and the audio overlay both
+   wrap window.navigate / window.jumpTo, so both are declared on
+   window explicitly and never re-bound after load.
+   ============================================================ */
+var TOTAL = 46;
+var current = 1;
+var isAnimating = false;
+
+function renderNav(){
+  var prev=document.getElementById('prevbtn'), next=document.getElementById('nextbtn');
+  if(prev) prev.disabled = (current===1);
+  if(next) next.textContent = (current===TOTAL) ? 'Finish' : 'Next';
+  var p=document.getElementById('progress');
+  if(p) p.style.width = ((current/TOTAL)*100)+'%';
+  var c=document.getElementById('counter');
+  if(c) c.textContent = current+' / '+TOTAL;
+}
+
+function show(n){
+  var slides=document.querySelectorAll('.slide');
+  for(var i=0;i<slides.length;i++) slides[i].classList.remove('active');
+  var t=document.getElementById('slide-'+n);
+  if(t){ t.classList.add('active'); t.scrollTop=0; }
+  current=n; renderNav();
+  document.dispatchEvent(new CustomEvent('cq-slide-shown',{detail:{index:n}}));
+}
+
+window.jumpTo=function(n){
+  if(n<1||n>TOTAL) return;
+  show(n);
+};
+
+window.navigate=function(dir){
+  if(isAnimating) return;
+  var tgt=current+dir;
+  if(tgt<1||tgt>TOTAL) return;
+  isAnimating=true;
+  setTimeout(function(){ isAnimating=false; },390);
+  show(tgt);
+};
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight') window.navigate(1);
+  if(e.key==='ArrowLeft')  window.navigate(-1);
+});
+(function(){
+  var x0=null;
+  document.addEventListener('touchstart',function(e){ x0=e.touches[0].clientX; },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(x0===null) return;
+    var dx=e.changedTouches[0].clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    window.navigate(dx<0?1:-1);
+  },{passive:true});
+})();
+window.addEventListener('DOMContentLoaded',function(){ show(1); });
+</script>
+<script>
+/* ============================================================
+   CraneQualified KC Gate Engine v1  (Stage 4 / S4_M16)
+   Server-authoritative; installs a local FNV-1a shim ONLY if the
+   platform has not defined window.CQ. Answers are stored as FNV-1a
+   hashes, never plaintext, and the correct option is never revealed
+   on a gate miss. Gate = 6 final questions at 100%. Forward navigation
+   to the completion slide is locked until the gate passes.
+   ============================================================ */
+(function(){
+"use strict";
+var SALT="CQ1:S4_M16_UnequalLegLoading";
+var HASHES={"S4_M16_q01": "d503d03d", "S4_M16_q02": "7627a7e6", "S4_M16_q03": "7bf28827", "S4_M16_q04": "a217312f", "S4_M16_q05": "1790741b", "S4_M16_q06": "d9b47fb7", "S4_M16_q07": "c17f30be", "S4_M16_q08": "b3215650", "S4_M16_q09": "abffa9d2", "S4_M16_q10": "ee90dd36", "S4_M16_q11": "080360af", "S4_M16_q12": "c5de8b93", "S4_M16_q13": "712849ad", "S4_M16_q14": "2b036e45", "S4_M16_q15": "4275ee98", "S4_M16_q16": "8051e2fc", "S4_M16_q17": "8cb0ca46", "S4_M16_q18": "15d23368", "S4_M16_q19": "3044b874", "S4_M16_q20": "2d100717", "S4_M16_q21": "139d839e", "S4_M16_q22": "7334b8fc", "S4_M16_q23": "69ebf9e8", "S4_M16_q24": "c7832c20", "S4_M16_q25": "d010de2d"};
+var GATE=["S4_M16_q18", "S4_M16_q19", "S4_M16_q20", "S4_M16_q21", "S4_M16_q22", "S4_M16_q23", "S4_M16_q24", "S4_M16_q25"];
+var GATESET=new Set(GATE);
+var LOCK_AFTER=45;            /* completion slide (46) blocked until gate passes */
+var gatePassed=false, answered={}, gateOK={};
+
+function fnv(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
+
+/* 1) Local CQ shim (platform can pre-define window.CQ and win) */
+if(!window.CQ){
+  window.CQ={
+    scoreAnswer:function(qid,idx){
+      var correct=fnv(SALT+':'+qid+':'+idx)===HASHES[qid];
+      var isGate=GATESET.has(qid), out={correct:correct};
+      if(!isGate){
+        for(var i=0;i<4;i++){ if(fnv(SALT+':'+qid+':'+i)===HASHES[qid]){out.correctIndex=i;break;} }
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct \u2014 the correct option is now highlighted. Review the reasoning, then continue.';
+      } else {
+        out.feedbackHtml = correct ? 'Correct.' : 'Not correct. This gate requires 100% \u2014 the correct answer is not shown. Review the module and retest.';
+      }
+      return Promise.resolve(out);
+    },
+    requestComplete:function(){
+      var right=0,i; for(i=0;i<GATE.length;i++){ if(gateOK[GATE[i]]) right++; }
+      var passed=right===GATE.length, score=right+' / '+GATE.length;
+      if(passed){ gatePassed=true; setTimeout(function(){ document.dispatchEvent(new CustomEvent('cq-complete',{detail:{completionId:'local-'+Date.now()}})); },300); }
+      return Promise.resolve({passed:passed,score:score});
+    },
+    ack:function(){}
+  };
+}
+document.addEventListener('cq-complete',function(){ gatePassed=true; });
+
+/* gate-bar + tracking helpers */
+function bar(){return document.getElementById('cq-gatebar');}
+function btn(){return document.getElementById('cq-gatebtn');}
+function msg(t){var m=document.getElementById('cq-gatemsg'); if(m)m.textContent=t; var b=bar(); if(b)b.style.display='block';}
+function gateRight(){var r=0,i;for(i=0;i<GATE.length;i++)if(gateOK[GATE[i]])r++;return r;}
+function chip(){var c=document.getElementById('score-chip'); if(c)c.textContent='GATE '+gateRight()+' / '+GATE.length;}
+function buildReview(passed,score){
+  var sum=document.getElementById('score-summary'), list=document.getElementById('review-list');
+  if(sum) sum.textContent = passed ? ('Knowledge check passed \u2014 '+score+' (100%).') : ('Gate score '+score+'. This gate requires 100%. Review the items below, then retest.');
+  if(list){ list.innerHTML='';
+    if(!passed){ var i; for(i=0;i<GATE.length;i++){ if(GATE[i] in gateOK && !gateOK[GATE[i]]){ var d=document.createElement('div'); d.className='review-item'; d.innerHTML='<b>Final Question '+(Number(GATE[i].match(/(\d+)$/)[1])-17)+'</b> - revisit this topic before retesting.'; list.appendChild(d); } } }
+  }
+}
+
+/* 2) Answer handler (bound to existing cqAnswer(this,qid,idx,fbid) onclicks) */
+window.cqAnswer=async function(b,qid,idx,fbid){
+  if(answered[qid])return; answered[qid]=true;
+  var grp=b.parentElement;
+  grp.querySelectorAll('.quiz-option').forEach(function(o){o.disabled=true;o.style.pointerEvents='none';o.classList.remove('correct','wrong');});
+  var r=await CQ.scoreAnswer(qid,idx);
+  b.classList.add(r.correct?'correct':'wrong');
+  var isGate=GATESET.has(qid), fb=fbid?document.getElementById(fbid):null;
+  if(!isGate){
+    if(!r.correct && typeof r.correctIndex==='number'){ var os=grp.querySelectorAll('.quiz-option'); if(os[r.correctIndex]) os[r.correctIndex].classList.add('correct'); }
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+  } else {
+    gateOK[qid]=r.correct;
+    if(fb){ fb.textContent=r.feedbackHtml; fb.classList.add('show'); }
+    chip();
+    if(GATE.every(function(q){return q in gateOK;})) checkGate();
+  }
+};
+
+async function checkGate(){
+  msg('Submitting knowledge check...'); var bt=btn(); if(bt)bt.style.display='none';
+  var r=await CQ.requestComplete();
+  buildReview(r.passed,r.score);
+  if(r.passed){ msg('Knowledge check passed ('+r.score+'). You may continue to completion.'); }
+  else{ msg('Not yet - this gate requires 100%. Review the module, then retest.');
+        if(bt){ bt.style.display='inline-block'; bt.textContent='Review and Retest'; bt.onclick=function(){location.reload();}; } }
+}
+
+document.addEventListener('cq-complete',function(){ msg('Module complete - recorded by the platform.'); var bt=btn(); if(bt)bt.style.display='none'; chip(); if(window.CQ&&CQ.ack)CQ.ack(); });
+document.addEventListener('cq-denied',function(){ msg('Completion denied by the platform. Review and retest.'); });
+
+/* 3) Forward navigation lock - completion slide (46) blocked until gate passes */
+function blocked(t){ return !gatePassed && t>LOCK_AFTER; }
+if(typeof window.navigate==='function'){
+  var _nav=window.navigate;
+  window.navigate=function(dir){
+    var tgt=(typeof current!=='undefined'?current:1)+dir;
+    if(blocked(tgt)){ msg('Pass the knowledge check (100%) before completing the module.'); if(typeof window.jumpTo==='function')window.jumpTo(LOCK_AFTER); return; }
+    return _nav(dir);
+  };
+}
+if(typeof window.jumpTo==='function'){
+  var _jmp=window.jumpTo;
+  window.jumpTo=function(n){ if(blocked(n)){ msg('Pass the knowledge check (100%) before completing the module.'); return _jmp(LOCK_AFTER); } return _jmp(n); };
+}
+
+/* platform progress beacon + initial chip */
+window.addEventListener('load',function(){
+  if(window.CQ&&CQ.start){try{CQ.start();}catch(e){}}
+  if(window.CQ&&CQ.slide){ var _n2=window.navigate; window.navigate=function(d){var rr=_n2(d); try{CQ.slide(current,TOTAL);}catch(e){} return rr;}; }
+  chip();
+});
+})();
+</script>
+<script>
+/* ============================================================
+   cq-slide-audio-flow  (Stage 4 / S4_M16)
+   Instructor narration + per-question hard lock + auto-advance.
+   Runs LAST so it wraps the gate engine.
+     - window.cqAnswer = w   <-- overlay discriminator
+   Answered state persists in sessionStorage EXCLUDING gate qids,
+   so a reload is the retest escape.
+
+   Audio source order:
+     1. CQ_AUDIO[slideIndex]  (base64 MP3, ElevenLabs pass)
+     2. speechSynthesis fallback (preview only)
+   Chrome stalls speechSynthesis on utterances over ~15s, so a
+   keepalive pause/resume runs every 9s while speaking.
+   ============================================================ */
+(function(){
+"use strict";
+var NARR = {"1": "Welcome to Unequal Leg Loading and Off-Level Pick Points, module two of the Advanced Rigger stage. Last module you learned to find where a load balances. This module answers the question that comes right after: now that you know where it balances, how much load is actually in each sling leg? And the answer surprises people, because it is almost never what you would guess by dividing the weight by the number of legs. A four-leg bridle does not divide by four. A sling that leans carries more than its share. And a pick point that is not over the balance point loads one leg harder than the others. Get any of those wrong and you size a sling for a load that is smaller than what it actually feels, which is how slings fail with the load chart looking fine. I have watched good riggers do everything right on weight and balance and still under-size a leg because they forgot what the angle does. [PAUSE / ASK] Before we start, ask yourself how much load is in one leg of a four-leg bridle holding twenty thousand pounds. Hold that guess.", "2": "Seven outcomes, and notice they build in a chain. First you learn why the leg count you see is not the leg count you design for. Then you learn the one relationship that governs all of it -- angle multiplies tension. Then two calculations: the load angle factor, and the tension that comes from it. Then the off-level case, where the legs stop sharing evenly. Then how to spot the worst leg and how to fix a load that hangs crooked. Each one leans on the one before it, so do not skip. The gate at the end is six questions at one hundred percent, same as last module, because a sling sized off the wrong number is not a rounding error -- it is the sling that parts. These calculations become second nature with reps, and I have seen riggers running them in their heads within a few weeks of practice. [PAUSE / ASK] Look at that list and find the calculation you are least sure of.", "3": "First section. Before any math, we have to kill the most comfortable and most dangerous assumption in rigging: that the legs of a bridle share the load equally. They usually do not, and on a rigid load with four legs they really do not. We are going to look at why a rigid load rocks onto two legs, why that means you design for two, and set up the idea that angle -- not just leg count -- decides what each leg carries. Get this section and the math later is just putting numbers to things you already understand. I have watched a whole crew nod along that four legs share four ways, and every one of them would have been surprised by the scale. [PAUSE / ASK] Ask yourself whether you have ever counted legs and divided.", "4": "Start with why this happens, because once you see it you will never divide by four again. A rigid load cannot bend. So when it hangs from four legs, it does exactly what a stiff table does on an uneven floor -- it settles onto two legs and the other two barely carry anything. They are touching, they are steadying the load against tipping, but they are not sharing the weight. A flexible load is different. Something that can sag will conform and spread itself across the legs more evenly. But most of what you pick on a four-leg bridle -- machine bases, weldments, structural pieces -- is rigid. And here is the part that gets people: the load hangs perfectly level and stable while two of its legs are badly overloaded. Nothing looks wrong. You cannot even tell by looking which two legs drew the short straw. So the practice is simple and conservative: on a rigid load, size the bridle as if two legs carry the whole weight. I have watched a rigid machine base come up on a four-leg bridle and rock onto two corners in the first inch, and the crew who sized every leg for half the load slept fine. [PAUSE / ASK] Picture a stiff table on a floor that is not flat, and which legs take the weight.", "5": "This is the single most important idea in the whole module, so we lead with it. On a rigid load, a four-leg bridle does not split the weight four ways. Because the load will not flex, it is entirely possible for two legs to end up carrying almost the whole thing while the other two are just there keeping it from tipping. Think about setting a rigid table on an uneven floor -- it rocks on two legs and the other two barely touch. Same physics hanging from a hook. Some folks will divide by four and feel good about it, and that is exactly the assumption that overloads a sling, because the real share on the working legs is far more than a quarter. Someone might say all four share equally, which is only true if the load is perfectly symmetric, the legs are perfectly matched, and the hook is dead over the balance point -- three things that are rarely all true at once. Some people will guess the longest legs carry most, but on a rigid load it is the geometry and the fit-up, not leg length alone, that decides. [PAUSE / ASK] I have watched a rigid weldment on a four-leg bridle rock onto two corners the second it came up. Make your call.", "6": "So if we cannot count on four legs, what do we design for? Two. The standard rigging practice on a rigid load is to calculate as though only two of the four legs carry the load, and let the other two be a stability bonus you do not rely on. That is conservative on purpose, because being wrong in this direction means a leg has margin it did not need, and being wrong the other direction means a leg tears. Some folks will divide by four, which is the trap we just talked about. Someone might split the difference and divide by three, which feels like a reasonable compromise and is not grounded in anything -- the load does not care about your compromise. Some people will treat it as a single vertical, which ignores the geometry entirely. Design for two legs carrying, and you are rigging the way the load actually behaves. [PAUSE / ASK] On a job where the drawing called a four-leg pick, we still sized every leg for half the load. Make your call.", "7": "Now the second force at work, and it is the one that turns this from a counting problem into a calculation. It is not just how many legs -- it is the angle each leg hangs at. A leg that runs straight up and down carries just its portion of the weight, nothing extra. But the moment a leg leans, it carries its portion plus a penalty, and that penalty grows fast as the leg gets flatter. Think about why. A leaning leg is not just holding the load up, it is also pulling inward against the other legs, and that inward pull is extra tension the vertical leg never had. Flatten the leg toward horizontal and that inward pull dominates, and the tension can run to double, triple, more than the share. The load never got heavier. The geometry did the damage. Everything left in this module is about measuring that penalty and respecting it. I have seen a rigger hold a leg out flat to clear a beam and never feel what that did to the tension. [PAUSE / ASK] Think about holding a weight with your arm straight down versus straight out to the side, and which burns.", "8": "This is the relationship that governs everything downstream, so let us be very clear about the direction. As the sling gets flatter -- as the angle from the horizontal gets smaller -- the tension in the leg goes up, and it goes up fast. A leg at a low, flat angle is fighting to hold a load that wants to pull it straight sideways, and that fight shows up as tension that can run to several times the actual weight it is lifting. Some folks will say tension drops as the sling flattens, which is backward and it is the misread that fails slings. Someone might think the angle does not matter, that a leg carries what it carries, but the whole reason we do this math is that it changes enormously with angle. Some people will imagine it goes to zero, which is exactly wrong -- flat is where tension is highest, not lowest. [PAUSE / ASK] Picture pulling a clothesline tight and dead level, and how hard that gets. Make your call.", "9": "Section two, and this is your house calculation for a symmetric pick. Three small steps: find the angle factor, find each leg's share, multiply them for the tension. It is the method your earlier training used and it is the one you will run on most bridles. Once the three steps are muscle memory you can do it standing next to the load with a tape measure. What I want most is for you to keep the steps separate and in order, because the mistakes almost always come from mashing two steps together. On a job I helped plan, a crew who swore they hated math had this running cold by the end of the day. [PAUSE / ASK] Ask yourself whether you have ever used a load angle factor before.", "10": "Step one, the load angle factor. It is leg length divided by headroom, and those are two measurements you can take with a tape. Leg length is the sling leg itself, hook down to the load. Headroom is the straight-up vertical distance from where the sling attaches on the load up to the hook. Divide leg length by headroom. On a vertical leg those two are the same number, so you get one, no penalty. On any leaning leg, the sling leg is longer than the straight-up height -- it has to be, it is taking the long diagonal path -- so the factor comes out bigger than one. That factor is always one or more. If you ever get a number under one, you flipped the division, put headroom over leg length, and you need to turn it right side up. Keep leg length on top. On a compressor skid I helped plan, we measured leg length and headroom right there on the pad and had the factor before the crane even swung over. [PAUSE / ASK] Which measurement is the long diagonal, and which is straight up?", "11": "Here is the house formula, the one you will use on every symmetric bridle. The Load Angle Factor is the leg length divided by the headroom. Leg length is how long the sling leg actually is, hook to load. Headroom is the vertical height from the load attachment up to the hook. Divide the leg length by the headroom and you get a number that is always one or bigger, and that number is your multiplier. Some folks will flip it and divide headroom by leg length, which gives you a number less than one and would tell you tension goes down as the sling flattens -- the exact backward answer we just warned about. Someone might multiply the two, which is not the relationship and gives you a meaningless figure. Some people will reach for weight over leg length, mixing up two different steps of the calculation. Leg length over headroom. Say it twice. [PAUSE / ASK] Which measurement goes on top? Make your call.", "12": "The vertical leg is your reference point and its factor is exactly one. When a leg runs straight up and down, the leg length and the headroom are the same measurement, so leg length divided by headroom is one over one, which is one. A factor of one means the leg carries its share of the load and nothing extra -- there is no angle penalty because there is no angle. Every other leg you ever calculate will have a factor bigger than one, because any lean adds tension. Some folks will guess a half, which would mean a vertical leg somehow carries less than the weight it holds, and that is not physical. Someone might say one and a half or two, but those are the factors for legs that are leaning, not for a straight vertical. Some people will overthink it, but vertical is the one clean case: factor of one, no penalty. [PAUSE / ASK] Anchor on this one -- everything else is measured against it. Make your call.", "13": "Step two, the share of load, and it is the easy one. On a symmetric load each leg's fair share is just the total weight divided by the number of legs you are designing for. Twelve thousand pounds, three legs, four thousand pounds a leg. But watch the leg count -- if this is a rigid load on a four-leg bridle, the number you divide by is two, not four, for the reason we spent all of section one on. So a twelve-thousand-pound rigid load on four legs has a share of six thousand pounds per working leg, not three. This share is a starting number. It is the weight before the angle penalty gets stacked on top in the next step. Keep it clean and separate from the factor, because the most common error in this whole method is collapsing share and factor into one confused step. On a rigid pump skid on four legs, I watched a crew catch themselves about to divide by four and stop. [PAUSE / ASK] For a rigid four-leg pick, what number do you divide the weight by?", "14": "Before you can find a leg's tension, you need its fair share of the weight, and on a symmetric load that is just the total weight divided by the number of legs you are designing for. Twelve thousand pounds on a three-leg symmetric pick is four thousand pounds of share per leg. This is the starting number, before the angle penalty gets applied on top of it. Some folks will use the whole load weight for each leg, which drastically over-sizes and confuses share with total. Someone might multiply weight by the number of legs, which grows the number the wrong direction entirely. Some people will pull the Load Angle Factor into this step, but the factor comes next -- share first, then multiply by the factor. Keep the two steps separate and they are both easy. [PAUSE / ASK] Get the share, then we will apply the angle. Make your call.", "15": "Step three ties it together, and it is a multiplication. Tension equals the share times the load angle factor. The share is the weight portion, the factor is the angle penalty, and their product is the real tension in the leg. That tension is what you take to the sling chart, not the share. The difference between the two numbers is exactly what the angle cost you, and it is the number a rigger leaves on the table when they size off the share and forget the factor. Once you have the tension, you check it against the sling's rated capacity with its design factor, the same way you would any load. Three steps: factor, share, multiply. Say it back -- leg length over headroom for the factor, weight over legs for the share, factor times share for the tension. I have watched a rigger nail the share and skip the factor, and the sling was undersized the instant the legs leaned in. [PAUSE / ASK] Which number do you take to the sling chart -- share or tension? Make sure you know before you move on.", "16": "Let us run the whole thing end to end with real numbers. Twelve thousand pound symmetric load, three-leg bridle. Leg length twenty feet, headroom fifteen feet. Step one, the factor: twenty divided by fifteen is one point three three. Step two, the share: twelve thousand over three legs is four thousand pounds. Step three, the tension: four thousand times one point three three is five thousand three hundred and twenty pounds in each leg. Sit with that for a second. The share was four thousand, but each leg actually feels five thousand three hundred and twenty. That thirteen hundred pound difference is pure angle penalty, and it is the number that decides whether your sling is big enough. You size to the five thousand three twenty, then apply your design factor on top. This is exactly the calculation from your worksheet, same numbers, so it should feel like home. I have used this exact three-step on a compressor pick with a tape and a scrap of cardboard. [PAUSE / ASK] Cover the work and run it yourself: twelve thousand, three legs, twenty over fifteen.", "17": "Now we put the two pieces together, and it is a multiplication. Tension in the leg equals the share of load times the load angle factor. The share is the fair portion of the weight, the factor is the angle penalty, and multiplying them gives you what the leg actually feels. That tension number is what you size the sling against, not the share. Some folks will divide by the factor instead of multiplying, which makes the tension come out smaller than the share and tells you the angle helped you -- it never does. Someone might subtract, mixing units that do not subtract. Some people will divide the factor by the leg count, which scrambles two separate steps together. Share times factor equals tension. That is the whole method in five words. [PAUSE / ASK] I have watched a rigger size a sling off the share and forget the factor, and the sling was undersized the moment the legs leaned. Make your call.", "18": "Run the house method. Twelve thousand pounds, three legs, so the share of load is twelve thousand divided by three, which is four thousand pounds per leg. Now apply the angle penalty: four thousand times the load angle factor of one point four gives five thousand six hundred pounds of tension in each leg. Notice the tension is sixteen hundred pounds more than the share -- that extra is what the angle costs you, and it is exactly what you would miss if you sized the sling off the share alone. Some folks will stop at the share, four thousand, and under-size. Someone might use the whole twelve thousand for a leg, wildly over. Some people will divide by the factor instead of multiplying and land near twenty-nine hundred, below even the share, which should look wrong immediately. [PAUSE / ASK] Work the two steps on paper. Make your call.", "19": "Section three, and this is where module one and module two come together. Everything so far assumed a symmetric pick with the hook over the balance point. Now we deal with the real world, where the lugs are where the engineer put them and the balance point is somewhere else. When the hook is not over the balance point, the legs stop sharing evenly, one point carries more, and you have to split the load between the points before you even get to the angle. We use the moment method for that -- the same one you used to find the balance point last module, now aimed at load sharing. I have seen riggers who could run a symmetric bridle in their sleep get caught out the first time the pick points were not over the CG. [PAUSE / ASK] Think of a load whose lifting lugs were nowhere near where it balanced.", "20": "Here is the picture I want in your head for the whole section: two people carrying a plank with a heavy box sitting near the left end. The person on the left, close to the box, is straining. The person on the right is barely working. That is an off-level pick. When your hook is not over the balance point, your two lift points are those two people -- the one nearer the balance point carries the big share, the far one carries the little share. And until you correct it, the load hangs crooked and the near leg is working hard the entire time it is in the air. So on an off-level pick you have an extra job before you ever touch the angle math: you have to split the load between the two points and find out how much each one is really carrying. Then you size each sling to its own share, with its own angle on top. I have watched a vessel with off-center trunnions come up and lean hard because nobody split the load first. [PAUSE / ASK] On that plank, which person would you rather be? Make sure you know why.", "21": "This is where the last module and this one meet. When your hook is not over the balance point, the legs stop sharing evenly, and the leg closer to the balance point picks up more of the load. That is the off-level pick, and it is common on real equipment where the lugs are where the lugs are and the balance point is somewhere else. Some folks will assume the legs still share evenly, which is only true with the hook over the balance point -- the whole premise here is that it is not. Someone might say each leg carries half, which is the answer for a balanced two-point pick, not an off-level one. Some people will think the legs carry nothing until the load levels, but the load hangs the instant it leaves the ground, off-level and all, and the legs are loaded the whole time. [PAUSE / ASK] Think about carrying a ladder by two rungs when the heavy end is near one hand. Make your call.", "22": "The point nearer the balance point carries more, and this is worth getting straight because it is easy to say backward. Picture a plank with a heavy box sitting near the left end, carried by two people. The person on the left, near the box, is straining. The person on the right is barely working. The support nearest the weight carries the most. Same with your two pick points -- the one closer to the balance point takes the bigger share. Some folks will say the far point carries more, which is the plank carried backward and it is the common misread. Someone might insist both are equal, which is only the case when the balance point sits exactly between them. Some people will grab the higher point, but height is not what sets the share -- distance from the balance point is. [PAUSE / ASK] Which end of that plank is the near person carrying? Make your call.", "23": "The tool for the split is the moment method, and you already own it from last module. The share at a point equals the weight times the distance from the balance point to the OTHER point, divided by the total span between the points. That opposite-point business is the thing to hold onto, and it makes sense if you think about the plank: the near person carries more, and you calculate the near person's share by reaching across to the far distance. Here is your built-in check, and use it every time: the two shares have to add up to the total weight. If they do not, you made an arithmetic slip and you caught it before it mattered. And the answer always lands the right way round -- the nearer point gets the bigger share, just like the strained person on the plank. Same moment method as finding the balance point, just pointed at a different question. On a vessel with off-center trunnions, a crew I was on split the load this way before sizing a sling. [PAUSE / ASK] Which distance gives you the near point's share -- its own, or the far one?", "24": "Let us split a real one. Eighty-two hundred pound load, two points, balance point four feet from point one and nine feet from point two, so the span is thirteen feet. Point one is the nearer point, so it carries more, and we get its share using the far distance, nine feet: eighty-two hundred times nine over thirteen is five thousand six hundred seventy-seven pounds. Point two, the far point, uses the near distance of four feet: eighty-two hundred times four over thirteen is two thousand five hundred twenty-three pounds. Now the check that keeps you honest -- add them. Five thousand six seventy-seven plus two thousand five twenty-three is eighty-two hundred, the full load. It balances, so the arithmetic is clean. Point one is carrying more than double point two, which is what you would expect with the weight sitting close to it. And you are not done -- each of those shares still gets its own angle factor on top before you size the sling. This is the off-level example straight out of your worksheet. I have caught my own arithmetic with that add-up check more than once out on a job. [PAUSE / ASK] Add the two shares and confirm they hit the total before you trust them.", "25": "The tool for splitting an off-level load between two points is the moment method -- the same moment thinking you used to find the balance point, now pointed at load sharing. The share at one point is the weight times the distance from the balance point to the OTHER point, divided by the total span. That opposite-distance rule trips people, so hold onto it: the nearer point carries more, and you get its share by measuring to the far point. Some folks will reach for the Load Angle Factor, but that handles the angle on a symmetric pick, not the split on an unbalanced one. Someone might just divide by two, which only works when the load is balanced between the points. Some people will grab leg length over headroom, which is the angle factor formula, a different step. [PAUSE / ASK] Same moment method as last module, new target. Make your call.", "26": "Work it with the opposite-distance rule. Point 1 is three feet from the balance point, so point 1 is the nearer point and should carry more. To get the share at point 1, use the distance to the FAR point -- that is point 2 at seven feet: ten thousand pounds times seven, divided by the ten-foot span, gives seven thousand pounds at point 1. Check it against your gut -- point 1 is nearer the weight, so point 1 carrying seven thousand of the ten is exactly right. Some folks will use point 1's own distance of three and land on three thousand, which puts the big share on the wrong point. Someone might split it down the middle at five thousand, ignoring that the load is not centered. Some people will load the whole ten thousand onto one point, forgetting the other point carries the rest. On a transformer set I watched a crew nearly undersize the near-point sling by grabbing the wrong distance. [PAUSE / ASK] Nearer point, bigger share -- does your answer honor that? Make your call.", "27": "Here is the step people skip on off-level picks. Finding the share at each point is only half the job. That heavily loaded point still has a sling leg at some angle, and the angle penalty applies on top of the share, exactly like it did on the symmetric pick. So the tension in that leg is the share you just calculated times the angle factor for that leg -- two effects stacked. Some folks will treat the share as the final tension and stop, which misses the angle and under-sizes the busiest leg on the pick. Someone might fixate on the sling color, which tells you nothing about tension. Some people will chase the hook block weight, which belongs in your total below-the-hook buildup, not in the per-leg tension. Share sets how much of the load that point carries; the angle factor turns that into the tension the leg feels. [PAUSE / ASK] Two effects, both applied -- share and angle. Make your call.", "28": "Last section before the gate. You know how to calculate leg tension now, so this section is about the limits that keep those numbers safe and the moves that fix a bad one. Where the practical floor on sling angle sits and why. How to find the one leg that governs the whole pick when the legs are unequal. And how to bring an off-level load back to level so the legs share the way you calculated. These are the judgment calls that sit on top of the math. I have watched a crew flatten a bridle to reach a spread and never run the tension that flattening created. [PAUSE / ASK] Think about the flattest sling angle you have ever seen used on a job.", "29": "Because tension climbs so fast as slings flatten, the trade sets a floor, and the number to carry is thirty degrees from horizontal. Walk the table with me. Straight vertical, ninety degrees, the leg carries just its share, no penalty. Come down to sixty degrees and it is about fifteen percent over the share -- still cheap. Forty-five degrees, about forty percent over. Thirty degrees, and now the leg is carrying roughly double its share, and that is the line the trade draws. Below thirty degrees the tension does not climb gently anymore, it takes off, and the practice is that you do not go there without an engineer signing off or you change the rigging to steepen the legs. Notice the pattern: every step flatter costs more than the step before it. That is why flat is dangerous and why nobody lets a bridle go flat just to reach a wide spread. I have seen a bridle let go flat to reach a spread and put a leg near double before anyone ran it. [PAUSE / ASK] What does a leg carry at the thirty degree floor -- roughly how many times its share?", "30": "Low angles are dangerous for one concrete reason: they multiply the tension in the leg far past the share, and they can drive it right through the sling's rating without the load ever getting heavier. A leg at thirty degrees off horizontal is carrying roughly double the share it would at vertical. Flatter than that and it climbs faster still. Some folks will say a flat sling is easier to inspect, which is beside the point and does not make it safe. Someone might think the flat angle takes load off the crane, but the crane still lifts the whole weight -- the angle just punishes the slings. Some people will assume a rated sling is immune, but the rating is a limit you can absolutely exceed with a bad angle. This is why most rigging practice sets a floor on sling angle and why you never let a bridle go flat to reach a spread. [PAUSE / ASK] I have seen a crew flatten a bridle to clear an obstruction and never check what it did to the tension. Make your call.", "31": "The number widely taught as the practical floor is thirty degrees from horizontal, and below it the tension climbs steeply enough that most rigging guidance treats it as a hard stop without engineering. At thirty degrees a leg is already carrying about double its share; go much flatter and you are into tensions that eat slings. Some folks will say five degrees, which is nearly flat and is deep into the danger zone, not a floor. Someone might name seventy-five degrees, which is a fine steep angle with a low penalty -- a good place to be, not a minimum. Some people will say ninety, but ninety is straight vertical, the best case, not a limit. Thirty degrees is the line where the practical warnings turn into a stop. [PAUSE / ASK] Below this number you are getting an engineer or changing the rigging. Make your call.", "32": "When your legs are not the same length, they are not at the same angle, and that means they are not carrying the same tension. One leg is flatter than the others, and the flattest leg is working hardest. So the rule is: find that flattest leg, the one with the smallest angle to horizontal, and build your capacity around it. If the worst leg is safe, everything else on the pick is safe too. The trap is averaging. It feels reasonable to average the legs, but averaging pretends the steep, comfortable legs are helping carry the flat leg's burden, and they are not -- the flat leg fails on its own terms no matter how relaxed the others are. Your older references put this as using the smallest ratio when the legs are unequal, and it is the same idea: the worst leg governs. Find it, protect it, and stop worrying about the others. On a structural pick with mismatched legs, a rigger I worked with sized the whole thing off the flattest leg. [PAUSE / ASK] On a bridle with one leg flatter than the rest, which leg sets your limit?", "33": "When your legs are not the same length, they are not at the same angle, and the flattest one is working hardest. Rigging practice is to find the worst leg -- the one with the smallest angle to horizontal -- and base your capacity on it, because if the worst leg is safe, the rest are. Some folks will grab the longest leg, and length is related but it is the angle that actually sets the tension, so name the angle, not the length. Someone might average the legs, which quietly assumes the easy legs cover for the hard one -- they do not, the flat leg fails on its own. Some people will use the shortest leg, which on many geometries is the steepest and least loaded, exactly the wrong one to design around. Find the flattest leg and protect it. [PAUSE / ASK] Which single leg decides whether this pick is safe? Make your call.", "34": "Fixing an off-level pick is the same two moves you learned in the balance module, and now you understand why they matter to leg loading. One, adjust the effective length of the legs with turnbuckles or chain lever hoists so the load levels from where it is attached. Two, move the pick points so the hook lines up over the balance point. Either one levels the load, and a level load shares between the legs the way you calculated. The things that are not fixes: hoist speed does nothing for balance; adding a leg to an unbalanced pick just adds a leg to an unbalanced pick; tag lines are not for holding a load level; and lifting the tilted load anyway locks in the uneven loading you are trying to escape. One critical follow-up, and it is the same warning from last module -- the moment you change leg lengths you change angles, and new angles mean new tensions. So go back and recheck your sling capacity against the geometry you actually ended up with. On a steel job I watched a crew come-along one leg shorter and never revisit the tension. [PAUSE / ASK] What do you have to recheck after you change a leg length?", "35": "You have two honest ways to bring an off-level bridle back to level, and they should sound familiar from the last module. Adjust the effective length of the legs with turnbuckles or chain lever hoists so the load levels from fixed attachment points, or move the pick points so the hook ends up over the balance point. Both put the load level and both restore a sane share between the legs. Some folks will reach for hoist speed, which has nothing to do with balance and only adds energy to a load that is already misbehaving. Someone might add a fifth leg, which does not fix an off-center pick -- it just adds another leg to an unbalanced arrangement. Some people will shrug and lift the tilted load, which locks in the uneven leg loading you are trying to fix and puts the busy leg at risk. Level the load, and the legs share the way you calculated. [PAUSE / ASK] Same two fixes as the CG module -- level it or move the hook. Make your call.", "36": "Let us assemble the whole workflow, because the individual pieces only help if you run them in order. Start where module one left off: get the weight, find the balance point. Then decide your design leg count -- and remember, a rigid four-leg bridle is a two-leg design. If the hook is not over the balance point, split the load between the points with the moment method before anything else. Then for each leg, find its angle factor, leg length over headroom. Multiply each leg's share by its factor to get the real tension. Pick out the flattest leg, because it governs. And finally size each sling to its tension, apply your design factor, and confirm no leg is flatter than the thirty degree floor. Seven steps, and every one of them we worked through in this module and the last. Run them in order and a complicated pick becomes a checklist. I have watched a good rigger take a nasty off-level, unequal-leg pick and make it boring by just walking these steps one at a time. [PAUSE / ASK] Which step do you think gets skipped most often on a busy job?", "37": "This is the gate. Six questions, all six required. Two are load angle factor and tension calculations, one is an off-level load split, and three are judgment: the rigid-load leg count, the angle-factor direction, and the governing leg. Everything came out of the last forty minutes. Take the calculations on paper -- write your share, write your factor, multiply, and sanity check whether the tension came out bigger than the share, because it always should. On the off-level split, use the opposite-distance rule and confirm your two shares add to the total. Miss one and you will not be shown the answer; you review and retest, because on sling tension, understanding why beats memorizing what. I have never met a strong rigger who resented being made to understand the angle twice. [PAUSE / ASK] Breathe, and take your time on the arithmetic.", "38": "This lands on the rigger, and B30.9 puts it there plainly among the rigger's duties: make sure the sling's rated capacity is enough for the load handled, accounting for the number of legs, the hitch, and the effects of angles. That last phrase is this whole module -- the effects of angles are exactly the tension multiplication we have been calculating. Some folks will hand this to the manufacturer, who stamps a rating on the sling but is not standing on your job choosing the geometry. Someone might assign it to the owner, whose duties run to inspection and maintenance, not to sizing every pick. Some people will name the delivery driver, who has no role in the lift at all. The rigger owns the angle math because the rigger chose the angle. [PAUSE / ASK] If the geometry is yours, so is the tension it creates. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "39": "Rigid versus flexible is the distinction that makes the four-leg bridle dangerous, and it is worth one more pass. A flexible load -- something that can sag and conform -- will settle onto all four legs and share reasonably. A rigid load cannot sag, so like that table on the uneven floor it rocks onto two legs and the other two just steady it, and the two working legs can be carrying far more than a quarter each. Some folks will say the rigid load spreads weight evenly, which is exactly the comforting assumption that gets a leg overloaded. Someone might claim the rigid load always tips, but it does not tip -- it hangs fine, it just loads two legs hard while looking perfectly stable. Some people will picture all four legs going slack, which is not a thing a hanging load does. Rigid means two legs work; design for two. [PAUSE / ASK] Rigid or flexible changes everything about how you size this. Make your call. This one is part of the final set, so it counts toward your one hundred percent. Make your call.", "40": "Two steps, house method. Nine thousand pounds over three legs gives a share of three thousand pounds each. Then the angle penalty: three thousand times the factor of one point five is four thousand five hundred pounds of tension per leg. That fifteen-hundred-pound gap between the share and the tension is the angle cost, and it is the number you would miss sizing off the share alone. Some folks will stop at the three-thousand share and under-size. Someone might carry the whole nine thousand onto one leg, far over. Some people will divide by the factor and land near two thousand, below the share, which should read as obviously wrong. [PAUSE / ASK] Share first, then times the factor. Make your call.", "41": "Rigid load, four-leg bridle -- design as a two-leg lift. You size the slings as if two legs carry the whole weight, because on a rigid load that is what can actually happen, and the other two legs are stability you do not lean on. Some folks will divide by four, the exact assumption that overloads a leg when the load rocks onto two corners. Someone might use three as a compromise, which is not grounded in how the load behaves. Some people will design for a single leg, which over-sizes past what even the worst case needs. Two legs carrying is the rule for a rigid load, every time. [PAUSE / ASK] Rigid means two. Make your call.", "42": "Off the vertical, the factor only goes one direction -- up. A vertical leg sits at a factor of one. Tip it toward horizontal and the leg length grows relative to the headroom, so leg length over headroom climbs above one, and the tension climbs with it. The flatter you go, the bigger the factor and the harder the leg works. Some folks will say it stays at one, which would mean angle does not matter, and the whole module says it does. Someone might say it drops below one, the backward answer that makes flat slings look safe. Some people will say zero, but zero tension at a flat angle is the opposite of the truth -- flat is the worst case. [PAUSE / ASK] From vertical, the only way the factor moves is up. Make your call.", "43": "Opposite-distance rule. Point 1 is four feet from the balance point, so A is the nearer point and carries the bigger share. Get A's share using the distance to the far point, B at twelve feet: twenty thousand pounds times twelve, divided by the sixteen-foot span, gives fifteen thousand pounds at point 1. Sanity check -- A is much closer to the weight, so A carrying fifteen of the twenty is exactly the lopsided split you would expect. Some folks will use A's own four feet and land on five thousand, the big share dumped on the wrong point. Someone might halve it to ten thousand, ignoring that the load is way off center. Some people will pile the whole twenty thousand on one point. [PAUSE / ASK] Measure to the far point to get the near point's share. Make your call.", "44": "A flat bridle is a tension problem, and the rigger who catches it is doing the job. As the legs flatten to reach a wide spread, the angle factor climbs and the tension in every leg climbs with it, well above each leg's fair share, and on a wide enough spread it can pass the sling's rating with the load weight never changing. Some folks will worry the slings are too steep, which is the opposite geometry -- flat is the danger, not steep. Someone might think the hook is carrying less, but the crane still lifts the full weight; only the slings pay the angle penalty. Some people will say the factor dropped below one, which cannot happen -- the factor is one at vertical and only rises from there. Flat spread, high tension, check the rating. [PAUSE / ASK] What did flattening the bridle do to the leg tension? Make your call.", "45": "Unequal legs mean unequal angles, and the flatter leg is carrying the higher tension, so that is the leg your capacity is built around. Protect the worst leg and the whole pick is safe; ignore it and it fails on its own no matter how comfortable the other leg is. Some folks will design around the steeper leg because it is easier to reach or measure, but easy has nothing to do with which leg is at risk. Someone might average the two, which pretends the steep leg shares the flat leg's burden -- it does not. Some people will pick the newer leg, but age is a separate inspection question, not a capacity one. The flatter leg governs. [PAUSE / ASK] Flattest leg, highest tension, that is the one that sets your limit. Make your call.", "46": "That is Unequal Leg Loading and Off-Level Pick Points. Here is what you carry out. A four-leg bridle on a rigid load is a two-leg design, because the load rocks onto two legs while looking perfectly stable. Angle multiplies tension: leg length over headroom is your factor, share times factor is your tension, and you size to the tension, never the share. Thirty degrees from horizontal is the practical floor. On an off-level pick, split the load with the moment method first -- nearer point carries more, opposite distance gives you the share -- then apply each leg's angle on top. And the flattest leg governs. Next module is Sling Tension Beyond the Chart and Specialty Slings, which takes the tension work you just did and goes deeper -- deriving the load angle factor instead of memorizing it, the difference between sling-to-horizontal and included angle that fools people, the D-over-d ratio, and the specialty sling types with their own rules. It builds straight on today. I have watched these two modules click together and give a rigger real confidence with a load chart for the first time. [PAUSE / ASK] Before you go, think of one pick on your job where you would now size the slings differently."};
+var GATE = ["S4_M16_q18", "S4_M16_q19", "S4_M16_q20", "S4_M16_q21", "S4_M16_q22", "S4_M16_q23", "S4_M16_q24", "S4_M16_q25"];
+var GATESET = new Set(GATE);
+var QSLIDE = {"5": "S4_M16_q01", "6": "S4_M16_q02", "8": "S4_M16_q03", "11": "S4_M16_q04", "12": "S4_M16_q05", "14": "S4_M16_q06", "17": "S4_M16_q07", "18": "S4_M16_q08", "21": "S4_M16_q09", "22": "S4_M16_q10", "25": "S4_M16_q11", "26": "S4_M16_q12", "27": "S4_M16_q13", "30": "S4_M16_q14", "31": "S4_M16_q15", "33": "S4_M16_q16", "35": "S4_M16_q17", "38": "S4_M16_q18", "39": "S4_M16_q19", "40": "S4_M16_q20", "41": "S4_M16_q21", "42": "S4_M16_q22", "43": "S4_M16_q23", "44": "S4_M16_q24", "45": "S4_M16_q25"};          /* slideIndex -> qid for quiz slides */
+var AUDIO = (typeof CQ_AUDIO!=='undefined') ? CQ_AUDIO : {};
+var SKEY = 'cq_answered_S4_M16';
+
+var answered = {};
+try{
+  var raw=sessionStorage.getItem(SKEY);
+  if(raw){ answered=JSON.parse(raw)||{}; }
+}catch(e){ answered={}; }
+/* gate qids never persist - reload is the retest escape */
+for(var g=0; g<GATE.length; g++){ delete answered[GATE[g]]; }
+
+function persist(){
+  try{
+    var keep={};
+    for(var k in answered){ if(!GATESET.has(k)) keep[k]=answered[k]; }
+    sessionStorage.setItem(SKEY, JSON.stringify(keep));
+  }catch(e){}
+}
+
+/* ---------------- audio ---------------- */
+var audioOn=false, el=null, keepalive=null, speaking=false;
+
+function stopAudio(){
+  if(el){ try{el.pause();}catch(e){} el=null; }
+  if(window.speechSynthesis){ try{speechSynthesis.cancel();}catch(e){} }
+  if(keepalive){ clearInterval(keepalive); keepalive=null; }
+  speaking=false;
+}
+
+function speak(idx, done){
+  stopAudio();
+  if(!audioOn){ if(done)done(); return; }
+  var text=NARR[idx];
+  if(!text){ if(done)done(); return; }
+
+  if(AUDIO[idx]){
+    el=new Audio(AUDIO[idx]);
+    speaking=true;
+    el.onended=function(){ speaking=false; if(done)done(); };
+    el.onerror=function(){ speaking=false; if(done)done(); };
+    el.play().catch(function(){ speaking=false; if(done)done(); });
+    return;
+  }
+
+  if(!window.speechSynthesis){ if(done)done(); return; }
+  var u=new SpeechSynthesisUtterance(text);
+  u.rate=0.97; u.pitch=1.0;
+  speaking=true;
+  u.onend=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  u.onerror=function(){
+    speaking=false;
+    if(keepalive){ clearInterval(keepalive); keepalive=null; }
+    if(done)done();
+  };
+  speechSynthesis.speak(u);
+  /* Chrome/Chromium silently stalls utterances over ~15s.
+     Pausing and resuming every 9s keeps the queue alive. */
+  keepalive=setInterval(function(){
+    if(!speaking){ clearInterval(keepalive); keepalive=null; return; }
+    try{ speechSynthesis.pause(); speechSynthesis.resume(); }catch(e){}
+  },9000);
+}
+
+/* ---------------- per-question hard lock ---------------- */
+function qidFor(n){ return QSLIDE[n]||null; }
+function locked(n){
+  var qid=qidFor(n);
+  return !!(qid && !answered[qid]);
+}
+
+function notify(t){
+  var m=document.getElementById('cq-gatemsg');
+  var b=document.getElementById('cq-gatebar');
+  if(m) m.textContent=t;
+  if(b){ b.style.display='block'; }
+}
+
+var _nav=window.navigate;
+window.navigate=function(dir){
+  if(dir>0 && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _nav(dir);
+};
+
+var _jmp=window.jumpTo;
+window.jumpTo=function(n){
+  if(n>current && locked(current)){
+    notify('Answer the question on this slide before continuing.');
+    return;
+  }
+  return _jmp(n);
+};
+
+/* ---------------- answer wrapper ---------------- */
+/* Wraps the gate engine's cqAnswer. Awaits it so scoring and the
+   gate check complete before auto-advance is considered. */
+var inner = window.cqAnswer;
+var w = function(b,qid,idx,fbid){
+  var r = inner ? inner(b,qid,idx,fbid) : null;
+  var after = function(){
+    answered[qid]=true;
+    persist();
+    if(!GATESET.has(qid)) advanceWhenReady();
+  };
+  if(r && typeof r.then==='function'){ r.then(after, after); }
+  else { after(); }
+  return r;
+};
+window.cqAnswer = w;
+
+/* KC auto-advance polls for readiness. Never a fixed-delay timer:
+   scoring is async and narration length varies. */
+function advanceWhenReady(){
+  var startedOn=current;
+  var tries=0;
+  (function poll(){
+    tries++;
+    if(current!==startedOn) return;           /* user moved on */
+    if(tries>400) return;                     /* ~60s ceiling */
+    if(speaking){ setTimeout(poll,150); return; }
+    var qid=qidFor(startedOn);
+    if(qid && !answered[qid]){ setTimeout(poll,150); return; }
+    if(current===startedOn && current<TOTAL){ window.navigate(1); }
+  })();
+}
+
+/* ---------------- slide narration driver ---------------- */
+document.addEventListener('cq-slide-shown',function(ev){
+  var n=ev.detail.index;
+  var bar=document.getElementById('cq-gatebar');
+  if(bar && !locked(n)) bar.style.display='none';
+  speak(n, function(){
+    /* content slides do not auto-advance; the learner controls pace */
+  });
+});
+
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('audiobtn');
+  if(btn){
+    btn.onclick=function(){
+      audioOn=!audioOn;
+      btn.classList.toggle('on',audioOn);
+      btn.textContent = audioOn ? 'Narration: On' : 'Narration: Off';
+      if(audioOn){ speak(current,function(){}); } else { stopAudio(); }
+    };
+  }
+  /* restore answered-state styling for non-gate questions */
+  for(var qid in answered){
+    var grp=document.querySelector('.quiz-group[data-qid="'+qid+'"]');
+    if(grp){
+      grp.querySelectorAll('.quiz-option').forEach(function(o){
+        o.disabled=true; o.style.pointerEvents='none';
+      });
+    }
+  }
+});
+})();
+</script>
+</body></html>

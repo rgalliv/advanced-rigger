@@ -20,17 +20,17 @@ overwritten.
 
 Stage 4 currently ends at `S4_M14`. These continue the sequence.
 
-| ACS module | New ID | Gate code |
-|---|---|---|
-| Center of Gravity Determination | `S4_M15` | AR-101C |
-| Unequal Leg Loading and Off-Level Pick Points | `S4_M16` | AR-102C |
-| Sling Tension Beyond the Chart | `S4_M17` | AR-103C |
-| Slings and Field-Assembled Terminations | `S4_M18` | AR-104C |
-| Rigging Hardware and Specialty Attachments | `S4_M19` | AR-105C |
-| Blocks, Sheaves and Multi-Part Line Loading | `S4_M20` | AR-106C |
-| Multi-Point Lifts and Load Sharing | `S4_M21` | AR-107C |
-| Friction and Inclined-Plane Rigging | `S4_M22` | AR-108C |
-| Below-the-Hook Lifting Device Design (BTH-1) | `S4_M23` | AR-109C |
+| ACS module | New ID | Gate code | Build |
+|---|---|---|---|
+| Center of Gravity Determination | `S4_M15` | AR-101C | **Built** 23/23 |
+| Unequal Leg Loading and Off-Level Pick Points | `S4_M16` | AR-102C | **Built** 23/23 |
+| Sling Tension Beyond the Chart | `S4_M17` | AR-103C | pending |
+| Slings and Field-Assembled Terminations | `S4_M18` | AR-104C | pending |
+| Rigging Hardware and Specialty Attachments | `S4_M19` | AR-105C | pending |
+| Blocks, Sheaves and Multi-Part Line Loading | `S4_M20` | AR-106C | pending |
+| Multi-Point Lifts and Load Sharing | `S4_M21` | AR-107C | pending |
+| Friction and Inclined-Plane Rigging | `S4_M22` | AR-108C | pending |
+| Below-the-Hook Lifting Device Design (BTH-1) | `S4_M23` | AR-109C | pending |
 
 `data-cq-stage="4"` unchanged. Salts become `CQ1:S4_M15_...`. Keys append to the existing
 `platform/cq_keys_S4.json` (112 records to 184). ACS codes renumber with the modules:
